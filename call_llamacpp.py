@@ -1,3 +1,20 @@
+"""
+Instructions:
+1. Install Jan and download some models
+2. Download any other models and put in the models folders in their own folders
+3. Use this from anywhere, putting in the path to the models' folder
+
+note:
+There is a function to tell you what gguf models you already have and can pick from
+You can use a shortened version of the model name.
+
+
+Note:
+Context-history looks like a big mystery...
+
+"""
+
+
 # gpt4 OpenAI
 import subprocess
 
