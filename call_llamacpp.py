@@ -85,23 +85,23 @@ def api_llamacapp(prompt, model_path_base, model_name, parameter_dict=[]):
     for key, value in parameter_dict.items():
         
         # There will be a key, so add it in
-        parameter_string.append(key + " ")
+        parameter_string += (str(key) + " ")
         
         # if there is a value, add that too
         if value:
-            parameter_string.append(value + " ")
+            parameter_string += (str(value) + " ")
     
     
     whole_model_path = model_path_base + model_name
     
     # Define the command as a string
     command = f"""
-    make -j && ./main 2>/dev/null -m {whole_model_path} -p "{prompt}"
+    make -j && ./main 2>/dev/null -m {whole_model_path} --prompt "{prompt}"
     """
 
     # Define the command as a string
     command = f"""
-    ./main 2>/dev/null -m {whole_model_path} -p "{prompt}"
+    ./main 2>/dev/null -m {whole_model_path} --prompt "{prompt}"
     """
 
     print(f"command -> {command}")
@@ -222,7 +222,20 @@ def api_llamacapp(prompt, model_path_base, model_name, parameter_dict=[]):
 
 prompt = "What is a horseshoe crab?"
 
-parameter_dict = {}
+parameter_dict = {
+    '--temp N': 0.8, # (default value is 0.8)
+    '--top-k': 40,   # (selection among N most probable. default: 40)
+    '--top-p': 0.9,  # (probability above threshold P. default: 0.9)
+    '--min-p': 0.05, # (minimum probability threshold. default: 0.05)
+    '--seed': -1,    # seed, =1 is random seed
+    '--tfs': 1,	     # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
+    '--threads': 8,     # (~ set to number of physical CPU cores)
+    '--typical': 1,	# (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
+    '--mirostat': 2, # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
+    '--mirostat-lr': 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
+    '--mirostat-ent': 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
+    '--ctx-size': 500      # Sets the size of the prompt context
+    }
 
 model_path_base = "/home/oops/jan/models/"
 model_name = "tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
