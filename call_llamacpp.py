@@ -1,76 +1,16 @@
-
-
 # gpt4 OpenAI
 import subprocess
 
-
-
-
-
-
-def api_llamacapp(prompt, model_path_base, model_name, parameter_dict=[]):
+def api_llamacapp(prompt, cpp_path, model_path_base, model_name, parameter_dict=[]):
     """
     requires:
-        subprocess
+        import subprocess
     
     function/script code in python to make use of llama.cpp cli
     in project pipelines,
     e.g. to swap-in for another API (public cloud, not private)
     e.g. to use a local mode instead of an online-api (local, offline, private)
     
-    
-    possible parameters:
-
-    parameters = [
-        "-m, --model",
-        "-i, --interactive",
-        "-ins, --instruct",
-        "-n, --n-predict",
-        "-c, --ctx-size",
-        "--prompt",
-        "--file",
-        "--interactive-first",
-        "--random-prompt",
-        "-r, --reverse-prompt",
-        "--in-prefix",
-        "--in-suffix",
-        "--color",
-        "--keep",
-        "--temp",
-        "--repeat-penalty",
-        "--repeat-last-n",
-        "--no-penalize-nl",
-        "--top-k",
-        "--top-p",
-        "--min-p",
-        "--tfs",
-        "--typical",
-        "--mirostat",
-        "--mirostat-lr",
-        "--mirostat-ent",
-        "-l, --logit-bias",
-        "-s, --seed",
-        "-t, --threads",
-        "-tb, --threads-batch",
-        "--mlock",
-        "--no-mmap",
-        "--numa distribute",
-        "--numa isolate",
-        "--numa numactl",
-        "--memory-f32",
-        "-b, --batch-size",
-        "--prompt-cache",
-        "--grammar",
-        "--grammar-file",
-        "-h, --help",
-        "--verbose-prompt",
-        "-ngl, --n-gpu-layers",
-        "-mg, --main-gpu",
-        "-ts, --tensor-split",
-        "--lora",
-        "--lora-base"
-    ]
-
     """
     
     ###
@@ -123,7 +63,10 @@ def api_llamacapp(prompt, model_path_base, model_name, parameter_dict=[]):
     
     """
     try:
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        result = subprocess.run(command, shell=True, capture_output=True, text=True, cwd=cpp_path)
+
+
+        
 
     except Exception as e:
         possible_exception = str(e)
@@ -137,7 +80,6 @@ def api_llamacapp(prompt, model_path_base, model_name, parameter_dict=[]):
     return_code_zero_means_ok = result.returncode
     
     if result.returncode == 0:
-        print("command_executed_successfully_finis")
 
         # Assuming valid output means non-empty stdout
         if result.stdout.strip():
@@ -239,8 +181,9 @@ parameter_dict = {
 
 model_path_base = "/home/oops/jan/models/"
 model_name = "tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+cpp_path = "/home/oops/code/llama_cpp/llama.cpp"
 
-result = api_llamacapp(prompt, model_path_base, model_name, parameter_dict)
+result = api_llamacapp(prompt, cpp_path, model_path_base, model_name, parameter_dict)
 
 # get third part of tuple
 exit_code = result[0]
