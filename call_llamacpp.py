@@ -4,7 +4,11 @@
 import subprocess
 
 
-def api_llamacapp(prompt, parameter_dict=[]):
+
+
+
+
+def api_llamacapp(prompt, model_path_base, model_name, parameter_dict=[]):
     """
     requires:
         subprocess
@@ -13,19 +17,94 @@ def api_llamacapp(prompt, parameter_dict=[]):
     in project pipelines,
     e.g. to swap-in for another API (public cloud, not private)
     e.g. to use a local mode instead of an online-api (local, offline, private)
+    
+    
+    possible parameters:
+
+    parameters = [
+        "-m, --model",
+        "-i, --interactive",
+        "-ins, --instruct",
+        "-n, --n-predict",
+        "-c, --ctx-size",
+        "--prompt",
+        "--file",
+        "--interactive-first",
+        "--random-prompt",
+        "-r, --reverse-prompt",
+        "--in-prefix",
+        "--in-suffix",
+        "--color",
+        "--keep",
+        "--temp",
+        "--repeat-penalty",
+        "--repeat-last-n",
+        "--no-penalize-nl",
+        "--top-k",
+        "--top-p",
+        "--min-p",
+        "--tfs",
+        "--typical",
+        "--mirostat",
+        "--mirostat-lr",
+        "--mirostat-ent",
+        "-l, --logit-bias",
+        "-s, --seed",
+        "-t, --threads",
+        "-tb, --threads-batch",
+        "--mlock",
+        "--no-mmap",
+        "--numa distribute",
+        "--numa isolate",
+        "--numa numactl",
+        "--memory-f32",
+        "-b, --batch-size",
+        "--prompt-cache",
+        "--grammar",
+        "--grammar-file",
+        "-h, --help",
+        "--verbose-prompt",
+        "-ngl, --n-gpu-layers",
+        "-mg, --main-gpu",
+        "-ts, --tensor-split",
+        "--lora",
+        "--lora-base"
+    ]
+
     """
     
+    ###
+    # Parameters
+    ###
+    
+    parameter_string = ""
+    
+    #######################################
+    # Construct string of extra parameters
+    ########################################
+    for key, value in parameter_dict.items():
+        
+        # There will be a key, so add it in
+        parameter_string.append(key + " ")
+        
+        # if there is a value, add that too
+        if value:
+            parameter_string.append(value + " ")
+    
+    
+    whole_model_path = model_path_base + model_name
     
     # Define the command as a string
     command = f"""
-    make -j && ./main 2>/dev/null -m /home/oops/jan/models/tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -p "What is a horseshoe crab?"
+    make -j && ./main 2>/dev/null -m {whole_model_path} -p "{prompt}"
     """
 
     # Define the command as a string
     command = f"""
-    ./main 2>/dev/null -m /home/oops/jan/models/tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -p "What is a horseshoe crab?"
+    ./main 2>/dev/null -m {whole_model_path} -p "{prompt}"
     """
 
+    print(f"command -> {command}")
 
     possible_exception = ""
 
@@ -75,7 +154,7 @@ def api_llamacapp(prompt, parameter_dict=[]):
             return_code_zero_means_ok = result.returncode
             
             # Write a custom status message
-            status_message = f"status_message=OK"
+            status_message = f"status_message: OK!!"
             
             # The model's output
             model_output = result.stdout
@@ -143,13 +222,18 @@ def api_llamacapp(prompt, parameter_dict=[]):
 
 prompt = "What is a horseshoe crab?"
 
-result = api_llamacapp(prompt, parameter_dict=[])
+parameter_dict = {}
+
+model_path_base = "/home/oops/jan/models/"
+model_name = "tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+
+result = api_llamacapp(prompt, model_path_base, model_name, parameter_dict)
 
 # get third part of tuple
 exit_code = result[0]
 message = result[1]
 assistant_says = result[2]
 
-print(exit_code)
-print(message)
-print(assistant_says)
+print(f"exit_code - > {exit_code}")
+print(f"message - > {message}")
+print(f"assistant_says - > {assistant_says}")
