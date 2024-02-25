@@ -197,7 +197,53 @@ def prompt_setup_llamacpp(prompt):
     return assistant_says
     
     
+def jan_model_history_local_gguf_api(this_model, converstion_history):
     
+    
+    #######################
+    # Tune Your Paramaters
+    #######################
+    parameter_dict = {
+        '--temp N': 0.8, # (default value is 0.8)
+        '--top-k': 40,   # (selection among N most probable. default: 40)
+        '--top-p': 0.9,  # (probability above threshold P. default: 0.9)
+        '--min-p': 0.05, # (minimum probability threshold. default: 0.05)
+        '--seed': -1,    # seed, =1 is random seed
+        '--tfs': 1,	     # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
+        '--threads': 8,     # (~ set to number of physical CPU cores)
+        '--typical': 1,	# (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
+        '--mirostat': 2, # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
+        '--mirostat-lr': 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
+        '--mirostat-ent': 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
+        '--ctx-size': 500      # Sets the size of the prompt context
+        }
+
+    # set your local jan path
+    model_path_base = "/home/oops/jan/models/"
+    
+    
+    model_name = "tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+    
+    
+    cpp_path = "/home/oops/code/llama_cpp/llama.cpp"
+
+    result = api_llamacapp(prompt, cpp_path, model_path_base, model_name, parameter_dict)
+
+    # get third part of tuple
+    exit_code = result[0]
+    message = result[1]
+    assistant_says = result[2]
+
+    # print(f"exit_code - > {exit_code}")
+    # print(f"message - > {message}")
+    # print(f"assistant_says - > {assistant_says}")
+
+    return assistant_says
+    
+    
+
+    
+            
 ######
 # Use
 ######
@@ -208,3 +254,23 @@ assistant_reponds = prompt_setup_llamacpp(prompt)
 
 # print(type(assistant_reponds))
 print(assistant_reponds)
+
+
+
+conversation_history = [
+{"role": "system", "content": user_input},
+{"role": "user", "content": user_input},
+{"role": "assistant", "content": user_input},
+{"role": "user", "content": user_input},
+{"role": "assistant", "content": user_input},
+{"role": "user", "content": user_input},
+]
+
+# Define the request body
+request_body = {
+  "model": "mistral-small",  # 'mistral-small' is 8x7, vs. 'mistral-tiny' for 7b
+  "messages": conversation_history
+}
+
+# Send the request
+response = requests.post(endpoint_url, headers=headers, json=request_body)
