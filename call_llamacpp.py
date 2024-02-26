@@ -284,11 +284,8 @@ def jan_model_history_local_gguf_api(this_model, converstion_history):
 
     return assistant_says
     
-
-    
 def call_ggug_modelname_history(model_nickname, converstion_history):
-    
-    
+
     #######################
     # Tune Your Paramaters
     #######################
