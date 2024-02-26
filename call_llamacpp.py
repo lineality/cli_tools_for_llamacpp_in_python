@@ -12,6 +12,10 @@ You can use a shortened version of the model name.
 Note:
 Context-history looks like a big mystery...
 
+TODO:
+add a chat_llamacapp.py
+using chat-context wrapper from Mixtral et all
+
 """
 
 
