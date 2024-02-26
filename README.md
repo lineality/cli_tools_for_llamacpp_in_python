@@ -5,3 +5,12 @@ a local gguf model instead of a paid cloud api.
 
 #### Notes:
 - system prompts and conversation history 'context' are still not clear, not well implimented yet. 
+
+
+# To use:
+1. close repo and cd inside (cd -> change directory)
+2. set path_to_model_foler as it exists on your system
+3. Run:
+```python
+python call_llamacapp.py
+```
