@@ -17,7 +17,8 @@ Context-history looks like a big mystery...
 
 # gpt4 OpenAI
 import subprocess
-
+import os
+    
 def api_llamacapp(prompt, cpp_path, model_path_base, model_and_folder, parameter_dict=[]):
     """
     requires:
@@ -39,9 +40,21 @@ def api_llamacapp(prompt, cpp_path, model_path_base, model_and_folder, parameter
     # parameter_dict {parameter_dict}
     # """)
     
-    ###
+    ######################
+    # Make paths absolute
+    ######################
+    cpp_path = os.path.abspath(cpp_path)
+    model_path_base = os.path.abspath(model_path_base)
+    
+    # make new path
+    # Constructing the whole model path by joining the two parts
+    whole_model_path = os.path.join(model_path_base, model_and_folder)
+    # Make absolute
+    whole_model_path = os.path.abspath(whole_model_path)
+    
+    #############
     # Parameters
-    ###
+    #############
     
     parameter_string = ""
     
@@ -58,7 +71,7 @@ def api_llamacapp(prompt, cpp_path, model_path_base, model_and_folder, parameter
             parameter_string += (str(value) + " ")
     
     
-    whole_model_path = model_path_base + model_and_folder
+
     
     # Define the command as a string
     command = f"""
