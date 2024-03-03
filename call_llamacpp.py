@@ -288,51 +288,6 @@ def jan_model_history_local_gguf_api(this_model, converstion_history):
 
     return assistant_says
     
-def call_ggug_modelname_history(model_nickname, converstion_history):
-
-    #######################
-    # Tune Your Paramaters
-    #######################
-    parameter_dict = {
-        '--temp N': 0.8, # (default value is 0.8)
-        '--top-k': 40,   # (selection among N most probable. default: 40)
-        '--top-p': 0.9,  # (probability above threshold P. default: 0.9)
-        '--min-p': 0.05, # (minimum probability threshold. default: 0.05)
-        '--seed': -1,    # seed, =1 is random seed
-        '--tfs': 1,	     # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
-        '--threads': 8,     # (~ set to number of physical CPU cores)
-        '--typical': 1,	# (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
-        '--mirostat': 2, # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
-        '--mirostat-lr': 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
-        '--mirostat-ent': 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
-        '--ctx-size': 500      # Sets the size of the prompt context
-        }
-
-    # set your local jan path
-    model_path_base = "/home/oops/jan/models/"
-    
-    model_path = get_model_path_by_name(model_path_base, model_nickname)
-    
-    print(model_path)
-    
-    cpp_path = "/home/oops/code/llama_cpp/llama.cpp"
-    
-    prompt = f"{sanitize_for_bash(str(converstion_history))}"
-    result = api_llamacapp(prompt, cpp_path, model_path_base, model_path, parameter_dict)
-
-    # get third part of tuple
-    exit_code = result[0]
-    message = result[1]
-    assistant_says = result[2]
-
-    # print(f"exit_code - > {exit_code}")
-    # print(f"message - > {message}")
-    # print(f"assistant_says - > {assistant_says}")
-
-    return assistant_says
-    
-
-
 """
 For use with Jan or another directory of models,
 this will return a list of optional gguf model-paths
@@ -420,13 +375,72 @@ def get_model_path_by_name(base_path, model_name):
 # print(model_path)
 
             
-####################
+            
+
+def call_ggug_modelname_history(model_nickname, converstion_history):
+
+    #######################
+    # Tune Your Paramaters
+    #######################
+    parameter_dict = {
+        '--temp N': 0.8, # (default value is 0.8)
+        '--top-k': 40,   # (selection among N most probable. default: 40)
+        '--top-p': 0.9,  # (probability above threshold P. default: 0.9)
+        '--min-p': 0.05, # (minimum probability threshold. default: 0.05)
+        '--seed': -1,    # seed, =1 is random seed
+        '--tfs': 1,	     # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
+        '--threads': 8,     # (~ set to number of physical CPU cores)
+        '--typical': 1,	# (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
+        '--mirostat': 2, # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
+        '--mirostat-lr': 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
+        '--mirostat-ent': 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
+        '--ctx-size': 500      # Sets the size of the prompt context
+        }
+
+    # set your local jan path
+    model_path_base = "/home/oops/jan/models/"
+    
+    model_path = get_model_path_by_name(model_path_base, model_nickname)
+    
+    print(model_path)
+    
+    cpp_path = "/home/oops/code/llama_cpp/llama.cpp"
+    
+    prompt = f"{sanitize_for_bash(str(converstion_history))}"
+    result = api_llamacapp(prompt, cpp_path, model_path_base, model_path, parameter_dict)
+
+    # get third part of tuple
+    exit_code = result[0]
+    message = result[1]
+    assistant_says = result[2]
+
+    # print(f"exit_code - > {exit_code}")
+    # print(f"message - > {message}")
+    # print(f"assistant_says - > {assistant_says}")
+
+    return assistant_says
+    
+
+            
+            
+            
+###################
 # Use direct prompt
-####################
-# prompt = "What is a horseshoe crab?"
-# assistant_reponds = prompt_setup_llamacpp(prompt)
-# # print(type(assistant_reponds))
-# print(assistant_reponds)
+###################
+prompt = "What is a horseshoe crab?"
+assistant_reponds = prompt_setup_llamacpp(prompt)
+# print(type(assistant_reponds))
+
+print("""
+###################
+Use direct prompt
+###################
+prompt = "What is a horseshoe crab?"
+assistant_reponds = prompt_setup_llamacpp(prompt)
+""")
+
+print(assistant_reponds)
+
 
 
 #############################
@@ -438,7 +452,7 @@ conversation_history = [
 {"role": "assistant", "content": "Yes, it is. What shall we cook?"},
 {"role": "user", "content": "Let's make bread."},
 {"role": "assistant", "content": "Here is a good cornbread recipe..."},
-{"role": "user", "content": "What are we cooking?"},
+{"role": "user", "content": "What seafood are we cooking now?"},
 ]
 
 # Define the request body
@@ -453,6 +467,9 @@ request_body = {
 # conversation_history = "What is a horseshoe crab?"
 
 # response = call_ggug_modelname_history(model_nickname, converstion_history)
+print("""
+    call_ggug_modelname_history("tinyllama", conversation_history)
+    """)
 response = call_ggug_modelname_history("tinyllama", conversation_history)
 
 print(response)
