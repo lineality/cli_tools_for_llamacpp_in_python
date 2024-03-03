@@ -25,7 +25,7 @@ using chat-context wrapper from Mixtral et all
 
 """
 
-from packer_unpacker import pack_unpack_python_objects
+# from packer_unpacker import pack_unpack_python_objects
 
 # gpt4 OpenAI
 import subprocess
@@ -258,9 +258,9 @@ def prompt_setup_llamacpp(prompt):
     message = result[1]
     assistant_says = result[2]
 
-    print(f"exit_code - > {exit_code}")
-    print(f"message - > {message}")
-    print(f"assistant_says - > {assistant_says}")
+    # print(f"exit_code - > {exit_code}")
+    # print(f"message - > {message}")
+    # print(f"assistant_says - > {assistant_says}")
 
     return assistant_says
 
@@ -303,9 +303,9 @@ def jan_model_history_local_gguf_api(this_model, converstion_history):
     message = result[1]
     assistant_says = result[2]
 
-    print(f"exit_code - > {exit_code}")
-    print(f"message - > {message}")
-    print(f"assistant_says - > {assistant_says}")
+    # print(f"exit_code - > {exit_code}")
+    # print(f"message - > {message}")
+    # print(f"assistant_says - > {assistant_says}")
 
     return assistant_says
 
@@ -429,7 +429,7 @@ def call_ggug_modelname_history(model_nickname, converstion_history):
 
     model_path = get_model_path_by_name(model_path_base, model_nickname)
 
-    print(model_path)
+    # print(model_path)
 
     cpp_path = "/home/oops/code/llama_cpp/llama.cpp"
 
@@ -443,44 +443,33 @@ def call_ggug_modelname_history(model_nickname, converstion_history):
     message = result[1]
     assistant_says = result[2]
 
-    print(f"exit_code - > {exit_code}")
-    print(f"message - > {message}")
-    print(f"assistant_says - > {assistant_says}")
+    # print(f"exit_code - > {exit_code}")
+    # print(f"message - > {message}")
+    # print(f"assistant_says - > {assistant_says}")
 
     return assistant_says
 
 
-###################
+# ###################
+# # Use direct prompt
+# ###################
+# prompt = "What is a horseshoe crab?"
+# assistant_reponds = prompt_setup_llamacpp(prompt)
+# # print(type(assistant_reponds))
+
+# print(
+#     """
+# ###################
 # Use direct prompt
-###################
-prompt = "What is a horseshoe crab?"
-assistant_reponds = prompt_setup_llamacpp(prompt)
-# print(type(assistant_reponds))
+# ###################
+# prompt = "What is a horseshoe crab?"
+# assistant_reponds = prompt_setup_llamacpp(prompt)
+# """
+# )
 
-print(
-    """
-###################
-Use direct prompt
-###################
-prompt = "What is a horseshoe crab?"
-assistant_reponds = prompt_setup_llamacpp(prompt)
-"""
-)
-
-print(assistant_reponds)
+# print(assistant_reponds)
 
 
-#############################
-# Use model select + history
-#############################
-conversation_history = [
-    {"role": "system", "content": "You are a friendly assistant."},
-    {"role": "user", "content": "Is cooking easy?"},
-    {"role": "assistant", "content": "Yes, it is. What shall we cook?"},
-    {"role": "user", "content": "Let's make bread."},
-    {"role": "assistant", "content": "Here is a good cornbread recipe..."},
-    {"role": "user", "content": "What seafood are we cooking now?"},
-]
 
 
 data = [
@@ -507,21 +496,40 @@ parameter_dict = {
     "--mirostat-lr": 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
     "--mirostat-ent": 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
     "--ctx-size": 500,  # Sets the size of the prompt context
+
 }
 
 
 configies_dict = {
     # set your local jan path
-    'model_path_base' : "/home/oops/jan/models/",
-    'model_nickname' : "tinyllama",
-    'cpp_path' : "/home/oops/code/llama_cpp/llama.cpp"
+    'model_path_base': "/home/oops/jan/models/",
+    'model_nickname': "tinyllama",
+    'cpp_path': "/home/oops/code/llama_cpp/llama.cpp"
 }
 
+
+
+#############################
+# Use model select + history
+#############################
+conversation_history = [
+    {"role": "system", "content": "You are a friendly assistant."},
+    {"role": "user", "content": "Is cooking easy?"},
+    {"role": "assistant", "content": "Yes, it is. What shall we cook?"},
+    {"role": "user", "content": "Let's make bread."},
+    {"role": "assistant", "content": "Here is a good cornbread recipe..."},
+    {"role": "user", "content": "What seafood are we cooking now?"},
+]
+
+
+from datetime import datetime, UTC
+
+
 def gguf_api(conversation_history_context_list, parameter_dict, configies_dict):
+
     ############################   
     # Take conversation history
     ############################
-
 
     # Define the path to the system_instructions directory
     system_instructions_dir = "system_instructions_files"
@@ -534,43 +542,69 @@ def gguf_api(conversation_history_context_list, parameter_dict, configies_dict):
         # If the directory does not exist, create it
         os.makedirs(system_instructions_dir)
 
-    with open("instruct.txt", "w") as f:
+    # from datetime import datetime, UTC
+    date_time = datetime.now(UTC)
+    clean_timestamp = date_time.strftime('%Y%m%d%H%M%S%f')
+
+    system_instruction_file_name = f"{clean_timestamp}_instructions.txt"
+
+    # Add system_instruction_file to path
+    system_instructions_dir = os.path.join(system_instructions_dir, system_instruction_file_name)
+
+    with open(system_instructions_dir, "w") as f_load:
         for item in conversation_history_context_list:
             if item["role"] == "system":
-                f.write(item["content"] + "\n")
-                break
+                f_load.write(item["content"])
+                # print(item["content"])
 
-    for item in conversation_history_context_list:
+                # set "instruct" in model parameters
+                # system_instruction_file_location = f"--instruct {system_instructions_dir}"
+                parameter_dict["--instruct"] = system_instructions_dir
+                break
+            else:
+                print("Note: no instruct found.")
+                pass
+
+    # search from the end backwards [-1] as that is where the user prompt will be:
+    for item in conversation_history_context_list[-1:]:
         if item["role"] == "user":
             prompt = item["content"]
+            # print(prompt)
             break
+        else:
+            print("Warning, no user prompt found.")
+            print(conversation_history_context_list)
+            prompt = conversation_history_context_list
+
 
     # # set your local jan path
     model_path_base = configies_dict["model_path_base"]
     model_nickname = configies_dict["model_nickname"]
+
+    # point to llama.cpp where install in local system
     cpp_path = configies_dict["cpp_path"]
 
-
+    # point to where model is, ideally: ~models/model_name/model.gguf 
     model_path = get_model_path_by_name(model_path_base, model_nickname)
-
     # print(model_path)
 
-    # cpp_path = "/home/oops/code/llama_cpp/llama.cpp"
-
+    ###########################
+    # Call low level llama.cpp
+    ###########################
     result = api_llamacapp(
         prompt, cpp_path, model_path_base, model_path, parameter_dict
     )
 
-    # get third part of tuple
-    exit_code = result[0]
-    message = result[1]
-    assistant_says = result[2]
+    # # get third part of tuple
+    # exit_code = result[0]
+    # message = result[1]
+    # assistant_says = result[2]
 
-    print(f"exit_code - > {exit_code}")
-    print(f"message - > {message}")
-    print(f"assistant_says - > {assistant_says}")
+    # print(f"exit_code - > {exit_code}")
+    # print(f"message - > {message}")
+    # print(f"assistant_says - > {assistant_says}")
 
-    return assistant_says
+    return result
 
 
 
@@ -595,12 +629,14 @@ request_body = {
 # conversation_history = "What is a horseshoe crab?"
 
 # response = call_ggug_modelname_history(model_nickname, converstion_history)
-print(
-    """
-    call_ggug_modelname_history("tinyllama", conversation_history)
-    """
-)
+# print(
+#     """
+#     call_ggug_modelname_history("tinyllama", conversation_history)
+#     """
+# )
 # response = call_ggug_modelname_history("tinyllama", conversation_history)
 
-response = call_ggug_modelname_history("tinyllama", conversation_history)
-print(response)
+response = gguf_api(conversation_history, parameter_dict, configies_dict)
+print(response[0])
+print(response[1])
+print(response[2])
