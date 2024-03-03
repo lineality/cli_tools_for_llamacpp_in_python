@@ -402,7 +402,7 @@ def call_ggug_modelname_history(model_nickname, converstion_history):
     
     model_path = get_model_path_by_name(model_path_base, model_nickname)
     
-    print(model_path)
+    # print(model_path)
     
     cpp_path = "/home/oops/code/llama_cpp/llama.cpp"
     
@@ -419,25 +419,25 @@ def call_ggug_modelname_history(model_nickname, converstion_history):
     # print(f"assistant_says - > {assistant_says}")
 
     return assistant_says
+    
 
-
-
-
-
+            
+            
+            
 ###################
 # Use direct prompt
 ###################
-prompt = "What is a horseshoe crab?"
+prompt = input("Say...")
 assistant_reponds = prompt_setup_llamacpp(prompt)
 # print(type(assistant_reponds))
 
-print("""
-###################
-Use direct prompt
-###################
-prompt = "What is a horseshoe crab?"
-assistant_reponds = prompt_setup_llamacpp(prompt)
-""")
+# print("""
+# ###################
+# Use direct prompt
+# ###################
+# prompt = "What is a horseshoe crab?"
+# assistant_reponds = prompt_setup_llamacpp(prompt)
+# """)
 
 print(assistant_reponds)
 
@@ -446,6 +446,8 @@ print(assistant_reponds)
 #############################
 # Use model select + history
 #############################
+
+
 conversation_history = [
 {"role": "system", "content": "You are a friendly assistant."},
 {"role": "user", "content": "Is cooking easy?"},
@@ -456,22 +458,14 @@ conversation_history = [
 ]
 
 
-data = [{'role': 'system', 'content': 'You are a talking bird.'}, {'role': 'assistant', 'content': 'Squawk, I am a bird.'}, {'role': 'user', 'content': 'what is a bird?'}]
-
-with open('instruct.txt', 'w') as f:
-    for item in data:
-        if item['role'] == 'system':
-            f.write(item['content'] + '\n')
-            
-            
-"""
-input: t dictionaries
-1. conversation history dict that include system instruction (if any)
-2. a parameters dict
-3. a model selection dict
-
-"""
-
+conversation_history = [
+{"role": "system", "content": "You are a friendly assistant."},
+{"role": "user", "content": "Is cooking easy?"},
+{"role": "assistant", "content": "Yes, it is. What shall we cook?"},
+{"role": "user", "content": "Let's make bread."},
+{"role": "assistant", "content": "Here is a good cornbread recipe..."},
+{"role": "user", "content": "What seafood are we cooking now?"},
+]
 
 # Define the request body
 request_body = {
@@ -484,10 +478,10 @@ request_body = {
 
 # conversation_history = "What is a horseshoe crab?"
 
-# response = call_ggug_modelname_history(model_nickname, converstion_history)
-print("""
-    call_ggug_modelname_history("tinyllama", conversation_history)
-    """)
-response = call_ggug_modelname_history("tinyllama", conversation_history)
+# # response = call_ggug_modelname_history(model_nickname, converstion_history)
+# print("""
+#     call_ggug_modelname_history("tinyllama", conversation_history)
+#     """)
+# response = call_ggug_modelname_history("tinyllama", conversation_history)
 
-print(response)
+# print(response)

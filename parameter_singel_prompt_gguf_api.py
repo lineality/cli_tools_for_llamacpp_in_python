@@ -419,11 +419,11 @@ def call_ggug_modelname_history(model_nickname, converstion_history):
     # print(f"assistant_says - > {assistant_says}")
 
     return assistant_says
+    
 
-
-
-
-
+            
+            
+            
 ###################
 # Use direct prompt
 ###################
@@ -454,24 +454,6 @@ conversation_history = [
 {"role": "assistant", "content": "Here is a good cornbread recipe..."},
 {"role": "user", "content": "What seafood are we cooking now?"},
 ]
-
-
-data = [{'role': 'system', 'content': 'You are a talking bird.'}, {'role': 'assistant', 'content': 'Squawk, I am a bird.'}, {'role': 'user', 'content': 'what is a bird?'}]
-
-with open('instruct.txt', 'w') as f:
-    for item in data:
-        if item['role'] == 'system':
-            f.write(item['content'] + '\n')
-            
-            
-"""
-input: t dictionaries
-1. conversation history dict that include system instruction (if any)
-2. a parameters dict
-3. a model selection dict
-
-"""
-
 
 # Define the request body
 request_body = {
