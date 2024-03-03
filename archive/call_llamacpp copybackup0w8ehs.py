@@ -7,7 +7,6 @@ Instructions:
 note:
 There is a function to tell you what gguf models you already have and can pick from
 You can use a shortened version of the model name.
- - get_model_path_by_name(base_path, model_name)
 
 
 Note:
@@ -22,15 +21,15 @@ or otherwise normal input instructions.
 
 
 add a chat_llamacapp.py
-
 using chat-context wrapper from Mixtral et all
 
 """
 
+# from packer_unpacker import pack_unpack_python_objects
 
+# gpt4 OpenAI
 import subprocess
 import os
-from datetime import datetime, UTC
 
 
 def api_llamacapp(
@@ -481,15 +480,51 @@ data = [
 
 
 
+#######################
+# Tune Your Paramaters
+#######################
+parameter_dict = {
+    "--temp N": 0.8,  # (default value is 0.8)
+    "--top-k": 40,  # (selection among N most probable. default: 40)
+    "--top-p": 0.9,  # (probability above threshold P. default: 0.9)
+    "--min-p": 0.05,  # (minimum probability threshold. default: 0.05)
+    "--seed": -1,  # seed, =1 is random seed
+    "--tfs": 1,  # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
+    "--threads": 8,  # (~ set to number of physical CPU cores)
+    "--typical": 1,  # (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
+    "--mirostat": 2,  # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
+    "--mirostat-lr": 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
+    "--mirostat-ent": 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
+    "--ctx-size": 500,  # Sets the size of the prompt context
+
+}
 
 
-"""
-input: 3 dictionaries
-1. conversation history dict that include system instruction (if any)
-2. a parameters dict
-3. a model selection dict
+configies_dict = {
+    # set your local jan path
+    'model_path_base': "/home/oops/jan/models/",
+    'model_nickname': "tinyllama",
+    'cpp_path': "/home/oops/code/llama_cpp/llama.cpp"
+}
 
-"""
+
+
+#############################
+# Use model select + history
+#############################
+conversation_history = [
+    {"role": "system", "content": "You are a friendly assistant."},
+    {"role": "user", "content": "Is cooking easy?"},
+    {"role": "assistant", "content": "Yes, it is. What shall we cook?"},
+    {"role": "user", "content": "Let's make bread."},
+    {"role": "assistant", "content": "Here is a good cornbread recipe..."},
+    {"role": "user", "content": "What seafood are we cooking now?"},
+]
+
+
+from datetime import datetime, UTC
+
+
 def gguf_api(conversation_history_context_list, parameter_dict, configies_dict):
 
     ############################   
@@ -579,11 +614,22 @@ def gguf_api(conversation_history_context_list, parameter_dict, configies_dict):
 
     return result
 
-# # Define the request body
-# request_body = {
-#     "model": "mistral-small",  # 'mistral-small' is 8x7, vs. 'mistral-tiny' for 7b
-#     "messages": conversation_history,
-# }
+
+
+"""
+input: t dictionaries
+1. conversation history dict that include system instruction (if any)
+2. a parameters dict
+3. a model selection dict
+
+"""
+
+
+# Define the request body
+request_body = {
+    "model": "mistral-small",  # 'mistral-small' is 8x7, vs. 'mistral-tiny' for 7b
+    "messages": conversation_history,
+}
 
 # Send the request
 # response = requests.post(endpoint_url, headers=headers, json=request_body)
@@ -598,47 +644,6 @@ def gguf_api(conversation_history_context_list, parameter_dict, configies_dict):
 # )
 # response = call_ggug_modelname_history("tinyllama", conversation_history)
 
-
-#######################
-# Tune Your Paramaters
-#######################
-parameter_dict = {
-    "--temp N": 0.8,  # (default value is 0.8)
-    "--top-k": 40,  # (selection among N most probable. default: 40)
-    "--top-p": 0.9,  # (probability above threshold P. default: 0.9)
-    "--min-p": 0.05,  # (minimum probability threshold. default: 0.05)
-    "--seed": -1,  # seed, =1 is random seed
-    "--tfs": 1,  # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
-    "--threads": 8,  # (~ set to number of physical CPU cores)
-    "--typical": 1,  # (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
-    "--mirostat": 2,  # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
-    "--mirostat-lr": 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
-    "--mirostat-ent": 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
-    "--ctx-size": 500,  # Sets the size of the prompt context
-}
-
-
-configies_dict = {
-    'model_path_base': "/home/oops/jan/models/",
-    'model_nickname': "tinyllama",
-    'cpp_path': "/home/oops/code/llama_cpp/llama.cpp"
-}
-
-
-
-#############################
-# Use model select + history
-#############################
-conversation_history = [
-    {"role": "system", "content": "You are a friendly assistant."},
-    {"role": "user", "content": "Is cooking easy?"},
-    {"role": "assistant", "content": "Yes, it is. What shall we cook?"},
-    {"role": "user", "content": "Let's make bread."},
-    {"role": "assistant", "content": "Here is a good cornbread recipe..."},
-    {"role": "user", "content": "What seafood are we cooking now?"},
-]
-
-# a local api function that acts like cloud api functions
 response = gguf_api(conversation_history, parameter_dict, configies_dict)
 print(response[0])
 print(response[1])
