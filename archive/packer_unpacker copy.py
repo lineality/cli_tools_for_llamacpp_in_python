@@ -35,6 +35,7 @@ the packer and unpacker are the same function,
 """
 import json
 import os
+from datetime import datetime, UTC
 
 
 def dict_package_keys_generator(dict_list, key_quantity=3):
@@ -59,7 +60,7 @@ def dict_package_keys_generator(dict_list, key_quantity=3):
         '#',
         '$',
         '%',
-        '&', 
+        '&',
         '*',
         '+',
         ',',
@@ -176,73 +177,15 @@ def dict_package_keys_generator(dict_list, key_quantity=3):
     return output_list
 
 
-def pack_unpack_dictionaries(*args):
-    """
-    Packs dictionaries into named string files when keys are blank.
-    Unpacks dictionaries from named string files when keys are provided.
-
-    Parameters:
-    - *args: Accepts six arguments:
-        - First three arguments are dictionaries or None.
-        - Last three arguments are substitution keys or None.
-
-    Returns:
-    - Names of the files when packing.
-    - Dictionaries when unpacking.
-    """
-    # Distinguish between packing and unpacking mode.
-    if args[3] is None:  # Packing mode
-        dicts = args[:3]
-        keys = dict_package_keys_generator(dicts)
-        filenames = []
-        for i, d in enumerate(dicts):
-            if d is not None:
-                # Convert dictionary to string.
-                dict_str = json.dumps(d)
-                for key in keys:
-                    # Replace critical characters with unique keys.
-                    dict_str = dict_str.replace(key, f"__{key}__")
-                # Save to file.
-                filename = f"dict_{i}.txt"
-                with open(filename, "w") as file:
-                    file.write(dict_str)
-                filenames.append(filename)
-        return filenames, keys
-    else:  # Unpacking mode
-        filenames = args[:3]
-        keys = args[3:]
-        dicts = []
-        for filename in filenames:
-            if os.path.exists(filename):
-                with open(filename, "r") as file:
-                    dict_str = file.read()
-                for key in keys:
-                    # Restore critical characters from unique keys.
-                    dict_str = dict_str.replace(f"__{key}__", key)
-                # Convert string back to dictionary.
-                d = json.loads(dict_str)
-                dicts.append(d)
-            else:
-                dicts.append(None)
-        return dicts
-
-# Note: For the actual implementation, ensure to handle exceptions
-# and edge cases, such as file read/write errors or json decoding issues.
-
-
-
-import os
-from datetime import datetime
-
 def pack_unpack_python_objects(dict_list, key_list=None):
     """
     Packs dictionaries into named string files when key_list is None.
     Unpacks dictionaries from named string files when key_list is provided.
-    
+
     Parameters:
-    - dict_list: A list of dictionaries to pack or a list of filenames to unpack.
-    - key_list: A list of substitution keys for unpacking, or None for packing.
-    
+    - dict_list: list of dictionaries to pack or a list of filenames to unpack.
+    - key_list: list of substitution keys for unpacking, or None for packing.
+
     Returns:
     - Names of the files and keys when packing.
     - Dictionaries when unpacking.
@@ -262,10 +205,12 @@ def pack_unpack_python_objects(dict_list, key_list=None):
                 # Save to file
                 ###############
                 # make readable time
-                date_time = datetime.utcnow()
+                # from datetime import datetime, UTC
+                date_time = datetime.now(UTC)
                 clean_timestamp = date_time.strftime('%Y%m%d%H%M%S%f')
 
                 filename = f"dict_{i}_{clean_timestamp}.txt"
+                
                 with open(filename, "w") as file:
                     file.write(dict_str)
                 filenames.append(filename)
@@ -294,29 +239,29 @@ def pack_unpack_python_objects(dict_list, key_list=None):
 
 
 
+
 #######################
 # Tune Your Paramaters
 #######################
 parameter_dict = {
-    '--temp N': 0.8, # (default value is 0.8)
-    '--top-k': 40,   # (selection among N most probable. default: 40)
-    '--top-p': 0.9,  # (probability above threshold P. default: 0.9)
-    '--min-p': 0.05, # (minimum probability threshold. default: 0.05)
-    '--seed': -1,    # seed, =1 is random seed
-    '--tfs': 1,	     # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
-    '--threads': 8,     # (~ set to number of physical CPU cores)
-    '--typical': 1,	# (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
-    '--mirostat': 2, # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
+    '--temp N': 0.8,  # (default value is 0.8)
+    '--top-k': 40,    # (selection among N most probable. default: 40)
+    '--top-p': 0.9,   # (probability above threshold P. default: 0.9)
+    '--min-p': 0.05,  # (minimum probability threshold. default: 0.05)
+    '--seed': -1,     # seed, =1 is random seed
+    '--tfs': 1,	      # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
+    '--threads': 8,   # (~ set to number of physical CPU cores)
+    '--typical': 1,	  # (locally typical sampling with parameter p typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
+    '--mirostat': 2,  # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
     '--mirostat-lr': 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
     '--mirostat-ent': 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
-    '--ctx-size': 500      # Sets the size of the prompt context
+    '--ctx-size': 500       # Sets the size of the prompt context
     }
 
 
-
 model_configs = {
-    'name': 'gguf', # (default value is 0.8)
-    'path': 'gguf', # (default value is 0.8)
+    'name': 'gguf',  # (default value is 0.8)
+    'path': 'gguf',  # (default value is 0.8)
     }
 
 
@@ -324,21 +269,14 @@ model_configs = {
 # Use model select + history
 #############################
 conversation_history = [
-{"role": "system", "content": "You are a friendly assistant."},
-{"role": "user", "content": "Is cooking easy?"},
-{"role": "assistant", "content": "Yes, it is. What shall we cook?"},
-{"role": "user", "content": "Let's make bread."},
-{"role": "assistant", "content": "Here is a good cornbread recipe..."},
-{"role": "user", "content": "What seafood are we cooking now?"},
+    {"role": "system", "content": "You are a friendly assistant."},
+    {"role": "user", "content": "Is cooking easy?"},
+    {"role": "assistant", "content": "Yes, it is. What shall we cook?"},
+    {"role": "user", "content": "Let's make bread."},
+    {"role": "assistant", "content": "Here is a good cornbread recipe..."},
+    {"role": "user", "content": "What seafood are we cooking now?"},
 ]
 
-
-
-
-file_names_list, keys_list = pack_unpack_dictionaries(parameter_dict, model_configs, conversation_history, None, None, None)
-
-print(file_names_list)
-print(keys_list)
 
 object_list = [parameter_dict, model_configs, conversation_history]
 
