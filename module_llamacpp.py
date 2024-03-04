@@ -27,7 +27,6 @@ using chat-context wrapper from Mixtral et all
 
 """
 
-
 import subprocess
 import os
 from datetime import datetime, UTC
@@ -46,15 +45,28 @@ def api_llamacapp(
     e.g. to use a local mode instead of an online-api (local, offline, private)
 
     """
-    # # inspection
-    # print("start")
-    # print(f"""
-    # prompt {prompt},
-    # cpp_path {cpp_path},
-    # model_path_base {model_path_base},
-    # model_and_folder {model_and_folder},
-    # parameter_dict {parameter_dict}
-    # """)
+    prompt = prompt.replace("\\", "\\\\")  
+    prompt = prompt.replace("\n", "")
+    prompt = prompt.replace("\\n", "")
+
+    # prompt = prompt.replace('json', '')  
+    # prompt = prompt.replace('"', '')  
+    prompt = prompt.replace('"', '\\"')
+    prompt = prompt.replace('`', '\\`')          
+    prompt = prompt.replace("'", "\\'")  
+
+    prompt = prompt.strip()
+
+    # inspection
+    print("start")
+    print(f"""
+    prompt -> {prompt}
+
+    cpp_path -> {cpp_path}
+    model_path_base -> {model_path_base}
+    model_and_folder -> {model_and_folder}
+    parameter_dict -> {parameter_dict}
+    """)
 
     ######################
     # Make paths absolute
@@ -86,6 +98,8 @@ def api_llamacapp(
         if value:
             parameter_string += str(value) + " "
 
+    print(f"parameter_string -> {parameter_string}")
+
     # Define the command as a string
     command = f"""
     make -j && ./main 2>/dev/null -m {whole_model_path} {parameter_string} --prompt "{prompt}"
@@ -97,12 +111,15 @@ def api_llamacapp(
     """
 
     # Define the command as a string
-    command = f"""
-    ./main 2>/dev/null -m {whole_model_path} -p "{prompt}"
-    """
+    command = f"""./main 2>/dev/null -m {whole_model_path} --prompt "{prompt}" {parameter_string}"""
+
+    # note: set threads to cpu count
+
+    # Define the command as a string
+    command = f"""./main 2>/dev/null -m {whole_model_path} --temp {parameter_dict["--temp"]} --top-k {parameter_dict["--top-k"]} --top-p {parameter_dict["--top-p"]} --min-p {parameter_dict["--min-p"]} --seed {parameter_dict["--seed"]} --tfs {parameter_dict["--tfs"]} --typical {parameter_dict["--typical"]} --mirostat {parameter_dict["--mirostat"]} --mirostat-lr {parameter_dict["--mirostat-lr"]} --mirostat-ent {parameter_dict["--mirostat-ent"]} --threads {str(int(os.cpu_count()))} --ctx-size {parameter_dict["--ctx-size"]} -p "{prompt}" """
 
     # # inspection
-    # print(f"command -> {command}")
+    print(f"command -> {repr(command)}")
 
     possible_exception = ""
 
@@ -169,10 +186,10 @@ def api_llamacapp(
             # No valid output; check if there's an error message
             if result.stderr.strip():
                 # Print the standard error if error info is available
-                status_message = f"ERROR: An error occured. {possible_exception}"
+                status_message = f"api_llamacapp() ERROR: An error occured. {possible_exception}"
 
                 # The model's ERROR output
-                model_output = f"STDERR: {result.stderr}"
+                model_output = f"api_llamacapp()  result.stderr.strip() STDERR: {result.stderr}"
 
                 # Make a tuple of output data for granular separate use
                 not_ok_output_tuple = (
@@ -208,7 +225,7 @@ def api_llamacapp(
 
         # No output and no error; might indicate an unexpected issue or simply no output for the input
         status_message = (
-            f"Error: Command failed with return code -> {possible_exception}"
+            f"Error: # No output and no error; might indicate an unexpected issue or simply no output for the input. {possible_exception}"
         )
 
         if result.stderr.strip():
@@ -506,51 +523,101 @@ def gguf_api(conversation_history_context_list, parameter_dict, configies_dict):
     # Take conversation history
     ############################
 
-    # Define the path to the system_instructions directory
-    system_instructions_dir = "system_instructions_files"
+    # # Define the path to the system_instructions directory
+    # system_instructions_dir = "system_instructions_files"
 
-    # make absolute path
-    system_instructions_dir = os.path.abspath(system_instructions_dir)
+    # # make absolute path
+    # system_instructions_dir = os.path.abspath(system_instructions_dir)
 
-    # Check if the system_instructions directory exists
-    if not os.path.exists(system_instructions_dir):
-        # If the directory does not exist, create it
-        os.makedirs(system_instructions_dir)
+    # # Check if the system_instructions directory exists
+    # if not os.path.exists(system_instructions_dir):
+    #     # If the directory does not exist, create it
+    #     os.makedirs(system_instructions_dir)
 
-    # from datetime import datetime, UTC
-    date_time = datetime.now(UTC)
-    clean_timestamp = date_time.strftime('%Y%m%d%H%M%S%f')
+    # # from datetime import datetime, UTC
+    # date_time = datetime.now(UTC)
+    # clean_timestamp = date_time.strftime('%Y%m%d%H%M%S%f')
 
-    system_instruction_file_name = f"{clean_timestamp}_instructions.txt"
+    # system_instruction_file_name = f"{clean_timestamp}_instructions.txt"
 
-    # Add system_instruction_file to path
-    system_instructions_dir = os.path.join(system_instructions_dir, system_instruction_file_name)
+    # # Add system_instruction_file to path
+    # system_instructions_dir = os.path.join(system_instructions_dir, system_instruction_file_name)
 
-    with open(system_instructions_dir, "w") as f_load:
-        for item in conversation_history_context_list:
-            if item["role"] == "system":
-                f_load.write(item["content"])
-                # print(item["content"])
+    # with open(system_instructions_dir, "w") as f_load:
+    #     for item in conversation_history_context_list:
+    #         if item["role"] == "system":
+    #             f_load.write(item["content"])
+    #             # print(item["content"])
 
-                # set "instruct" in model parameters
-                # system_instruction_file_location = f"--instruct {system_instructions_dir}"
-                parameter_dict["--instruct"] = system_instructions_dir
-                break
-            else:
-                print("Note: no instruct found.")
-                pass
+    #             # set "instruct" in model parameters
+    #             # system_instruction_file_location = f"--instruct {system_instructions_dir}"
+    #             parameter_dict["--instruct"] = system_instructions_dir
+    #             break
+    #         else:
+    #             print("Note: no instruct found.")
+    #             pass
+
+    # # search from the end backwards [-1] as that is where the user prompt will be:
+    # for item in conversation_history_context_list[-1:]:
+    #     if item["role"] == "user":
+    #         prompt = item["content"]
+    #         # print(prompt)
+    #         break
+    #     else:
+    #         print("Warning, no user prompt found.")
+    #         print(conversation_history_context_list)
+    #         prompt = conversation_history_context_list
+
+
+    ################################################
+    # Setting up and formatting single, line prompt
+    ################################################
+
+    system_role = ""
+    user_role = ""
+
+    for item in conversation_history_context_list:
+        if item["role"] == "system":
+
+            system_role += "(System Instruction) System: "
+
+            system_role += item["content"] + ' '
+            # print(system_role)
+            break
+        else:
+            print("Note: no instruct found.")
+            pass
 
     # search from the end backwards [-1] as that is where the user prompt will be:
     for item in conversation_history_context_list[-1:]:
         if item["role"] == "user":
-            prompt = item["content"]
-            # print(prompt)
+
+
+            user_role += "(User Instruction) User: "
+
+            user_role += item["content"] + ' '
+            # print(user_role)
             break
         else:
-            print("Warning, no user prompt found.")
+            print("Warning, no user prompt found. defaulting to cleaned whole context")
             print(conversation_history_context_list)
             prompt = conversation_history_context_list
+            prompt = prompt.replace("\\", "")
+            prompt = prompt.replace("\n", "")
+            prompt = prompt.replace("\\n", "")
+            prompt = prompt.replace('"', "")
+            prompt = prompt.replace('`', "")        
+            prompt = prompt.replace("'", "")
 
+
+    # make whole prompt
+    prompt = system_role + user_role
+
+    prompt = prompt.replace("\n", "")
+    prompt = prompt.replace("\\n", "")
+
+    # inspection
+    print(f"prompt -> {repr(prompt)}")
 
     # # set your local jan path
     model_path_base = configies_dict["model_path_base"]
@@ -561,7 +628,9 @@ def gguf_api(conversation_history_context_list, parameter_dict, configies_dict):
 
     # point to where model is, ideally: ~models/model_name/model.gguf 
     model_path = get_model_path_by_name(model_path_base, model_nickname)
-    # print(model_path)
+    print(model_path)
+
+    print(parameter_dict)
 
     ###########################
     # Call low level llama.cpp
@@ -570,22 +639,22 @@ def gguf_api(conversation_history_context_list, parameter_dict, configies_dict):
         prompt, cpp_path, model_path_base, model_path, parameter_dict
     )
 
-    # # get third part of tuple
-    # exit_code = result[0]
-    # message = result[1]
-    # assistant_says = result[2]
+    # get third part of tuple
+    exit_code = result[0]
+    message = result[1]
+    assistant_says = result[2]
 
-    # print(f"exit_code - > {exit_code}")
-    # print(f"message - > {message}")
-    # print(f"assistant_says - > {assistant_says}")
+    print(f"exit_code - > {exit_code}")
+    print(f"message - > {message}")
+    print(f"assistant_says - > {assistant_says}")
 
     ###########################
     # Clean up and return
     ###########################
 
-    # remove old instructions file
-    if os.path.exists(system_instructions_dir):
-        os.remove(system_instructions_dir)
+    # # remove old instructions file
+    # if os.path.exists(system_instructions_dir):
+    #     os.remove(system_instructions_dir)
 
     return result
 
@@ -613,7 +682,7 @@ def gguf_api(conversation_history_context_list, parameter_dict, configies_dict):
 # Tune Your Paramaters
 #######################
 parameter_dict = {
-    "--temp N": 0.8,  # (default value is 0.8)
+    "--temp": 0.8,  # (default value is 0.8)
     "--top-k": 40,  # (selection among N most probable. default: 40)
     "--top-p": 0.9,  # (probability above threshold P. default: 0.9)
     "--min-p": 0.05,  # (minimum probability threshold. default: 0.05)
@@ -630,20 +699,171 @@ parameter_dict = {
 
 configies_dict = {
     'model_path_base': "/home/oops/jan/models/",
-    'model_nickname': "tinyllama",
+    'model_nickname': "mistral",
     'cpp_path': "/home/oops/code/llama_cpp/llama.cpp"
 }
+
+# configies_dict = {
+#     'model_path_base': "/home/oops/jan/models/",
+#     'model_nickname': "tinyllama",
+#     'cpp_path': "/home/oops/code/llama_cpp/llama.cpp"
+# }
 
 
 #############################
 # Use model select + history
 #############################
-conversation_history = [
-    {"role": "system", "content": "You are a friendly assistant."},
-    {"role": "user", "content": "What seafood are we cooking now?"},
-]
+conversation_history = []
 
-# # a local api function that acts like cloud api functions
+# Helper Function
+def segment_for_adding_to_context_history(role, comment):
+
+    if role == "user":
+        segment = {"role": "user", "content": comment}
+
+    elif role == "assistant":
+        segment = {"role": "assistant", "content": comment}
+
+    elif role == "system":
+        segment = {"role": "system", "content": comment}
+
+    else:
+        print("error segment_for_adding_to_context_history(role, comment)")
+        print(role, comment)
+        print("error")
+
+    return segment
+
+
+# Helper Function
+def set_translator__system_prompt(context_history, target_language):
+
+    ################
+    # System Prompt
+    ################
+
+    example_1 = "a happy cat"
+
+    example_2 = {"translation": "chat heureux"}
+
+    example_bad = {"NOT THIS": "NO SINGLE QUOTES"}
+
+    example_3 = {"translation": "S'inscrire"}
+
+    # set translation language and structure of output in system
+    text_input = f"""
+    You are an expert helpful {target_language} language translator bot that produces high
+    quality professional translations in precise json formats.
+
+    You translate writen language, not emojis or syntax not
+    readable by a person. You use normal capitalization,
+    not all upper case. You use normal full words, not single letters
+    or obscure abreviations.
+
+    You always deliver your translation in the same correct json format.
+    starting with ```json and ending with ```.
+    "translation": "YOUR TRANSLATION HERE"
+
+    e.g. If the original phrase is:
+    {example_1}
+    Then your translation format is like this, with no other commentary needed:
+    ```jsons
+    {example_2}
+    ```
+
+    If the target language is french, and the translation is S'inscrire:
+    You output
+    {example_3}
+
+
+    Your translation is always expressed using valid json syntax,
+    using double quotes only in json.
+    (e.g. no trailing delimiter, escape conflicting characters, etc).
+
+
+    You only translate into {target_language}.
+    You only produce json output in exactly this structure
+    ```jsons
+    {example_2}
+    ```
+    Your translations are clear, accurate, helpful, honrable, brief, polite, and professional.
+    Your do you best to tranlsate every leaf value field leaving nothing blank.
+    Every final leaf values MUST be translated.
+
+    You always double check your work and make sure the translation is
+    excellent in the context of the whole body of translation.
+    """
+    role = "system"
+
+    context_history.append(segment_for_adding_to_context_history(role, text_input))
+
+    # # inspection
+    # print("set_translator__system_prompt -> ", context_history)
+
+    return context_history
+
+
+"""## Add 'user' request for translation"""
+
+
+# Helper Function
+def set_translate__user_prompt(context_history, target_language, original_data):
+
+    ###########################
+    # User Translation Request
+    ###########################
+
+    example_1 = "a happy cat"
+
+    example_2 = {"translation": "your translation here"}
+
+    example_bad = {"NOT THIS": "NO SINGLE QUOTES"}
+
+    example_bad2 = """{\'translation\': "BAD!! NO SINGLE QUOTES"}"""
+
+    # set translation language and structure of output in system
+    text_input = f"""
+
+    The person we are trying to help needs text string
+    translated into the {target_language} language.
+
+    Carefully translate this original text string into {target_language}.
+    The original string is: {original_data}
+
+    Double check your work and make sure the translation is
+    accurate, brief, and polite.
+
+    Make sure your translation is expressed using valid json syntax.
+    Always use double quotes " only around items in json.
+
+    Formatting for json must be like this in double-quotes for jsone.g.
+    ```json
+    {example_2}
+    ```
+
+    You can do it!!
+    """
+    role = "user"
+
+    context_history.append(segment_for_adding_to_context_history(role, text_input))
+
+    # # inspection
+    # print("set_translate__user_prompt", context_history)
+
+    return context_history
+
+
+"""# json inspection"""
+context_history = []
+target_language = "Dutch"
+original_data = "use the door"
+
+conversation_history = set_translator__system_prompt(context_history, target_language)
+conversation_history = set_translate__user_prompt(context_history, target_language, original_data)
+
+# print(conversation_history)
+
+# a local api function that acts like cloud api functions
 # response = gguf_api(conversation_history, parameter_dict, configies_dict)
 # print(response[0])
 # print(response[1])

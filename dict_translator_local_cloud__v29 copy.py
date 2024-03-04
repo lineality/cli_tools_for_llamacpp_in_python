@@ -1603,7 +1603,7 @@ def call_api_within_structure_check(context_history, use_this_model, mode_locale
                 # Tune Your Paramaters
                 #######################
                 parameter_dict = {
-                    "--temp N": 0.8,  # (default value is 0.8)
+                    "--temp": 0.8,  # (default value is 0.8)
                     "--top-k": 40,  # (selection among N most probable. default: 40)
                     "--top-p": 0.9,  # (probability above threshold P. default: 0.9)
                     "--min-p": 0.05,  # (minimum probability threshold. default: 0.05)
@@ -1726,7 +1726,7 @@ def crawlwer_call_api_within_json_structure_check(
                 # Tune Your Paramaters
                 #######################
                 parameter_dict = {
-                    "--temp N": 0.8,  # (default value is 0.8)
+                    "--temp": 0.8,  # (default value is 0.8)
                     "--top-k": 40,  # (selection among N most probable. default: 40)
                     "--top-p": 0.9,  # (probability above threshold P. default: 0.9)
                     "--min-p": 0.05,  # (minimum probability threshold. default: 0.05)
@@ -2363,11 +2363,11 @@ list_of_targeted_languages = [
     "Arabic",
 ]
 
-list_of_targeted_languages = ["German", "French"]
+list_of_targeted_languages = ["German"]
 
 # list_of_targeted_languages = ["French"]
 
-number_of_preliminary_translations = 2
+number_of_preliminary_translations = 1
 
 translate_json(
     list_of_targeted_languages,
@@ -2378,31 +2378,6 @@ translate_json(
 
 
 
-
-# #######################
-# # Tune Your Paramaters
-# #######################
-# parameter_dict = {
-#     "--temp N": 0.8,  # (default value is 0.8)
-#     "--top-k": 40,  # (selection among N most probable. default: 40)
-#     "--top-p": 0.9,  # (probability above threshold P. default: 0.9)
-#     "--min-p": 0.05,  # (minimum probability threshold. default: 0.05)
-#     "--seed": -1,  # seed, =1 is random seed
-#     "--tfs": 1,  # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
-#     "--threads": 8,  # (~ set to number of physical CPU cores)
-#     "--typical": 1,  # (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
-#     "--mirostat": 2,  # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
-#     "--mirostat-lr": 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
-#     "--mirostat-ent": 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
-#     "--ctx-size": 500,  # Sets the size of the prompt context
-# }
-
-
-# configies_dict = {
-#     'model_path_base': "/home/oops/jan/models/",
-#     'model_nickname': "tinyllama",
-#     'cpp_path': "/home/oops/code/llama_cpp/llama.cpp"
-# }
 
 
 # #############################

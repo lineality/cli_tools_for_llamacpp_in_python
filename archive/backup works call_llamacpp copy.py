@@ -52,8 +52,8 @@ def api_llamacapp(
     # prompt = prompt.replace('json', '')  
     # prompt = prompt.replace('"', '')  
     prompt = prompt.replace('"', '\\"')
-    # prompt = prompt.replace('`', '\\`')          
-    # prompt = prompt.replace("'", "\\'")  
+    prompt = prompt.replace('`', '\\`')          
+    prompt = prompt.replace("'", "\\'")  
 
     prompt = prompt.strip()
 
@@ -734,8 +734,6 @@ def segment_for_adding_to_context_history(role, comment):
 
     return segment
 
-import re
-
 
 # Helper Function
 def set_translator__system_prompt(context_history, target_language):
@@ -744,22 +742,50 @@ def set_translator__system_prompt(context_history, target_language):
     # System Prompt
     ################
 
+    example_1 = "a happy cat"
+
+    example_2 = {"translation": "chat heureux"}
+
+    example_bad = {"NOT THIS": "NO SINGLE QUOTES"}
+
+    example_3 = {"translation": "S'inscrire"}
 
     # set translation language and structure of output in system
     text_input = f"""
     You are an expert helpful {target_language} language translator bot that produces high
-    quality professional translations. You translate writen UTF-8 language, not emojis or syntax not
-    readable by a person.
+    quality professional translations in precise json formats.
 
-    You always deliver your translation in the same simple standard format
-    between a demiter of three pipes
-    |||YOUR TRANSLATION HERE|||
+    You translate writen language, not emojis or syntax not
+    readable by a person. You use normal capitalization,
+    not all upper case. You use normal full words, not single letters
+    or obscure abreviations.
+
+    You always deliver your translation in the same correct json format.
+    starting with ```json and ending with ```.
+    "translation": "YOUR TRANSLATION HERE"
+
+    e.g. If the original phrase is:
+    {example_1}
+    Then your translation format is like this, with no other commentary needed:
+    ```jsons
+    {example_2}
+    ```
+
+    If the target language is french, and the translation is S'inscrire:
+    You output
+    {example_3}
 
 
-    Your translation format is like this, with no other commentary needed:
-    |||your translation here|||
+    Your translation is always expressed using valid json syntax,
+    using double quotes only in json.
+    (e.g. no trailing delimiter, escape conflicting characters, etc).
+
 
     You only translate into {target_language}.
+    You only produce json output in exactly this structure
+    ```jsons
+    {example_2}
+    ```
     Your translations are clear, accurate, helpful, honrable, brief, polite, and professional.
     Your do you best to tranlsate every leaf value field leaving nothing blank.
     Every final leaf values MUST be translated.
@@ -767,10 +793,6 @@ def set_translator__system_prompt(context_history, target_language):
     You always double check your work and make sure the translation is
     excellent in the context of the whole body of translation.
     """
-
-    # Remove duplicate spaces
-    text_input = re.sub(r'\s+', ' ', text_input.strip())
-
     role = "system"
 
     context_history.append(segment_for_adding_to_context_history(role, text_input))
@@ -791,29 +813,36 @@ def set_translate__user_prompt(context_history, target_language, original_data):
     # User Translation Request
     ###########################
 
+    example_1 = "a happy cat"
+
+    example_2 = {"translation": "your translation here"}
+
+    example_bad = {"NOT THIS": "NO SINGLE QUOTES"}
+
+    example_bad2 = """{\'translation\': "BAD!! NO SINGLE QUOTES"}"""
 
     # set translation language and structure of output in system
     text_input = f"""
-    The person we are trying to help needs a {target_language} language translation of a text string.
 
-    Carefully translate the original text string into {target_language}.
+    The person we are trying to help needs text string
+    translated into the {target_language} language.
+
+    Carefully translate this original text string into {target_language}.
     The original string is: {original_data}
 
     Double check your work and make sure the translation is
     accurate, brief, and polite.
 
-    Produce just a {target_language} language translation identified
-    by surrounding tripple pipes. |||your translation her|||
+    Make sure your translation is expressed using valid json syntax.
+    Always use double quotes " only around items in json.
 
-    For example "a happy cat" translated into French would be expressed as 
-    |||your translation here|||
+    Formatting for json must be like this in double-quotes for jsone.g.
+    ```json
+    {example_2}
+    ```
 
     You can do it!!
     """
-
-    # Remove duplicate spaces
-    text_input = re.sub(r'\s+', ' ', text_input.strip())
-
     role = "user"
 
     context_history.append(segment_for_adding_to_context_history(role, text_input))
@@ -822,6 +851,7 @@ def set_translate__user_prompt(context_history, target_language, original_data):
     # print("set_translate__user_prompt", context_history)
 
     return context_history
+
 
 """# json inspection"""
 context_history = []
