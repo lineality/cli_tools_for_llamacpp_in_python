@@ -1293,12 +1293,6 @@ def set_translator__system_prompt(context_history, target_language):
     # System Prompt
     ################
 
-    example_1 = "a happy cat"
-
-    example_2 = "|||chat heureux|||"
-
-    example_3 = "|||S'inscrire|||"
-
     # set translation language and structure of output in system
     text_input = f"""
     You are an expert helpful {target_language} language translator bot that produces high
@@ -1307,20 +1301,20 @@ def set_translator__system_prompt(context_history, target_language):
 
     You always deliver your translation in the same simple standard format
     between a demiter of three pipes
-    |||YOUR TRANSLATION HERE|||
+    |||translation|||
 
-    e.g. If the original phrase is:
-    {example_1}
-    Then your translation format is like this, with no other commentary needed:
-    {example_2}
+    You do not put anything else in ||| ever, only your translation.
+    This is how your translation is identified.
 
-    If the target language is French and the translation is S'inscrire:
-    You output is: {example_3} 
+    Tour translation format is like this, with no other commentary needed:
+    |||translation|||
 
-    You only translate into {target_language}.
+    You only translate into {target_language}, and only produce a translation no other commentary.
     Your translations are clear, accurate, helpful, honrable, brief, polite, and professional.
     Your do you best to tranlsate every leaf value field leaving nothing blank.
     Every final leaf values MUST be translated.
+
+    Do not say anything else, just your translation in |||.
 
     You always double check your work and make sure the translation is
     excellent in the context of the whole body of translation.
@@ -1361,10 +1355,9 @@ def set_translate__user_prompt(context_history, target_language, original_data):
     accurate, brief, and polite.
 
     Produce just a {target_language} language translation identified
-    by surrounding tripple pipes. |||your translation|||
+    by surrounding tripple pipes. |||translation|||
 
-    For example "a happy cat" translated into French would be expressed as 
-    |||your translation|||
+    Do not say anything else, just your translation in |||.
 
     You can do it!!
     """
@@ -1482,7 +1475,12 @@ def check_structure_of_response(dict_str):
         # matches_list is a list of all captured groups in the text
         # If you expect only one match and want to return just that, you can adjust the code accordingly
 
-        translation = matches_list[0]
+        matches_list.pop("translation")
+
+        translation = matches_list
+
+        # inspection
+        print(matches_list)
 
         if len(translation):
             return translation
@@ -2006,16 +2004,14 @@ def set_select_best__system_prompt(context_history, target_language):
     # System Prompt to pick best traslation
     ########################################
 
-    example_2 = "|||your translation here|||"
-
     # set translation language and structure of output in system
     text_input = f"""
     You are a helpful expert translator bot that selects high
     quality professional translations from a list, choosing
     the one best translation.
 
-    You always present your selection in the same precise json format:
-    {example_2}
+    You always present your selection in the same precise format:
+    |||translation|||
 
     You always only use ||| triple pipes to surround the translation.
 
@@ -2023,6 +2019,8 @@ def set_select_best__system_prompt(context_history, target_language):
     Always select one best translation, only one.
 
     You always do your best to produce top quality results.
+
+    Do not say anything else, just your translation in |||.
     """
 
     # Remove duplicate spaces
@@ -2044,7 +2042,6 @@ def set_select_best__user_prompt(
     # User Translation Request to select best translation
     ###########################
 
-    example_3 = "|||your translation here|||"
 
     # set translation language and structure of output in system
     text_input = f"""
@@ -2055,7 +2052,9 @@ def set_select_best__user_prompt(
     accurate, brief, and polite.
 
     Aways only use ||| triple pipes to surround the translation.
-    {example_3}
+    |||translation|||
+
+    Do not say anything else, just your translation in |||.
 
     Do your best!
     """
