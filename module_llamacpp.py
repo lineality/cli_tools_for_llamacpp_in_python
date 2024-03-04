@@ -303,9 +303,12 @@ def prompt_setup_llamacpp(prompt):
     message = result[1]
     assistant_says = result[2]
 
-    # print(f"exit_code - > {exit_code}")
-    # print(f"message - > {message}")
-    # print(f"assistant_says - > {assistant_says}")
+    print(f"exit_code - > {exit_code}")
+    print(f"message - > {message}")
+    print(f"assistant_says - > {assistant_says}")
+
+    # # breakpoint
+    # input("breakpoint")
 
     return assistant_says
 
@@ -353,9 +356,12 @@ def jan_model_history_local_gguf_api(this_model, converstion_history):
     message = result[1]
     assistant_says = result[2]
 
-    # print(f"exit_code - > {exit_code}")
-    # print(f"message - > {message}")
-    # print(f"assistant_says - > {assistant_says}")
+    print(f"exit_code - > {exit_code}")
+    print(f"message - > {message}")
+    print(f"assistant_says - > {assistant_says}")
+
+    # breakpoint
+    input("breakpoint")
 
     return assistant_says
 
@@ -505,9 +511,12 @@ def call_ggug_modelname_history(model_nickname, converstion_history):
     message = result[1]
     assistant_says = result[2]
 
-    # print(f"exit_code - > {exit_code}")
-    # print(f"message - > {message}")
-    # print(f"assistant_says - > {assistant_says}")
+    print(f"exit_code - > {exit_code}")
+    print(f"message - > {message}")
+    print(f"assistant_says - > {assistant_says}")
+
+    # breakpoint
+    input("breakpoint")
 
     return assistant_says
 
@@ -643,7 +652,7 @@ def gguf_api(conversation_history_context_list, parameter_dict, configies_dict):
             # print(user_role)
             break
         else:
-            print("Warning, no user prompt found. defaulting to cleaned whole context")
+            print("\n\nWarning, no user prompt found. defaulting to cleaned whole context")
             print(conversation_history_context_list)
             prompt = conversation_history_context_list
             prompt = prompt.replace("\\", "")
@@ -655,7 +664,6 @@ def gguf_api(conversation_history_context_list, parameter_dict, configies_dict):
 
 
     # make whole prompt
-    prompt = system_role + user_role
 
     prompt = prompt.replace("\n", "")
     prompt = prompt.replace("\\n", "")
@@ -691,6 +699,9 @@ def gguf_api(conversation_history_context_list, parameter_dict, configies_dict):
     print(f"exit_code - > {exit_code}")
     print(f"message - > {message}")
     print(f"assistant_says - > {assistant_says}")
+
+    # breakpoint
+    input("breakpoint")
 
     ###########################
     # Clean up and return
