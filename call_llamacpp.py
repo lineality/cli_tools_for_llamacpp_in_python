@@ -131,9 +131,9 @@ def api_llamacapp(
     Shell=True is used to interpret the command as a string and execute it through the shell
     This is necessary for commands that involve shell operators like '&&'
 
-    make -j && ./main 2>/dev/null -m /home/oops/jan/models/tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -p "What is a horseshoe crab?"
+    make -j && ./main 2>/dev/null -m /home/xxx/jan/models/tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -p "What is a horseshoe crab?"
 
-    ./main 2>/dev/null -m /home/oops/jan/models/tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -p "What is a horseshoe crab?"
+    ./main 2>/dev/null -m /home/xxx/jan/models/tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -p "What is a horseshoe crab?"
 
     """
     try:
@@ -247,6 +247,32 @@ def api_llamacapp(
 ##############
 
 
+
+def get_absolute_base_path():
+    # Get the absolute path to the current user's home directory (Starts from root, ends at home directory)
+    home_directory = os.path.expanduser("~")  # e.g., "/home/john"
+
+    absolute_path = os.path.abspath(home_directory)
+
+    return absolute_path
+
+
+def add_segment_to_absolute_base_path(additional_segment):
+    # Get the absolute path to the current user's home directory
+    home_directory = os.path.expanduser("~")
+    # print(f"Home Directory: {home_directory}")  # Debugging print
+
+    # Create an absolute path by joining the home directory with the additional segment
+    absolute_path = os.path.join(home_directory, additional_segment)
+    # print(f"Joined Path Before abspath: {absolute_path}")  # Debugging print
+
+    # Ensure the path is absolute (this should not change the path if already absolute)
+    absolute_path = os.path.abspath(absolute_path)
+    # print(f"Final Absolute Path: {absolute_path}")  # Debugging print
+
+    return absolute_path
+
+
 def prompt_setup_llamacpp(prompt):
     parameter_dict = {
         "--temp N": 0.8,  # (default value is 0.8)
@@ -263,9 +289,10 @@ def prompt_setup_llamacpp(prompt):
         "--ctx-size": 500,  # Sets the size of the prompt context
     }
 
-    model_path_base = "/home/oops/jan/models/"
+
+    model_path_base = add_segment_to_absolute_base_path("jan/models/")
     model_name = "tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
-    cpp_path = "/home/oops/code/llama_cpp/llama.cpp"
+    cpp_path = add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp")
 
     result = api_llamacapp(
         prompt, cpp_path, model_path_base, model_name, parameter_dict
@@ -304,11 +331,16 @@ def jan_model_history_local_gguf_api(this_model, converstion_history):
     }
 
     # set your local jan path
-    model_path_base = "/home/oops/jan/models/"
+    # model_path_base = "/home/xxx/jan/models/"
 
+    # model_name = "tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+
+    # cpp_path = "/home/xxx/code/llama_cpp/llama.cpp"
+
+
+    model_path_base = add_segment_to_absolute_base_path("jan/models/")
     model_name = "tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
-
-    cpp_path = "/home/oops/code/llama_cpp/llama.cpp"
+    cpp_path = add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp")
 
     prompt = str(converstion_history)
 
@@ -354,7 +386,7 @@ def find_folders_and_files_with_gguf(base_path):
 
 
 # Base path where to search for folders and gguf files
-# base_path = '/home/oops/jan/models'
+# base_path = '/home/xxx/jan/models'
 
 # # Call the function and print the result
 # folders_and_files = find_folders_and_files_with_gguf(base_path)
@@ -396,6 +428,11 @@ def sanitize_for_bash(input_str):
 
 
 def get_model_path_by_name(base_path, model_name):
+
+
+    # inspection
+    print(f"base_path -> {base_path}")
+    print(f"model_name -> {model_name}")
     # Call the function to get all folders and files with gguf
     folders_and_files = find_folders_and_files_with_gguf(base_path)
 
@@ -415,7 +452,7 @@ def get_model_path_by_name(base_path, model_name):
 
 
 # # Example usage
-# base_path = '/home/oops/jan/models'
+# base_path = '/home/xxx/jan/models'
 # model_name = input("Please enter the model name you are looking for: ")
 # model_path = get_model_path_by_name(base_path, model_name)
 
@@ -443,13 +480,20 @@ def call_ggug_modelname_history(model_nickname, converstion_history):
     }
 
     # set your local jan path
-    model_path_base = "/home/oops/jan/models/"
+    # model_path_base = "/home/xxx/jan/models/"
 
-    model_path = get_model_path_by_name(model_path_base, model_nickname)
+
 
     # print(model_path)
 
-    cpp_path = "/home/oops/code/llama_cpp/llama.cpp"
+    # cpp_path = "/home/xxx/code/llama_cpp/llama.cpp"
+
+    model_path_base = add_segment_to_absolute_base_path("jan/models/")
+    model_path = get_model_path_by_name(model_path_base, model_nickname)
+
+    # model_name = "tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+    cpp_path = add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp")
+
 
     prompt = f"{sanitize_for_bash(str(converstion_history))}"
     result = api_llamacapp(
@@ -697,16 +741,20 @@ parameter_dict = {
 }
 
 
+model_path_base = add_segment_to_absolute_base_path("jan/models/")
+model_name = "tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+cpp_path = add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp")
+
 configies_dict = {
-    'model_path_base': "/home/oops/jan/models/",
+    'model_path_base': add_segment_to_absolute_base_path("jan/models/"),
     'model_nickname': "mistral",
-    'cpp_path': "/home/oops/code/llama_cpp/llama.cpp"
+    'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
 }
 
 # configies_dict = {
-#     'model_path_base': "/home/oops/jan/models/",
+#     'model_path_base': "/home/xxx/jan/models/",
 #     'model_nickname': "tinyllama",
-#     'cpp_path': "/home/oops/code/llama_cpp/llama.cpp"
+#     'cpp_path': "/home/xxx/code/llama_cpp/llama.cpp"
 # }
 
 

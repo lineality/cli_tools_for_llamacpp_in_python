@@ -52,8 +52,8 @@ def api_llamacapp(
     # prompt = prompt.replace('json', '')  
     # prompt = prompt.replace('"', '')  
     prompt = prompt.replace('"', '\\"')
-    prompt = prompt.replace('`', '\\`')          
-    prompt = prompt.replace("'", "\\'")  
+    # prompt = prompt.replace('`', '\\`')          
+    # prompt = prompt.replace("'", "\\'")  
 
     prompt = prompt.strip()
 
@@ -131,9 +131,9 @@ def api_llamacapp(
     Shell=True is used to interpret the command as a string and execute it through the shell
     This is necessary for commands that involve shell operators like '&&'
 
-    make -j && ./main 2>/dev/null -m /home/oops/jan/models/tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -p "What is a horseshoe crab?"
+    make -j && ./main 2>/dev/null -m /home/xxx/jan/models/tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -p "What is a horseshoe crab?"
 
-    ./main 2>/dev/null -m /home/oops/jan/models/tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -p "What is a horseshoe crab?"
+    ./main 2>/dev/null -m /home/xxx/jan/models/tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -p "What is a horseshoe crab?"
 
     """
     try:
@@ -247,6 +247,32 @@ def api_llamacapp(
 ##############
 
 
+
+def get_absolute_base_path():
+    # Get the absolute path to the current user's home directory (Starts from root, ends at home directory)
+    home_directory = os.path.expanduser("~")  # e.g., "/home/john"
+
+    absolute_path = os.path.abspath(home_directory)
+
+    return absolute_path
+
+
+def add_segment_to_absolute_base_path(additional_segment):
+    # Get the absolute path to the current user's home directory
+    home_directory = os.path.expanduser("~")
+    # print(f"Home Directory: {home_directory}")  # Debugging print
+
+    # Create an absolute path by joining the home directory with the additional segment
+    absolute_path = os.path.join(home_directory, additional_segment)
+    # print(f"Joined Path Before abspath: {absolute_path}")  # Debugging print
+
+    # Ensure the path is absolute (this should not change the path if already absolute)
+    absolute_path = os.path.abspath(absolute_path)
+    # print(f"Final Absolute Path: {absolute_path}")  # Debugging print
+
+    return absolute_path
+
+
 def prompt_setup_llamacpp(prompt):
     parameter_dict = {
         "--temp N": 0.8,  # (default value is 0.8)
@@ -263,9 +289,10 @@ def prompt_setup_llamacpp(prompt):
         "--ctx-size": 500,  # Sets the size of the prompt context
     }
 
-    model_path_base = "/home/oops/jan/models/"
+
+    model_path_base = add_segment_to_absolute_base_path("jan/models/")
     model_name = "tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
-    cpp_path = "/home/oops/code/llama_cpp/llama.cpp"
+    cpp_path = add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp")
 
     result = api_llamacapp(
         prompt, cpp_path, model_path_base, model_name, parameter_dict
@@ -304,11 +331,16 @@ def jan_model_history_local_gguf_api(this_model, converstion_history):
     }
 
     # set your local jan path
-    model_path_base = "/home/oops/jan/models/"
+    # model_path_base = "/home/xxx/jan/models/"
 
+    # model_name = "tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+
+    # cpp_path = "/home/xxx/code/llama_cpp/llama.cpp"
+
+
+    model_path_base = add_segment_to_absolute_base_path("jan/models/")
     model_name = "tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
-
-    cpp_path = "/home/oops/code/llama_cpp/llama.cpp"
+    cpp_path = add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp")
 
     prompt = str(converstion_history)
 
@@ -354,7 +386,7 @@ def find_folders_and_files_with_gguf(base_path):
 
 
 # Base path where to search for folders and gguf files
-# base_path = '/home/oops/jan/models'
+# base_path = '/home/xxx/jan/models'
 
 # # Call the function and print the result
 # folders_and_files = find_folders_and_files_with_gguf(base_path)
@@ -396,6 +428,11 @@ def sanitize_for_bash(input_str):
 
 
 def get_model_path_by_name(base_path, model_name):
+
+
+    # inspection
+    print(f"base_path -> {base_path}")
+    print(f"model_name -> {model_name}")
     # Call the function to get all folders and files with gguf
     folders_and_files = find_folders_and_files_with_gguf(base_path)
 
@@ -415,7 +452,7 @@ def get_model_path_by_name(base_path, model_name):
 
 
 # # Example usage
-# base_path = '/home/oops/jan/models'
+# base_path = '/home/xxx/jan/models'
 # model_name = input("Please enter the model name you are looking for: ")
 # model_path = get_model_path_by_name(base_path, model_name)
 
@@ -443,13 +480,20 @@ def call_ggug_modelname_history(model_nickname, converstion_history):
     }
 
     # set your local jan path
-    model_path_base = "/home/oops/jan/models/"
+    # model_path_base = "/home/xxx/jan/models/"
 
-    model_path = get_model_path_by_name(model_path_base, model_nickname)
+
 
     # print(model_path)
 
-    cpp_path = "/home/oops/code/llama_cpp/llama.cpp"
+    # cpp_path = "/home/xxx/code/llama_cpp/llama.cpp"
+
+    model_path_base = add_segment_to_absolute_base_path("jan/models/")
+    model_path = get_model_path_by_name(model_path_base, model_nickname)
+
+    # model_name = "tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+    cpp_path = add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp")
+
 
     prompt = f"{sanitize_for_bash(str(converstion_history))}"
     result = api_llamacapp(
@@ -697,16 +741,20 @@ parameter_dict = {
 }
 
 
+model_path_base = add_segment_to_absolute_base_path("jan/models/")
+model_name = "tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+cpp_path = add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp")
+
 configies_dict = {
-    'model_path_base': "/home/oops/jan/models/",
+    'model_path_base': add_segment_to_absolute_base_path("jan/models/"),
     'model_nickname': "mistral",
-    'cpp_path': "/home/oops/code/llama_cpp/llama.cpp"
+    'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
 }
 
 # configies_dict = {
-#     'model_path_base': "/home/oops/jan/models/",
+#     'model_path_base': "/home/xxx/jan/models/",
 #     'model_nickname': "tinyllama",
-#     'cpp_path': "/home/oops/code/llama_cpp/llama.cpp"
+#     'cpp_path': "/home/xxx/code/llama_cpp/llama.cpp"
 # }
 
 
@@ -734,6 +782,8 @@ def segment_for_adding_to_context_history(role, comment):
 
     return segment
 
+import re
+
 
 # Helper Function
 def set_translator__system_prompt(context_history, target_language):
@@ -742,50 +792,22 @@ def set_translator__system_prompt(context_history, target_language):
     # System Prompt
     ################
 
-    example_1 = "a happy cat"
-
-    example_2 = {"translation": "chat heureux"}
-
-    example_bad = {"NOT THIS": "NO SINGLE QUOTES"}
-
-    example_3 = {"translation": "S'inscrire"}
 
     # set translation language and structure of output in system
     text_input = f"""
     You are an expert helpful {target_language} language translator bot that produces high
-    quality professional translations in precise json formats.
+    quality professional translations. You translate writen UTF-8 language, not emojis or syntax not
+    readable by a person.
 
-    You translate writen language, not emojis or syntax not
-    readable by a person. You use normal capitalization,
-    not all upper case. You use normal full words, not single letters
-    or obscure abreviations.
-
-    You always deliver your translation in the same correct json format.
-    starting with ```json and ending with ```.
-    "translation": "YOUR TRANSLATION HERE"
-
-    e.g. If the original phrase is:
-    {example_1}
-    Then your translation format is like this, with no other commentary needed:
-    ```jsons
-    {example_2}
-    ```
-
-    If the target language is french, and the translation is S'inscrire:
-    You output
-    {example_3}
+    You always deliver your translation in the same simple standard format
+    between a demiter of three pipes
+    |||YOUR TRANSLATION HERE|||
 
 
-    Your translation is always expressed using valid json syntax,
-    using double quotes only in json.
-    (e.g. no trailing delimiter, escape conflicting characters, etc).
-
+    Your translation format is like this, with no other commentary needed:
+    |||your translation here|||
 
     You only translate into {target_language}.
-    You only produce json output in exactly this structure
-    ```jsons
-    {example_2}
-    ```
     Your translations are clear, accurate, helpful, honrable, brief, polite, and professional.
     Your do you best to tranlsate every leaf value field leaving nothing blank.
     Every final leaf values MUST be translated.
@@ -793,6 +815,10 @@ def set_translator__system_prompt(context_history, target_language):
     You always double check your work and make sure the translation is
     excellent in the context of the whole body of translation.
     """
+
+    # Remove duplicate spaces
+    text_input = re.sub(r'\s+', ' ', text_input.strip())
+
     role = "system"
 
     context_history.append(segment_for_adding_to_context_history(role, text_input))
@@ -813,36 +839,29 @@ def set_translate__user_prompt(context_history, target_language, original_data):
     # User Translation Request
     ###########################
 
-    example_1 = "a happy cat"
-
-    example_2 = {"translation": "your translation here"}
-
-    example_bad = {"NOT THIS": "NO SINGLE QUOTES"}
-
-    example_bad2 = """{\'translation\': "BAD!! NO SINGLE QUOTES"}"""
 
     # set translation language and structure of output in system
     text_input = f"""
+    The person we are trying to help needs a {target_language} language translation of a text string.
 
-    The person we are trying to help needs text string
-    translated into the {target_language} language.
-
-    Carefully translate this original text string into {target_language}.
+    Carefully translate the original text string into {target_language}.
     The original string is: {original_data}
 
     Double check your work and make sure the translation is
     accurate, brief, and polite.
 
-    Make sure your translation is expressed using valid json syntax.
-    Always use double quotes " only around items in json.
+    Produce just a {target_language} language translation identified
+    by surrounding tripple pipes. |||your translation her|||
 
-    Formatting for json must be like this in double-quotes for jsone.g.
-    ```json
-    {example_2}
-    ```
+    For example "a happy cat" translated into French would be expressed as 
+    |||your translation here|||
 
     You can do it!!
     """
+
+    # Remove duplicate spaces
+    text_input = re.sub(r'\s+', ' ', text_input.strip())
+
     role = "user"
 
     context_history.append(segment_for_adding_to_context_history(role, text_input))
@@ -851,7 +870,6 @@ def set_translate__user_prompt(context_history, target_language, original_data):
     # print("set_translate__user_prompt", context_history)
 
     return context_history
-
 
 """# json inspection"""
 context_history = []
@@ -863,7 +881,7 @@ conversation_history = set_translate__user_prompt(context_history, target_langua
 
 # print(conversation_history)
 
-# a local api function that acts like cloud api functions
+# # a local api function that acts like cloud api functions
 # response = gguf_api(conversation_history, parameter_dict, configies_dict)
 # print(response[0])
 # print(response[1])
