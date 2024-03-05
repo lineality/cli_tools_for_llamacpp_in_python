@@ -279,19 +279,64 @@ def save_json_to_file(input_text, file_name, target_language, optional_tag=""):
     new_title = optional_tag + new_title
 
     # Determine the path to the directory that should contain the file
-    directory_path = "translations/sets"
+    make_directory_path = "translations/sets"
+    directory_path = "translations"
 
     # Check if the directory exists
-    if not os.path.exists(directory_path):
+    if not os.path.exists(make_directory_path):
 
         # If it does not exist, create it
         # Ensure the directory exists
         try:
             os.makedirs(
-                directory_path, exist_ok=True
+                make_directory_path, exist_ok=True
             )  # Ensure the directory is created if it does not exist
         except Exception as e:
-            print(f"Error creating directory {directory_path}: {e}")
+            print(f"Error creating directory {make_directory_path}: {e}")
+            return  # Exit the function if directory creation fails
+
+    # Determine the path to the file that should be saved
+    file_path = os.path.join(directory_path, new_title)
+
+    # Save the JSON data to the file with UTF-8 encoding
+    with open(file_path, "w", encoding="utf-8") as outfile:
+        json.dump(input_text, outfile, indent=4, ensure_ascii=False)
+
+
+# Helper Function
+def set_set_save_json_to_file(input_text, file_name, target_language, optional_tag=""):
+    """
+    Saves a JSON object to a file.
+
+    :param data: The JSON object to save.
+    :param file_path: The path to the JSON file where the object should be saved.
+    """
+    # with open(file_path, 'w') as file:
+    #     json.dump(data, file, indent=4)
+
+    # make readable time
+    date_time = datetime.utcnow()
+    clean_timestamp = date_time.strftime("%Y%m%d%H%M%S%f")
+
+    new_title = f"{target_language}_{clean_timestamp}_{file_name}"
+
+    new_title = optional_tag + new_title
+
+    # Determine the path to the directory that should contain the file
+    make_directory_path = "translations/sets"
+    directory_path = "translations/sets"
+
+    # Check if the directory exists
+    if not os.path.exists(make_directory_path):
+
+        # If it does not exist, create it
+        # Ensure the directory exists
+        try:
+            os.makedirs(
+                make_directory_path, exist_ok=True
+            )  # Ensure the directory is created if it does not exist
+        except Exception as e:
+            print(f"Error creating directory {make_directory_path}: {e}")
             return  # Exit the function if directory creation fails
 
     # Determine the path to the file that should be saved
@@ -2500,11 +2545,11 @@ def translate_json(
                 # Select Top Top Goodest Translation Star-Good-Prime
                 #####################################################
 
-                save_json_to_file(
+                set_save_json_to_file(
                     populated_skeleton,
                     this_original_json_file,
                     target_language,
-                    "sets/set_of_translations_",
+                    "set_of_translations_",
                 )
 
                 # reset context history for new 'conversation' about selection
@@ -2703,7 +2748,7 @@ def mini_translate_json(
                     populated_skeleton,
                     this_original_json_file,
                     target_language,
-                    "set_of_translations_",
+                    "sets/set_of_translations_",
                 )
 
                 # reset context history for new 'conversation' about selection
