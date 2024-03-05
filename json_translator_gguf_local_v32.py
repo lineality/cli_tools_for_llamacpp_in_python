@@ -1515,6 +1515,21 @@ def clean_and_convert_to_json(input_str):
 # print(json_obj)
 
 
+def remove_specific_strings(original_list, strings_to_remove):
+    """
+    Remove specific strings from a list of strings.
+
+    Parameters:
+    - original_list: List of strings from which to remove.
+    - strings_to_remove: List of strings to be removed.
+
+    Returns:
+    - A new list with specific strings removed.
+    """
+    # Using list comprehension to filter out the strings to remove
+    return [item for item in original_list if item not in strings_to_remove]
+
+
 # Helper Function
 def check_structure_of_response(dict_str):
     """
@@ -1533,6 +1548,19 @@ def check_structure_of_response(dict_str):
 
         # matches_list is a list of all captured groups in the text
         # If you expect only one match and want to return just that, you can adjust the code accordingly
+
+        strings_to_remove = [
+            "YOUR_TRANSLATION",
+            "YOUR TRANSLATION",
+            "your_translation",
+            "your translation",
+            "best_selection",
+            "best selection",
+            "TRANSLATION",
+            "selection",
+        ]
+
+        matches_list = remove_specific_strings(matches_list, strings_to_remove)
 
         translation = matches_list
 
@@ -2617,8 +2645,11 @@ def mini_translate_json(
 
                 # make empty conversation
                 # reset context history for new 'conversation' about translation
-                context_history = f"translate '{untranslated_leaf}'' into {target_language} with the translation in pipes |||YOUR_TRANSLATION||| no other commentary needed, just a translation please"
-
+                # context_history = f"translate '{untranslated_leaf}'' into {target_language} with the translation in pipes |||YOUR_TRANSLATION||| no other commentary needed, just a translation please"
+                context_history = f"""
+                translate only '{untranslated_leaf}'' into {target_language} with the translation formatted
+                inside tripple pipes |||YOUR_TRANSLATION||| just that, no other commentary,
+                and earn a treat"""
 
                 # # breakpoint
                 # print(f"\n\n mini breakpoint 5: context_history -> {context_history}")
@@ -2695,7 +2726,16 @@ def mini_translate_json(
                 # )
 
 
-                context_history = f"select best translation of '{untranslated_leaf}'' into {target_language} from these {list_of_options} putting best translation in pipes |||YOUR_SELECTION||| no other commentary needed, just a best translation please"
+                context_history = f"""
+                Select the most accurate {target_language} translation for '{untranslated_leaf}' from these options: {list_of_options}. 
+                Indicate your choice by placing it between triple pipes, like this: |||best_selection|||. 
+                No additional comments. A reward awaits your accurate selection."""
+
+                """
+                Select the most accurate {target_language} translation for '{untranslated_leaf}' from these options: {list_of_options}. 
+                Indicate your choice by placing it between triple pipes, like this: |||best_selection|||. 
+                No additional comments. The reward of a job well done awaits your accurate selection!"""
+
                 # # breakpoint
                 print(f"\n\n mini breakpoint 6: context_history -> {context_history}")
                 # input("breakpoint")
@@ -2708,6 +2748,10 @@ def mini_translate_json(
                 selected_bestest_value = call_api_within_structure_check(
                     context_history, use_this_model, mode_locale, skeleton_json
                 )
+
+                print(type(selected_bestest_value))
+
+                selected_bestest_value = selected_bestest_value[0]
 
                 # add value to json
                 select_best_frame = insert_value_by_path(

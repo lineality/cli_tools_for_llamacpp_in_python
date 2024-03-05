@@ -14,9 +14,16 @@ Note:
 Context-history looks like a big mystery...
 
 TODO:
+
+fix broken skeleton structure:
+- 
+
 todo: make a cli_gguf.py version that takes
 parameters, e.g. taking pack-unpack as the input
 or otherwise normal input instructions.
+
+experiment with .csv format output
+
 
 
 
