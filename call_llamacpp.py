@@ -1,4 +1,17 @@
 """
+
+This is part of a deliberately 'small' micro-operation
+to do a finite operation
+in a set of sets of operations
+in a structured externalized-tabular project-object-database format
+
+this may not seem different from plum-pudding model output, but it is.
+
+With this building block
+many modular avenues for doing task, and testing-benchmarking abilities, are opened up.
+Modular-recombinant processes.
+
+
 Instructions:
 1. Install Jan and download some models
 2. Download any other models and put in the models folders in their own folders
