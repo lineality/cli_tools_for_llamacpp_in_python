@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from module_llamacpp import gguf_api, get_model_path_by_name
+from module_llamacpp import gguf_api, mini_ggui_api, get_model_path_by_name
 
 """dict_translator_local_cloud_delimiter_v29.ipynb
 
@@ -119,7 +119,9 @@ def list_json_files_in_cwd():
     # Filter the list to include only .json files
     json_files = [file for file in files_in_cwd if file.endswith(".json")]
 
-    return json_files
+    clipped_json_files = [item for item in json_files if not item.startswith('empty_')]
+
+    return clipped_json_files
 
 
 """# Process Json
@@ -1286,6 +1288,95 @@ def ask_mistral_tiny(context_history, use_this_model):
 
 
 
+# # Helper Function
+# def set_translator__system_prompt(context_history, target_language):
+
+#     ################
+#     # System Prompt
+#     ################
+
+#     # set translation language and structure of output in system
+#     text_input = f"""
+#     You are an expert helpful {target_language} language translator bot that produces high
+#     quality professional translations. You translate writen UTF-8 language, not emojis or syntax not
+#     readable by a person.
+
+#     You always deliver your translation in the same simple standard format
+#     between a demiter of three pips like markdown text
+#     between two sets of ```
+
+
+#     You do not put anything else in ``` ever, only your translation.
+#     This is how your translation is identified.
+
+#     Tour translation format is like this, with no other commentary needed:
+
+#     You only translate into {target_language}, and only produce a translation no other commentary.
+#     Your translations are clear, accurate, helpful, honrable, brief, polite, and professional.
+#     Your do you best to tranlsate every leaf value field leaving nothing blank.
+#     Every final leaf values MUST be translated.
+
+#     Do not say anything else, just your translation between two sets of ```
+
+#     You always double check your work and make sure the translation is
+#     excellent in the context of the whole body of translation.
+#     """
+
+#     # Remove duplicate spaces
+#     text_input = re.sub(r'\s+', ' ', text_input.strip())
+
+#     role = "system"
+
+#     context_history.append(segment_for_adding_to_context_history(role, text_input))
+
+#     # # inspection
+#     # print("set_translator__system_prompt -> ", context_history)
+
+#     return context_history
+
+
+# """## Add 'user' request for translation"""
+
+
+# # Helper Function
+# def set_translate__user_prompt(context_history, target_language, original_data):
+
+#     ###########################
+#     # User Translation Request
+#     ###########################
+
+
+#     # set translation language and structure of output in system
+#     text_input = f"""
+#     The person we are trying to help needs a {target_language} language translation of a text string.
+
+#     Carefully translate the original text string into {target_language}.
+#     The original string is: {original_data}
+
+#     Double check your work and make sure the translation is
+#     accurate, brief, and polite.
+
+#     Produce just a {target_language} language translation identified
+#     by surrounding two sets of ```
+
+#     Do not say anything else, just your translation in  two sets of ```
+
+#     You can do it!!
+#     """
+
+#     # Remove duplicate spaces
+#     text_input = re.sub(r'\s+', ' ', text_input.strip())
+
+#     role = "user"
+
+#     context_history.append(segment_for_adding_to_context_history(role, text_input))
+
+#     # # inspection
+#     # print("set_translate__user_prompt", context_history)
+
+#     return context_history
+
+
 # Helper Function
 def set_translator__system_prompt(context_history, target_language):
 
@@ -1345,25 +1436,10 @@ def set_translate__user_prompt(context_history, target_language, original_data):
 
 
     # set translation language and structure of output in system
-    text_input = f"""
-    The person we are trying to help needs a {target_language} language translation of a text string.
+    text_input = f"""translate {original_data}' into {target_language} with the translation in pipes |||YOUR_TRANSLATION||| no other commentary needed, just a translation please"""
 
-    Carefully translate the original text string into {target_language}.
-    The original string is: {original_data}
-
-    Double check your work and make sure the translation is
-    accurate, brief, and polite.
-
-    Produce just a {target_language} language translation identified
-    by surrounding two sets of ```
-
-    Do not say anything else, just your translation in  two sets of ```
-
-    You can do it!!
-    """
-
-    # Remove duplicate spaces
-    text_input = re.sub(r'\s+', ' ', text_input.strip())
+    # # Remove duplicate spaces
+    # text_input = re.sub(r'\s+', ' ', text_input.strip())
 
     role = "user"
 
@@ -1373,7 +1449,6 @@ def set_translate__user_prompt(context_history, target_language, original_data):
     # print("set_translate__user_prompt", context_history)
 
     return context_history
-
 
 """# json inspection"""
 
@@ -1710,6 +1785,32 @@ def check_structure_of_response(dict_str):
 
 # """# Call api within: Check json structure against original"""
 
+
+def get_absolute_base_path():
+    # Get the absolute path to the current user's home directory (Starts from root, ends at home directory)
+    home_directory = os.path.expanduser("~")  # e.g., "/home/john"
+
+    absolute_path = os.path.abspath(home_directory)
+
+    return absolute_path
+
+
+def add_segment_to_absolute_base_path(additional_segment):
+    # Get the absolute path to the current user's home directory
+    home_directory = os.path.expanduser("~")
+    # print(f"Home Directory: {home_directory}")  # Debugging print
+
+    # Create an absolute path by joining the home directory with the additional segment
+    absolute_path = os.path.join(home_directory, additional_segment)
+    # print(f"Joined Path Before abspath: {absolute_path}")  # Debugging print
+
+    # Ensure the path is absolute (this should not change the path if already absolute)
+    absolute_path = os.path.abspath(absolute_path)
+    # print(f"Final Absolute Path: {absolute_path}")  # Debugging print
+
+    return absolute_path
+
+
 # helper function
 def call_api_within_structure_check(context_history, use_this_model, mode_locale, skeleton_json):
     retry_counter = 0
@@ -1749,6 +1850,9 @@ def call_api_within_structure_check(context_history, use_this_model, mode_locale
                 # get model path name-end
                 use_this_model = get_model_path_by_name("/home/oops/jan/models/", use_this_model)
 
+                # inspection
+                print(f"use_this_model -> {use_this_model}")
+
                 #######################
                 # Tune Your Paramaters
                 #######################
@@ -1769,21 +1873,22 @@ def call_api_within_structure_check(context_history, use_this_model, mode_locale
 
 
                 configies_dict = {
-                    'model_path_base': "/home/oops/jan/models/",
+                    'model_path_base': add_segment_to_absolute_base_path("jan/models/"),
                     'model_nickname': use_this_model,
-                    'cpp_path': "/home/oops/code/llama_cpp/llama.cpp"
+                    'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
+                    'pipeline_mode': mini_ggui_api,
                 }
+
 
 
                 ######################
                 # local api with gguf
                 ######################
-                response = gguf_api(context_history, parameter_dict, configies_dict)
+                response = configies_dict["pipeline_mode"](context_history, parameter_dict, configies_dict)
                 print(response[0])
                 print(response[1])
                 print(response[2])
                 dict_str = response[2]
-
 
             ################
             # for cloud api
@@ -1892,9 +1997,9 @@ def crawlwer_call_api_within_json_structure_check(
 
 
                 configies_dict = {
-                    'model_path_base': "/home/oops/jan/models/",
+                    'model_path_base': add_segment_to_absolute_base_path("jan/models/"),
                     'model_nickname': use_this_model,
-                    'cpp_path': "/home/oops/code/llama_cpp/llama.cpp"
+                    'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
                 }
 
 
@@ -2441,6 +2546,206 @@ def translate_json(
             )
 
 
+
+
+def mini_translate_json(
+    list_of_targeted_languages,
+    use_this_model,
+    mode_locale,
+    number_of_preliminary_translations,
+):
+
+    ######################
+    # Translation Factory
+    ######################
+
+    # Example usage
+    json_files_list = list_json_files_in_cwd()
+
+    if not json_files_list:
+        print("Error: You missed a step, No Json files were provided.")
+        raise "No Json files were provided."
+
+    # inspection
+    print("JSON files in the CWD:", json_files_list)
+
+    for this_original_json_file in json_files_list:
+
+        # Load the original JSON file
+        original_data = load_json_file(this_original_json_file)
+
+        # Create a new JSON file with the deep empty structure
+        name_of_skeleton_saved_file = "empty_lists_" + "_" + this_original_json_file
+
+        skeleton_json = create_empty_json_file(
+            original_data, name_of_skeleton_saved_file
+        )
+
+        name_of_EMPTY_select_best_frame_saved_file = (
+            "empty_string_best_" + "_" + this_original_json_file
+        )
+        select_best_frame = create_empty_selectbest_frame(
+            original_data, name_of_EMPTY_select_best_frame_saved_file
+        )
+
+        #########################################
+        # Crawler: Make preliminary Translations
+        #########################################
+
+        paths_list = generate_paths(original_data)
+        check_paths_list = generate_paths(skeleton_json)
+        select_best_frame_paths_list = generate_paths(select_best_frame)
+
+        print(
+            f"""
+        paths_list                   {paths_list}
+        check_paths_list             {check_paths_list}
+        select_best_frame_paths_list {select_best_frame_paths_list}
+        """
+        )
+
+        # breakpoint
+        input("breakpoint")
+
+        # Sanity check
+        if paths_list != select_best_frame_paths_list:
+            error_message = "Error: Path lists between the original JSON and its skeleton do not match."
+            print(error_message)
+            raise ValueError(error_message)
+
+        # for this language
+        for target_language in list_of_targeted_languages:
+
+            # make a blank frame of lists for the translations
+            populated_skeleton = skeleton_json
+
+            # for this leaf
+            for this_path in paths_list:
+
+                untranslated_leaf = extract_value_by_path(original_data, this_path)
+
+                # breakpoint
+                print(f"\n\n breakpoint 5: untranslated_leaf -> {untranslated_leaf}")
+                # input("breakpoint")
+
+                # make empty conversation
+                # reset context history for new 'conversation' about translation
+                context_history = f"translate '{untranslated_leaf}'' into {target_language} with the translation in pipes |||YOUR_TRANSLATION||| no other commentary needed, just a translation please"
+
+
+                # breakpoint
+                print(f"\n\n breakpoint 5: context_history -> {context_history}")
+                # input("breakpoint")
+
+                # making N translation-versions
+                for i in range(number_of_preliminary_translations):
+                    """
+                    using both the populated skeleton and the original file:
+                    - tree-search through both (original and blank-list-skeleton) in the same way
+                    - check and guarantee that the dict-address (often nested)
+                      is the same for the original and where the answers are recorded
+                    - part 1: extract just the next terminal leaf, return this.
+                    separate step next ->
+                    - part 2: put a new (language translated value) in the corresponding
+                    place in blank-skeleton list.
+                    """
+                    """
+                    ####################
+                    # Crawler functions
+                    ####################
+
+                    1. make list of paths   generate_paths(json_object)
+                    2. extrac path value    extract_value_by_path(original_data, this_path)
+                     (translate)
+                    3. add to list          append_value_by_path(json_structure, path, new_value)
+                    4. write final value    insert_value_by_path(skeleton_json, paths_list, translated_values)
+
+                    """
+
+                    ############
+                    # Translate
+                    ############
+                    translated_value = call_api_within_structure_check(
+                        context_history, use_this_model, mode_locale, skeleton_json
+                    )
+
+                    # add-insert value to json
+                    print(f"Before appending: {skeleton_json}")
+                    print(f"this_path -> {this_path}")
+                    skeleton_json = append_value_by_path(
+                        skeleton_json, this_path, translated_value
+                    )
+
+                #####################################################
+                # Select Top Top Goodest Translation Star-Good-Prime
+                #####################################################
+
+                save_json_to_file(
+                    populated_skeleton,
+                    this_original_json_file,
+                    target_language,
+                    "set_of_translations_",
+                )
+
+                # reset context history for new 'conversation' about selection
+                context_history = []
+
+                print("\n\n\nSelect Top Top Goodest Translation Star-Good-Prime")
+                # # inspection breakpoint
+                # print(f"\n\n breakpoint 5: populated_skeleton -> {populated_skeleton}")
+                # # input("breakpoint")
+
+                # set prompts to select best translation
+                list_of_options = extract_value_by_path(skeleton_json, this_path)
+
+                # # System Instructions
+                # context_history = set_select_best__system_prompt(
+                #     context_history, target_language
+                # )
+                # # User Prompt
+                # context_history = set_select_best__user_prompt(
+                #     context_history, target_language, list_of_options, untranslated_leaf
+                # )
+
+
+                context_history = f"select best translation of '{untranslated_leaf}'' into {target_language} from these {list_of_options} putting best translation in pipes |||YOUR_SELECTION||| no other commentary needed, just a best translation please"
+
+
+                #################
+                #################
+                # Select Bestest
+                #################
+                #################
+                selected_bestest_value = call_api_within_structure_check(
+                    context_history, use_this_model, mode_locale, skeleton_json
+                )
+
+                # add value to json
+                select_best_frame = insert_value_by_path(
+                    select_best_frame, this_path, selected_bestest_value
+                )
+
+            ##########################
+            # per language: save file
+            ##########################
+            print("trying to save file...")
+
+            # try:
+            #     # if test fails
+            #     if dict_leaf_detection_boolean_true_means_defective(select_best_frame):
+            #         return False
+
+            # except Exception as e:
+            #     print(f"\nTRY AGAIN: dict_leaf_detection_boolean_true_means_defective() empty or stub leaf found: {e}")
+            #     print(f"Failed dict_str -> {select_best_frame}")
+            #     return False
+
+            # add value to json
+            save_json_to_file(
+                select_best_frame, this_original_json_file, target_language, "selected_"
+            )
+
+
 """# Tranlate Json Files
 - Set your language list
 - Pick your model
@@ -2500,7 +2805,7 @@ use_this_model = "mistral"
 # use_this_model = "mistral-small"
 # use_this_model = "tinyllama"
 
-mode_locale = "gguf"
+mode_locale = "mini_gguf"
 
 # list_of_targeted_languages = ["Italian", "Spanish", "German", "Czech", "Arabic", "Hindi", "Portuguese", "French"]
 
