@@ -279,20 +279,19 @@ def save_json_to_file(input_text, file_name, target_language, optional_tag=""):
     new_title = optional_tag + new_title
 
     # Determine the path to the directory that should contain the file
-    make_directory_path = "translations/sets"
     directory_path = "translations"
 
     # Check if the directory exists
-    if not os.path.exists(make_directory_path):
+    if not os.path.exists(directory_path):
 
         # If it does not exist, create it
         # Ensure the directory exists
         try:
             os.makedirs(
-                make_directory_path, exist_ok=True
+                directory_path, exist_ok=True
             )  # Ensure the directory is created if it does not exist
         except Exception as e:
-            print(f"Error creating directory {make_directory_path}: {e}")
+            print(f"Error creating directory {directory_path}: {e}")
             return  # Exit the function if directory creation fails
 
     # Determine the path to the file that should be saved
@@ -304,7 +303,7 @@ def save_json_to_file(input_text, file_name, target_language, optional_tag=""):
 
 
 # Helper Function
-def set_set_save_json_to_file(input_text, file_name, target_language, optional_tag=""):
+def set_save_json_to_file(input_text, file_name, target_language, optional_tag=""):
     """
     Saves a JSON object to a file.
 
@@ -323,20 +322,19 @@ def set_set_save_json_to_file(input_text, file_name, target_language, optional_t
     new_title = optional_tag + new_title
 
     # Determine the path to the directory that should contain the file
-    make_directory_path = "translations/sets"
     directory_path = "translations/sets"
 
     # Check if the directory exists
-    if not os.path.exists(make_directory_path):
+    if not os.path.exists(directory_path):
 
         # If it does not exist, create it
         # Ensure the directory exists
         try:
             os.makedirs(
-                make_directory_path, exist_ok=True
+                directory_path, exist_ok=True
             )  # Ensure the directory is created if it does not exist
         except Exception as e:
-            print(f"Error creating directory {make_directory_path}: {e}")
+            print(f"Error creating directory {directory_path}: {e}")
             return  # Exit the function if directory creation fails
 
     # Determine the path to the file that should be saved
@@ -2744,11 +2742,11 @@ def mini_translate_json(
                 # Select Top Top Goodest Translation Star-Good-Prime
                 #####################################################
 
-                save_json_to_file(
+                set_save_json_to_file(
                     populated_skeleton,
                     this_original_json_file,
                     target_language,
-                    "sets/set_of_translations_",
+                    "set_of_translations_",
                 )
 
                 # reset context history for new 'conversation' about selection
