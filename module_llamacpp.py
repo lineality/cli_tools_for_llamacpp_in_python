@@ -1062,8 +1062,8 @@ translate only '{phrase}'' into {language} with the translation formatted
 inside tripple pipes |||YOUR_TRANSLATION||| just that, no other commentary,
 and earn a treat"""
 
-response = mini_gguf_api(conversation_history, parameter_dict, configies_dict)
+# response = mini_gguf_api(conversation_history, parameter_dict, configies_dict)
 
-print(response[0])
-print(response[1])
-print(response[2])
+# print(response[0])
+# print(response[1])
+# print(response[2])

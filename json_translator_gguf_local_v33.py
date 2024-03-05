@@ -2896,7 +2896,7 @@ list_of_targeted_languages = [
     "Arabic",
 ]
 
-list_of_targeted_languages = ["German"]
+list_of_targeted_languages = ["German", "French"]
 
 # list_of_targeted_languages = ["French"]
 
