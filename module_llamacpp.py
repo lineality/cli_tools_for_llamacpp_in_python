@@ -1,4 +1,17 @@
 """
+
+This is part of a deliberately 'small' micro-operation
+to do a finite operation
+in a set of sets of operations
+in a structured externalized-tabular project-object-database format
+
+this may not seem different from plum-pudding model output, but it is.
+
+With this building block
+many modular avenues for doing task, and testing-benchmarking abilities, are opened up.
+Modular-recombinant processes.
+
+
 Instructions:
 1. Install Jan and download some models
 2. Download any other models and put in the models folders in their own folders
@@ -14,9 +27,16 @@ Note:
 Context-history looks like a big mystery...
 
 TODO:
+
+fix broken skeleton structure:
+- 
+
 todo: make a cli_gguf.py version that takes
 parameters, e.g. taking pack-unpack as the input
 or otherwise normal input instructions.
+
+experiment with .csv format output
+
 
 
 
@@ -1034,4 +1054,16 @@ configies_dict = {
     'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
 }
 
-conversation_history = "translate 'sign in' into spanish with the translation in pipes ||||YOUR_TRANSLATION|||| and any other commentary separate, no other commentary needed, just a translation please"
+
+phrase = 'cat'
+language = 'spanish'
+conversation_history = f"""
+translate only '{phrase}'' into {language} with the translation formatted
+inside tripple pipes |||YOUR_TRANSLATION||| just that, no other commentary,
+and earn a treat"""
+
+response = mini_gguf_api(conversation_history, parameter_dict, configies_dict)
+
+print(response[0])
+print(response[1])
+print(response[2])
