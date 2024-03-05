@@ -2639,8 +2639,11 @@ def translate_json(
 
 
                 selected_is_in_list_ok = False
+                fail_counter = 0
 
                 while not selected_is_in_list_ok:
+
+
 
                     selected_bestest_value = call_api_within_structure_check(
                         context_history, use_this_model, mode_locale, skeleton_json
@@ -2656,7 +2659,9 @@ def translate_json(
                     if selected_bestest_value in list_of_options:
                         selected_is_in_list_ok = True
 
-
+                    else:
+                        fail_counter += 1
+                        print(f"\n\n\nfail_counter -> {fail_counter}")
 
                 # add value to json
                 select_best_frame = insert_value_by_path(
@@ -2760,137 +2765,166 @@ def mini_translate_json(
             # for this leaf
             for this_path in paths_list:
 
-                untranslated_leaf = extract_value_by_path(original_data, this_path)
+                leaf_ok_flag = False
+                leaf_fail_counter = 0
 
-                # # breakpoint
-                # print(f"\n\n breakpoint 5: untranslated_leaf -> {untranslated_leaf}")
-                # input("breakpoint")
+                while not leaf_ok_flag:
 
-                # make empty conversation
-                # reset context history for new 'conversation' about translation
-                # context_history = f"translate '{untranslated_leaf}'' into {target_language} with the translation in pipes |||YOUR_TRANSLATION||| no other commentary needed, just a translation please"
-                context_history = f"""
-                translate only '{untranslated_leaf}'' into {target_language} with the translation formatted
-                inside tripple pipes |||YOUR_TRANSLATION||| just that, no other commentary,
-                and earn a treat"""
 
-                # # breakpoint
-                # print(f"\n\n mini breakpoint 5: context_history -> {context_history}")
-                # input("breakpoint")
+                    if leaf_fail_counter > 10:
+                        raise "fail_counter > 25"
 
-                # making N translation-versions
-                for i in range(number_of_preliminary_translations):
-                    """
-                    using both the populated skeleton and the original file:
-                    - tree-search through both (original and blank-list-skeleton) in the same way
-                    - check and guarantee that the dict-address (often nested)
-                      is the same for the original and where the answers are recorded
-                    - part 1: extract just the next terminal leaf, return this.
-                    separate step next ->
-                    - part 2: put a new (language translated value) in the corresponding
-                    place in blank-skeleton list.
-                    """
-                    """
-                    ####################
-                    # Crawler functions
-                    ####################
+                    untranslated_leaf = extract_value_by_path(original_data, this_path)
 
-                    1. make list of paths   generate_paths(json_object)
-                    2. extrac path value    extract_value_by_path(original_data, this_path)
-                     (translate)
-                    3. add to list          append_value_by_path(json_structure, path, new_value)
-                    4. write final value    insert_value_by_path(skeleton_json, paths_list, translated_values)
+                    # # breakpoint
+                    # print(f"\n\n breakpoint 5: untranslated_leaf -> {untranslated_leaf}")
+                    # input("breakpoint")
 
-                    """
+                    # make empty conversation
+                    # reset context history for new 'conversation' about translation
+                    # context_history = f"translate '{untranslated_leaf}'' into {target_language} with the translation in pipes |||YOUR_TRANSLATION||| no other commentary needed, just a translation please"
+                    context_history = f"""
+                    translate only '{untranslated_leaf}'' into {target_language} with the translation formatted
+                    inside tripple pipes |||YOUR_TRANSLATION||| just that, no other commentary,
+                    and earn a treat"""
 
-                    ############
-                    # Translate
-                    ############
-                    translated_value = call_api_within_structure_check(
-                        context_history, use_this_model, mode_locale, skeleton_json
+                    # # breakpoint
+                    # print(f"\n\n mini breakpoint 5: context_history -> {context_history}")
+                    # input("breakpoint")
+
+                    # making N translation-versions
+                    for i in range(number_of_preliminary_translations):
+                        """
+                        using both the populated skeleton and the original file:
+                        - tree-search through both (original and blank-list-skeleton) in the same way
+                        - check and guarantee that the dict-address (often nested)
+                        is the same for the original and where the answers are recorded
+                        - part 1: extract just the next terminal leaf, return this.
+                        separate step next ->
+                        - part 2: put a new (language translated value) in the corresponding
+                        place in blank-skeleton list.
+                        """
+                        """
+                        ####################
+                        # Crawler functions
+                        ####################
+
+                        1. make list of paths   generate_paths(json_object)
+                        2. extrac path value    extract_value_by_path(original_data, this_path)
+                        (translate)
+                        3. add to list          append_value_by_path(json_structure, path, new_value)
+                        4. write final value    insert_value_by_path(skeleton_json, paths_list, translated_values)
+
+                        """
+
+                        ############
+                        # Translate
+                        ############
+                        translated_value = call_api_within_structure_check(
+                            context_history, use_this_model, mode_locale, skeleton_json
+                        )
+
+                        # add-insert value to json
+                        print(f"Before appending: {skeleton_json}")
+                        print(f"this_path -> {this_path}")
+                        skeleton_json = append_value_by_path(
+                            skeleton_json, this_path, translated_value
+                        )
+
+                    #####################################################
+                    # Select Top Top Goodest Translation Star-Good-Prime
+                    #####################################################
+
+                    set_save_json_to_file(
+                        populated_skeleton,
+                        this_original_json_file,
+                        target_language,
+                        "set_of_translations_",
                     )
 
-                    # add-insert value to json
-                    print(f"Before appending: {skeleton_json}")
-                    print(f"this_path -> {this_path}")
-                    skeleton_json = append_value_by_path(
-                        skeleton_json, this_path, translated_value
+                    # reset context history for new 'conversation' about selection
+                    context_history = []
+
+                    print("\n\n\nSelect Top Top Goodest Translation Star-Good-Prime")
+                    # # inspection breakpoint
+                    # print(f"\n\n breakpoint 5: populated_skeleton -> {populated_skeleton}")
+                    # # input("breakpoint") 
+
+                    # set prompts to select best translation
+                    list_of_options_nested = extract_value_by_path(skeleton_json, this_path)
+
+                    # Combine into one list of strings using list comprehension
+                    list_of_options = [item for sublist in list_of_options_nested for item in sublist]
+
+                    # # System Instructions
+                    # context_history = set_select_best__system_prompt(
+                    #     context_history, target_language
+                    # )
+                    # # User Prompt
+                    # context_history = set_select_best__user_prompt(
+                    #     context_history, target_language, list_of_options, untranslated_leaf
+                    # )
+
+
+                    context_history = f"""
+                    Select the most accurate {target_language} translation for '{untranslated_leaf}' from these options: {list_of_options}. 
+                    Place your choice, spelled exactly the same, between triple pipes, like this: |||best_selection|||. 
+                    No additional comments. A tasty reward awaits your accurate selection."""
+
+                    """
+                    Select the most accurate {target_language} translation for '{untranslated_leaf}' from these options: {list_of_options}. 
+                    Indicate your choice by placing it between triple pipes, like this: |||best_selection|||. 
+                    No additional comments. The reward of a job well done awaits your accurate selection!"""
+
+                    # # breakpoint
+                    print(f"\n\n mini breakpoint 6: context_history -> {context_history}")
+                    # input("breakpoint")
+
+                    #################
+                    #################
+                    # Select Bestest
+                    #################
+                    #################
+
+                    selected_is_in_list_ok = False
+                    fail_counter = 0
+
+                    while not selected_is_in_list_ok:
+
+                        selected_bestest_value = call_api_within_structure_check(
+                            context_history, use_this_model, mode_locale, skeleton_json
+                        )
+
+                        print(f"type(selected_bestest_value) -> {type(selected_bestest_value)}") 
+
+                        selected_bestest_value = selected_bestest_value[0]
+
+                        print(f"selected_bestest_value -> {selected_bestest_value} vs. list_of_options -> {list_of_options}")
+                        print(f"type(list_of_options) -> {type(list_of_options)} && type(list_of_options[0]) -> {type(list_of_options[0]) }")
+
+
+                        # Make sure selected item is in the list (and not a new halucination or mutation)
+                        # note: if matching a string in a list, in a list...[[str]]
+                        if selected_bestest_value in list_of_options:
+                            selected_is_in_list_ok = True
+                            leaf_ok_flag = True
+
+                        else:
+                            fail_counter += 1
+                            leaf_fail_counter += 1
+                            print(f"\n\n\nfail_counter -> {fail_counter}")
+                            print(f"leaf_fail_counter -> {leaf_fail_counter}")
+
+                        if fail_counter > 6:
+                            print("Too many failes, restarting while loop for leaf.")
+
+                            break
+
+                    # add value to json
+                    select_best_frame = insert_value_by_path(
+                        select_best_frame, this_path, selected_bestest_value
                     )
 
-                #####################################################
-                # Select Top Top Goodest Translation Star-Good-Prime
-                #####################################################
-
-                set_save_json_to_file(
-                    populated_skeleton,
-                    this_original_json_file,
-                    target_language,
-                    "set_of_translations_",
-                )
-
-                # reset context history for new 'conversation' about selection
-                context_history = []
-
-                print("\n\n\nSelect Top Top Goodest Translation Star-Good-Prime")
-                # # inspection breakpoint
-                # print(f"\n\n breakpoint 5: populated_skeleton -> {populated_skeleton}")
-                # # input("breakpoint") 
-
-                # set prompts to select best translation
-                list_of_options = extract_value_by_path(skeleton_json, this_path)
-
-                # # System Instructions
-                # context_history = set_select_best__system_prompt(
-                #     context_history, target_language
-                # )
-                # # User Prompt
-                # context_history = set_select_best__user_prompt(
-                #     context_history, target_language, list_of_options, untranslated_leaf
-                # )
-
-
-                context_history = f"""
-                Select the most accurate {target_language} translation for '{untranslated_leaf}' from these options: {list_of_options}. 
-                Indicate your choice by placing it between triple pipes, like this: |||best_selection|||. 
-                No additional comments. A reward awaits your accurate selection."""
-
-                """
-                Select the most accurate {target_language} translation for '{untranslated_leaf}' from these options: {list_of_options}. 
-                Indicate your choice by placing it between triple pipes, like this: |||best_selection|||. 
-                No additional comments. The reward of a job well done awaits your accurate selection!"""
-
-                # # breakpoint
-                print(f"\n\n mini breakpoint 6: context_history -> {context_history}")
-                # input("breakpoint")
-
-                #################
-                #################
-                # Select Bestest
-                #################
-                #################
-
-                selected_is_in_list_ok = False
-
-                while not selected_is_in_list_ok:
-
-                    selected_bestest_value = call_api_within_structure_check(
-                        context_history, use_this_model, mode_locale, skeleton_json
-                    )
-
-                    print(type(selected_bestest_value))
-
-                    selected_bestest_value = selected_bestest_value[0]
-
-                    print(f"selected_bestest_value -> {selected_bestest_value} vs. list_of_options -> {list_of_options}")
-
-                    # Make sure selected item is in the list (and not a new halucination or mutation)
-                    if selected_bestest_value in list_of_options:
-                        selected_is_in_list_ok = True
-
-                # add value to json
-                select_best_frame = insert_value_by_path(
-                    select_best_frame, this_path, selected_bestest_value
-                )
 
             ##########################
             # per language: save file
