@@ -1552,6 +1552,7 @@ def check_structure_of_response(dict_str):
         strings_to_remove = [
             "YOUR_TRANSLATION",
             "YOUR TRANSLATION",
+            "YOUR_TRANSCRIPTION"
             "your_translation",
             "your translation",
             "best_selection",
