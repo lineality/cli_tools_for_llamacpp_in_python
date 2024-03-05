@@ -1,5 +1,63 @@
 # -*- coding: utf-8 -*-
+"""
+TODO:
+maybe do a best-2/3
+to ensure what it selects as the best
+is
+1. actually in the list
+2. a good selection
 
+3. add, perhaps with a different model such as an embedding distance model
+    a profile evaluation:
+    - quality translation-ness
+    - rude-ness
+    - nonsequitor-ness
+
+
+
+How to make sure the translation is decent...
+
+
+e.g.
+select the top two
+if 2/3 times the same thing appears int he top two
+use that.
+
+
+Modes:
+
+Big model & Batch mode
+
+
+Formatting, Structure, and Delimiters
+1. json formatting and language issues...
+    a dictionary format...?
+
+    For something json works very well IF simple ascii is ok.
+    but escape characters are a slippery slope to doom and ruin.
+
+    
+
+
+Smalls Model & Crawler Mode
+
+
+1. system instructions
+    - don't exist for many models
+    and attempting to force it causes disruption
+
+2. window size
+    - big jsons may not fit into
+
+3. state-scope
+    - a small model may not be able to handle batch requests
+
+4. simple delimiter works bettern than json for small models and single tasks.
+
+5. 
+
+
+"""
 
 from module_llamacpp import gguf_api, mini_gguf_api, get_model_path_by_name
 
@@ -2575,9 +2633,30 @@ def translate_json(
                 # Select Bestest
                 #################
                 #################
-                selected_bestest_value = call_api_within_structure_check(
-                    context_history, use_this_model, mode_locale, skeleton_json
-                )
+                # selected_bestest_value = call_api_within_structure_check(
+                #     context_history, use_this_model, mode_locale, skeleton_json
+                # )
+
+
+                selected_is_in_list_ok = False
+
+                while not selected_is_in_list_ok:
+
+                    selected_bestest_value = call_api_within_structure_check(
+                        context_history, use_this_model, mode_locale, skeleton_json
+                    )
+
+                    print(type(selected_bestest_value))
+
+                    selected_bestest_value = selected_bestest_value[0]
+
+                    print(f"selected_bestest_value -> {selected_bestest_value} vs. list_of_options -> {list_of_options}")
+
+                    # Make sure selected item is in the list (and not a new halucination or mutation)
+                    if selected_bestest_value in list_of_options:
+                        selected_is_in_list_ok = True
+
+
 
                 # add value to json
                 select_best_frame = insert_value_by_path(
@@ -2755,7 +2834,7 @@ def mini_translate_json(
                 print("\n\n\nSelect Top Top Goodest Translation Star-Good-Prime")
                 # # inspection breakpoint
                 # print(f"\n\n breakpoint 5: populated_skeleton -> {populated_skeleton}")
-                # # input("breakpoint")
+                # # input("breakpoint") 
 
                 # set prompts to select best translation
                 list_of_options = extract_value_by_path(skeleton_json, this_path)
@@ -2789,13 +2868,24 @@ def mini_translate_json(
                 # Select Bestest
                 #################
                 #################
-                selected_bestest_value = call_api_within_structure_check(
-                    context_history, use_this_model, mode_locale, skeleton_json
-                )
 
-                print(type(selected_bestest_value))
+                selected_is_in_list_ok = False
 
-                selected_bestest_value = selected_bestest_value[0]
+                while not selected_is_in_list_ok:
+
+                    selected_bestest_value = call_api_within_structure_check(
+                        context_history, use_this_model, mode_locale, skeleton_json
+                    )
+
+                    print(type(selected_bestest_value))
+
+                    selected_bestest_value = selected_bestest_value[0]
+
+                    print(f"selected_bestest_value -> {selected_bestest_value} vs. list_of_options -> {list_of_options}")
+
+                    # Make sure selected item is in the list (and not a new halucination or mutation)
+                    if selected_bestest_value in list_of_options:
+                        selected_is_in_list_ok = True
 
                 # add value to json
                 select_best_frame = insert_value_by_path(
