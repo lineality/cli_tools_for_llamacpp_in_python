@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from module_llamacpp import gguf_api, mini_ggui_api, get_model_path_by_name
+from module_llamacpp import gguf_api, mini_gguf_api, get_model_path_by_name
 
 """dict_translator_local_cloud_delimiter_v29.ipynb
 
@@ -1848,7 +1848,7 @@ def call_api_within_structure_check(context_history, use_this_model, mode_locale
                 print("Started gguf")
 
                 # get model path name-end
-                use_this_model = get_model_path_by_name("/home/oops/jan/models/", use_this_model)
+                # use_this_model = get_model_path_by_name("/home/oops/jan/models/", use_this_model)
 
                 # inspection
                 print(f"use_this_model -> {use_this_model}")
@@ -1876,10 +1876,14 @@ def call_api_within_structure_check(context_history, use_this_model, mode_locale
                     'model_path_base': add_segment_to_absolute_base_path("jan/models/"),
                     'model_nickname': use_this_model,
                     'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
-                    'pipeline_mode': mini_ggui_api,
+                    'pipeline_mode': mini_gguf_api,
                 }
 
 
+                print(f"configies_dict -> {configies_dict}")
+
+                # breakpoint
+                input("Breakpoint")
 
                 ######################
                 # local api with gguf
@@ -1923,7 +1927,7 @@ def call_api_within_structure_check(context_history, use_this_model, mode_locale
 
         else:
             retry_counter += 1
-            print(f"retry_counter -> {retry_counter}")
+            print(f"\n\nretry_counter -> {retry_counter}\n")
 
             # # breakpoint
             # input("Breakpoint")
@@ -2634,8 +2638,8 @@ def mini_translate_json(
 
 
                 # breakpoint
-                print(f"\n\n breakpoint 5: context_history -> {context_history}")
-                # input("breakpoint")
+                print(f"\n\n mini breakpoint 5: context_history -> {context_history}")
+                input("breakpoint")
 
                 # making N translation-versions
                 for i in range(number_of_preliminary_translations):
@@ -2709,7 +2713,9 @@ def mini_translate_json(
 
 
                 context_history = f"select best translation of '{untranslated_leaf}'' into {target_language} from these {list_of_options} putting best translation in pipes |||YOUR_SELECTION||| no other commentary needed, just a best translation please"
-
+                # breakpoint
+                print(f"\n\n mini breakpoint 6: context_history -> {context_history}")
+                input("breakpoint")
 
                 #################
                 #################
@@ -2805,7 +2811,7 @@ use_this_model = "mistral"
 # use_this_model = "mistral-small"
 # use_this_model = "tinyllama"
 
-mode_locale = "mini_gguf"
+mode_locale = "gguf"
 
 # list_of_targeted_languages = ["Italian", "Spanish", "German", "Czech", "Arabic", "Hindi", "Portuguese", "French"]
 
@@ -2825,7 +2831,7 @@ list_of_targeted_languages = ["German"]
 
 number_of_preliminary_translations = 1
 
-translate_json(
+mini_translate_json(
     list_of_targeted_languages,
     use_this_model,
     mode_locale,
