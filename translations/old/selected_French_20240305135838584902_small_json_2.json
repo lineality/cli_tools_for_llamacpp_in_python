@@ -1,0 +1,9 @@
+{
+    "signUp": {
+        "Account": "Votre nom de COMPTE",
+        "FirstName": "premier nom",
+        "Password": "Mot de passe",
+        "ConfirmNewPassword": "Confirmer le nouveau mot de passe",
+        "SignUp": "S'inscrire"
+    }
+}

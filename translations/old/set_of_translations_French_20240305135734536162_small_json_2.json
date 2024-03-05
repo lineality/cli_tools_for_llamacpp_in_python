@@ -1,0 +1,109 @@
+{
+    "signUp": {
+        "Account": [
+            [
+                "Ihr CONTO-Name"
+            ],
+            [
+                "Votre nom de COMPTE"
+            ]
+        ],
+        "FirstName": [
+            [
+                "Vorname"
+            ],
+            [
+                "premier nom"
+            ]
+        ],
+        "Password": [
+            [
+                "Passwort"
+            ],
+            [
+                "Mot de passe"
+            ]
+        ],
+        "ConfirmNewPassword": [
+            [
+                "Bestätigen Sie Ihr Neues Passwort"
+            ],
+            [
+                "Confirmer le nouveau mot de passe",
+                "Confirmer le nouveau mot de passe"
+            ]
+        ],
+        "SignUp": [
+            [
+                "Hier Anmelden"
+            ],
+            [
+                "S'inscrire",
+                "Log In",
+                "Se connecter",
+                "Forgot Password?",
+                "Mot de passe oublié?",
+                "Terms and Conditions",
+                "Conditions Générales d'Utilisation",
+                "Privacy Policy",
+                "Politique de Confidentialité",
+                "Email address",
+                "Adresse email",
+                "Password",
+                "Mot de passe",
+                "Confirm Password",
+                "Confirmer le mot de passe",
+                "First Name",
+                "Prénom",
+                "Last Name",
+                "Nom de famille",
+                "Gender",
+                "Genre",
+                "Phone number",
+                "Numéro de téléphone",
+                "Address Line 1",
+                "Adresse 1",
+                "Address Line 2",
+                "Adresse 2",
+                "City",
+                "Ville",
+                "State",
+                "État",
+                "Zip code",
+                "Code postal",
+                "Country",
+                "Pays",
+                "Create Account",
+                "Créer un compte",
+                "Sign Up",
+                "S'inscrire",
+                "Login",
+                "Connexion",
+                "Forgot Password",
+                "Mot de passe oublié",
+                "Password",
+                "Mot de passe",
+                "Confirm Password",
+                "Confirmer mot de passe",
+                "Back",
+                "Retour",
+                "Next",
+                "Suivant",
+                "Cancel",
+                "Annuler",
+                "Save",
+                "Enregistrer",
+                "Update",
+                "Mettre à jour",
+                "Delete",
+                "Supprimer",
+                "Search",
+                "Rechercher",
+                "Help",
+                "Aide",
+                "Logout",
+                "Déconnexion"
+            ]
+        ]
+    }
+}
