@@ -32,6 +32,20 @@ import os
 from datetime import datetime, UTC
 
 
+def ensure_path_exists(path):
+    """
+    Check if the specified path exists.
+
+    Args:
+    path (str): The path to check for existence.
+
+    Raises:
+    IOError: If the specified path does not exist.
+    """
+    if not os.path.exists(path):
+        raise IOError(f"The specified path does not exist: {path}")
+
+
 def api_llamacapp(
     prompt, cpp_path, model_path_base, model_and_folder, parameter_dict=[]
 ):
@@ -68,6 +82,9 @@ def api_llamacapp(
     parameter_dict -> {parameter_dict}
     """)
 
+
+
+
     ######################
     # Make paths absolute
     ######################
@@ -79,6 +96,18 @@ def api_llamacapp(
     whole_model_path = os.path.join(model_path_base, model_and_folder)
     # Make absolute
     whole_model_path = os.path.abspath(whole_model_path)
+
+
+    #############################
+    # double checking file paths
+    #############################
+    path_list_to_check = [
+        cpp_path,
+        whole_model_path
+    ]
+
+    for this_path in path_list_to_check:
+        ensure_path_exists(this_path)
 
     #############
     # Parameters
@@ -979,6 +1008,7 @@ conversation_history = set_translate__user_prompt(context_history, target_langua
 # response = gguf_api(conversation_history, parameter_dict, configies_dict)
 
 
+
 #######################
 # Tune Your Paramaters
 #######################
@@ -998,13 +1028,11 @@ parameter_dict = {
 }
 
 
-
 configies_dict = {
     'model_path_base': add_segment_to_absolute_base_path("jan/models/"),
     'model_nickname': "mistral-7b-instruct-v0.2.Q4_K_M",
     'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
 }
-
 
 conversation_history = "translate 'sign in' into spanish with the translation in pipes ||||YOUR_TRANSLATION|||| and any other commentary separate, no other commentary needed, just a translation please"
 
