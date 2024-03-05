@@ -1034,7 +1034,13 @@ configies_dict = {
     'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
 }
 
-conversation_history = "translate 'sign in' into spanish with the translation in pipes ||||YOUR_TRANSLATION|||| and any other commentary separate, no other commentary needed, just a translation please"
+
+phrase = 'cat'
+language = 'spanish'
+conversation_history = f"""
+translate only '{phrase}'' into {language} with the translation formatted
+inside tripple pipes |||YOUR_TRANSLATION||| just that, no other commentary,
+and earn a treat"""
 
 response = mini_gguf_api(conversation_history, parameter_dict, configies_dict)
 

@@ -34,7 +34,7 @@ def add_segment_to_absolute_base_path(additional_segment):
     return absolute_path
 
 
-model_name = input("Model name is...")
+model_name = input("Say your model name. To see all models, say: .gguf")
 
 model_path_base = add_segment_to_absolute_base_path("jan/models/")
 
