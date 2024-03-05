@@ -789,7 +789,6 @@ def mini_gguf_api(conversation_history_context_list, parameter_dict, configies_d
     print(f"parameter_dict - > {parameter_dict}")
 
 
-
     ###########################
     # Call low level llama.cpp
     ###########################
@@ -817,8 +816,6 @@ def mini_gguf_api(conversation_history_context_list, parameter_dict, configies_d
     return result
 
 
-
-
 # # Define the request body
 # request_body = {
 #     "model": "mistral-small",  # 'mistral-small' is 8x7, vs. 'mistral-tiny' for 7b
@@ -839,34 +836,12 @@ def mini_gguf_api(conversation_history_context_list, parameter_dict, configies_d
 # response = call_ggug_modelname_history("tinyllama", conversation_history)
 
 
-#######################
-# Tune Your Paramaters
-#######################
-parameter_dict = {
-    "--temp": 0.8,  # (default value is 0.8)
-    "--top-k": 40,  # (selection among N most probable. default: 40)
-    "--top-p": 0.9,  # (probability above threshold P. default: 0.9)
-    "--min-p": 0.05,  # (minimum probability threshold. default: 0.05)
-    "--seed": -1,  # seed, =1 is random seed
-    "--tfs": 1,  # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
-    "--threads": 8,  # (~ set to number of physical CPU cores)
-    "--typical": 1,  # (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
-    "--mirostat": 2,  # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
-    "--mirostat-lr": 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
-    "--mirostat-ent": 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
-    "--ctx-size": 500,  # Sets the size of the prompt context
-}
-
-
 model_path_base = add_segment_to_absolute_base_path("jan/models/")
-model_name = "tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+# model_name = "tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
 cpp_path = add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp")
 
-configies_dict = {
-    'model_path_base': add_segment_to_absolute_base_path("jan/models/"),
-    'model_nickname': "mistral",
-    'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
-}
+
+
 
 # configies_dict = {
 #     'model_path_base': "/home/xxx/jan/models/",
@@ -1002,6 +977,34 @@ conversation_history = set_translate__user_prompt(context_history, target_langua
 
 # a local api function that acts like cloud api functions
 # response = gguf_api(conversation_history, parameter_dict, configies_dict)
+
+
+#######################
+# Tune Your Paramaters
+#######################
+parameter_dict = {
+    "--temp": 0.8,  # (default value is 0.8)
+    "--top-k": 40,  # (selection among N most probable. default: 40)
+    "--top-p": 0.9,  # (probability above threshold P. default: 0.9)
+    "--min-p": 0.05,  # (minimum probability threshold. default: 0.05)
+    "--seed": -1,  # seed, =1 is random seed
+    "--tfs": 1,  # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
+    "--threads": 8,  # (~ set to number of physical CPU cores)
+    "--typical": 1,  # (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
+    "--mirostat": 2,  # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
+    "--mirostat-lr": 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
+    "--mirostat-ent": 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
+    "--ctx-size": 500,  # Sets the size of the prompt context
+}
+
+
+
+configies_dict = {
+    'model_path_base': add_segment_to_absolute_base_path("jan/models/"),
+    'model_nickname': "mistral-7b-instruct-v0.2.Q4_K_M",
+    'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
+}
+
 
 conversation_history = "translate 'sign in' into spanish with the translation in pipes ||||YOUR_TRANSLATION|||| and any other commentary separate, no other commentary needed, just a translation please"
 

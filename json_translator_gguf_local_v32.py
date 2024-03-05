@@ -1518,23 +1518,7 @@ def clean_and_convert_to_json(input_str):
 # Helper Function
 def check_structure_of_response(dict_str):
     """
-    This function CAN fail and should fail
-    if the AI needs to retry at a task.
-    Do not stop server when this this triggers an exception.
-
-    edge case: before there is a populated output_log
-
-    if passing, this function will return a valid json object
-    """
-
-    """
-    Extracts JSON string enclosed between ```json and ``` markers.
-
-    Parameters:
-    - text (str): The input text containing the JSON block.
-
-    Returns:
-    - str: The extracted JSON string, or an empty string if no JSON block is found.
+    
     """
     print(
         f"\n\n Starting check_structure_of_response, dict_str -> {repr(dict_str)} {type(dict_str)}"
@@ -1542,15 +1526,13 @@ def check_structure_of_response(dict_str):
 
     try:
         # Define the regex pattern to match text between triple pipes
-        pattern = r"\`\`\`(.+?)\`\`\`"
+        pattern = r"\|\|\|(.+?)\|\|\|"
 
         # Use re.findall to find all occurrences that match the pattern
         matches_list = re.findall(pattern, dict_str)
 
         # matches_list is a list of all captured groups in the text
         # If you expect only one match and want to return just that, you can adjust the code accordingly
-
-        matches_list.pop("translation")
 
         translation = matches_list
 
@@ -1569,8 +1551,7 @@ def check_structure_of_response(dict_str):
         return False
 
 
-    # if ok...
-    return dict_str
+
 
 
 """# Call api within: Check json structure against original"""
@@ -1882,8 +1863,8 @@ def call_api_within_structure_check(context_history, use_this_model, mode_locale
 
                 print(f"configies_dict -> {configies_dict}")
 
-                # breakpoint
-                input("Breakpoint")
+                # # breakpoint
+                # input("Breakpoint")
 
                 ######################
                 # local api with gguf
@@ -2403,8 +2384,8 @@ def translate_json(
         """
         )
 
-        # breakpoint
-        input("breakpoint")
+        # # breakpoint
+        # input("breakpoint")
 
         # Sanity check
         if paths_list != select_best_frame_paths_list:
@@ -2473,16 +2454,18 @@ def translate_json(
                     ############
                     # Translate
                     ############
-                    translated_value = call_api_within_structure_check(
+                    translated_value_list = call_api_within_structure_check(
                         context_history, use_this_model, mode_locale, skeleton_json
                     )
 
-                    # add-insert value to json
-                    print(f"Before appending: {skeleton_json}")
-                    print(f"this_path -> {this_path}")
-                    skeleton_json = append_value_by_path(
-                        skeleton_json, this_path, translated_value
-                    )
+                    for translated_value in translated_value_list:
+
+                        # add-insert value to json
+                        print(f"Before appending: {skeleton_json}")
+                        print(f"this_path -> {this_path}")
+                        skeleton_json = append_value_by_path(
+                            skeleton_json, this_path, translated_value
+                        )
 
                 #####################################################
                 # Select Top Top Goodest Translation Star-Good-Prime
@@ -2608,8 +2591,8 @@ def mini_translate_json(
         """
         )
 
-        # breakpoint
-        input("breakpoint")
+        # # breakpoint
+        # input("breakpoint")
 
         # Sanity check
         if paths_list != select_best_frame_paths_list:
@@ -2628,8 +2611,8 @@ def mini_translate_json(
 
                 untranslated_leaf = extract_value_by_path(original_data, this_path)
 
-                # breakpoint
-                print(f"\n\n breakpoint 5: untranslated_leaf -> {untranslated_leaf}")
+                # # breakpoint
+                # print(f"\n\n breakpoint 5: untranslated_leaf -> {untranslated_leaf}")
                 # input("breakpoint")
 
                 # make empty conversation
@@ -2637,9 +2620,9 @@ def mini_translate_json(
                 context_history = f"translate '{untranslated_leaf}'' into {target_language} with the translation in pipes |||YOUR_TRANSLATION||| no other commentary needed, just a translation please"
 
 
-                # breakpoint
-                print(f"\n\n mini breakpoint 5: context_history -> {context_history}")
-                input("breakpoint")
+                # # breakpoint
+                # print(f"\n\n mini breakpoint 5: context_history -> {context_history}")
+                # input("breakpoint")
 
                 # making N translation-versions
                 for i in range(number_of_preliminary_translations):
@@ -2713,9 +2696,9 @@ def mini_translate_json(
 
 
                 context_history = f"select best translation of '{untranslated_leaf}'' into {target_language} from these {list_of_options} putting best translation in pipes |||YOUR_SELECTION||| no other commentary needed, just a best translation please"
-                # breakpoint
+                # # breakpoint
                 print(f"\n\n mini breakpoint 6: context_history -> {context_history}")
-                input("breakpoint")
+                # input("breakpoint")
 
                 #################
                 #################
@@ -2807,7 +2790,7 @@ mode_locale = "cloud_api"
 # use_this_model = "gpt-3.5-turbo"
 # use_this_model = "mistral-large-latest"
 
-use_this_model = "mistral"
+use_this_model = "mistral-7b-instruct"
 # use_this_model = "mistral-small"
 # use_this_model = "tinyllama"
 
