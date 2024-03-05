@@ -1,4 +1,4 @@
-from call_llamacpp import get_model_path_by_name
+from module_llamacpp import get_model_path_by_name
 
 """
 'model_path_base': "/home/oops/jan/models/",
