@@ -2,6 +2,8 @@
 """
 TODO:
 maybe do a best-2/3
+ranked choice selection
+
 to ensure what it selects as the best
 is
 1. actually in the list
@@ -14,6 +16,9 @@ is
     - nonsequitor-ness
 
 
+seeds...
+print seed?
+set seed?
 
 How to make sure the translation is decent...
 
@@ -1660,6 +1665,7 @@ def check_structure_of_response(dict_str):
             "best selection",
             "TRANSLATION",
             "selection",
+            "#"
         ]
 
         matches_list = remove_specific_strings(matches_list, strings_to_remove)
@@ -2689,6 +2695,44 @@ def translate_json(
             )
 
 
+def add_ranks_votes_to_candidate(vote_list, candidate_dictionary):
+    """
+    Adds each item from vote_list to the list in candidate_dictionary corresponding to the item's sequence position,
+    where the sequence position is mapped to alphabetical keys ('a', 'b', 'c', etc.).
+
+    :param vote_list: List of numbers to be added.
+    :param candidate_dictionary: Dictionary with alphabetical keys representing sequence positions and values as lists.
+    """
+    # Create a list of keys from the dictionary to map index to keys
+    keys = list(candidate_dictionary.keys())
+
+    for index, value in enumerate(vote_list):
+        # Ensure the index is within the range of available keys
+        if index < len(keys):
+            # Append the item to the list for the corresponding key based on sequence position
+            candidate_dictionary[keys[index]].append(value)
+        else:
+            # Optionally handle or log if the index exceeds the available keys
+            print(f"No key available for index {index} in candidate_dictionary.")
+            raise "x add_ranks_votes_to_candidate()"
+
+
+def extract_top_rank(list_of_votes):
+    # # Assuming 'ranked_votes' is your dictionary where each key is an item and each value is a list of ranks
+    # ranked_votes = {
+    #     'item1': [1, 2, 3],
+    #     'item2': [2, 1, 3],
+    #     'item3': [3, 3, 1]
+    # }
+
+    # Calculate the sum of ranks for each item
+    sum_of_ranks = {item: sum(ranks) for item, ranks in list_of_votes.items()}
+
+    # Determine the item with the highest sum of ranks
+    highest_ranked_item = max(sum_of_ranks, key=sum_of_ranks.get)
+
+    return highest_ranked_item
+
 
 
 def mini_translate_json(
@@ -2772,7 +2816,7 @@ def mini_translate_json(
 
 
                     if leaf_fail_counter > 10:
-                        raise "fail_counter > 25"
+                        raise f"leaf_fail_counter > 10 -> {leaf_fail_counter}"
 
                     untranslated_leaf = extract_value_by_path(original_data, this_path)
 
@@ -2785,8 +2829,8 @@ def mini_translate_json(
                     # context_history = f"translate '{untranslated_leaf}'' into {target_language} with the translation in pipes |||YOUR_TRANSLATION||| no other commentary needed, just a translation please"
                     context_history = f"""
                     translate only '{untranslated_leaf}'' into {target_language} with the translation formatted
-                    inside tripple pipes |||YOUR_TRANSLATION||| just that, no other commentary,
-                    and earn a treat"""
+                    inside tripple pipes |||YOUR_TRANSLATION||| just that. no other commentary, no underscores _, not all caps.
+                    translate and earn a treat"""
 
                     # # breakpoint
                     # print(f"\n\n mini breakpoint 5: context_history -> {context_history}")
@@ -2876,49 +2920,56 @@ def mini_translate_json(
                     Indicate your choice by placing it between triple pipes, like this: |||best_selection|||. 
                     No additional comments. The reward of a job well done awaits your accurate selection!"""
 
+                    context_history = f"""
+                    Rank (0-10, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {list_of_options}. 
+                    Place your evaluations in order between triple pipes, like this: |||#|||#|||#|||#||| 
+                    No additional comments. A tasty reward awaits your accurate selection."""
+
                     # # breakpoint
-                    print(f"\n\n mini breakpoint 6: context_history -> {context_history}")
+                    print(f"\n\n context_history -> {context_history}")
                     # input("breakpoint")
 
                     #################
                     #################
                     # Select Bestest
+                    # By ranked choice
                     #################
                     #################
 
-                    selected_is_in_list_ok = False
-                    fail_counter = 0
-
-                    while not selected_is_in_list_ok:
-
-                        selected_bestest_value = call_api_within_structure_check(
-                            context_history, use_this_model, mode_locale, skeleton_json
-                        )
-
-                        print(f"type(selected_bestest_value) -> {type(selected_bestest_value)}") 
-
-                        selected_bestest_value = selected_bestest_value[0]
-
-                        print(f"selected_bestest_value -> {selected_bestest_value} vs. list_of_options -> {list_of_options}")
-                        print(f"type(list_of_options) -> {type(list_of_options)} && type(list_of_options[0]) -> {type(list_of_options[0]) }")
+                    # turn list of options int dict
+                    dict_of_options = {option: None for option in list_of_options}
+                    # get highest ranked item:
+                    best_key_option = None
 
 
-                        # Make sure selected item is in the list (and not a new halucination or mutation)
-                        # note: if matching a string in a list, in a list...[[str]]
-                        if selected_bestest_value in list_of_options:
-                            selected_is_in_list_ok = True
-                            leaf_ok_flag = True
+                    for i in range(3):
 
-                        else:
-                            fail_counter += 1
-                            leaf_fail_counter += 1
-                            print(f"\n\n\nfail_counter -> {fail_counter}")
-                            print(f"leaf_fail_counter -> {leaf_fail_counter}")
+                        vote_check_ok = False
 
-                        if fail_counter > 6:
-                            print("Too many failes, restarting while loop for leaf.")
+                        while not vote_check_ok:
 
-                            break
+                            # get a list of votes and make sure it matches the list of candidates
+                            list_of_votes = call_api_within_structure_check(
+                                context_history, use_this_model, mode_locale, skeleton_json
+                            )
+
+                            print(f"\n\nlist_of_votes -> {list_of_votes}")
+                            print(f"type list_of_votes -> {type(list_of_votes)}")
+
+
+                        # if there is one vote per candidate, list each candidates votes
+                        if len(list_of_votes) == len(list_of_options):
+                            add_ranks_votes_to_candidate(list_of_votes, dict_of_options)
+
+                            print(dict_of_options)
+                            
+                            # exit loop
+                            vote_check_ok = True
+
+
+                    best_key_option = extract_top_rank(list_of_votes)
+
+                    selected_bestest_value = list_of_options[best_key_option]
 
                     # add value to json
                     select_best_frame = insert_value_by_path(

@@ -92,7 +92,7 @@ def api_llamacapp(
     prompt = prompt.strip()
 
     # inspection
-    print("start")
+    print("api_llamacapp() starto!!")
     print(f"""
     prompt -> {prompt}
 
