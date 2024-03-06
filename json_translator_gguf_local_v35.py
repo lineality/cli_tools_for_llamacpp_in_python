@@ -2733,6 +2733,18 @@ def extract_top_rank(list_of_votes):
 
     return highest_ranked_item
 
+def filter_list_convert_to_int(input_list):
+    """
+    Takes a list of strings, removes any items that contain non-digit characters,
+    and converts the remaining items to integers.
+
+    :param input_list: List of strings to process.
+    :return: A list of integers after filtering out non-digit strings and converting.
+    """
+    # Filter out non-digit strings and convert the rest to integers
+    result = [int(item) for item in input_list if item.isdigit()]
+    
+    return result
 
 
 def mini_translate_json(
@@ -2921,32 +2933,47 @@ def mini_translate_json(
                     No additional comments. The reward of a job well done awaits your accurate selection!"""
 
                     context_history = f"""
-                    Rank (0-10, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {list_of_options}. 
-                    Place your evaluations in order between triple pipes, like this: |||#|||#|||#|||#||| 
+                    Evaluate (0-10, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {list_of_options}. 
+                    Place your evaluations in order between triple pipes, like this: |||#|||#|||#|||#||| for four options, or |||#||| to evaluate just one item. 
                     No additional comments. A tasty reward awaits your accurate selection."""
 
                     # # breakpoint
                     print(f"\n\n context_history -> {context_history}")
                     # input("breakpoint")
 
-                    #################
-                    #################
+                    ###################
+                    ###################
                     # Select Bestest
                     # By ranked choice
-                    #################
-                    #################
+                    ###################
+                    ###################
 
                     # turn list of options int dict
                     dict_of_options = {option: None for option in list_of_options}
                     # get highest ranked item:
                     best_key_option = None
 
+                    while_counter = 0
 
+                    # 
                     for i in range(3):
+
+                        print(f"while_counter -> {while_counter}")
 
                         vote_check_ok = False
 
+
                         while not vote_check_ok:
+                            """
+                            TODO if a different function rank_vote_call_api_within_structure_check()
+                            you should be able to filter everything except numbers out of the answer
+
+                            also...
+                            1. any complete duplicates can be filtered out...
+                            2. any non-numbers filtered out
+
+                            """
+
 
                             # get a list of votes and make sure it matches the list of candidates
                             list_of_votes = call_api_within_structure_check(
@@ -2956,15 +2983,23 @@ def mini_translate_json(
                             print(f"\n\nlist_of_votes -> {list_of_votes}")
                             print(f"type list_of_votes -> {type(list_of_votes)}")
 
+                            # filter out words and make type int
+                            list_of_votes = filter_list_convert_to_int(list_of_votes)
 
-                        # if there is one vote per candidate, list each candidates votes
-                        if len(list_of_votes) == len(list_of_options):
-                            add_ranks_votes_to_candidate(list_of_votes, dict_of_options)
+                            print(f"list_of_votes -> {list_of_votes}")
+                            print(f"type list_of_votes -> {type(list_of_votes)}\n\n")
 
-                            print(dict_of_options)
-                            
-                            # exit loop
-                            vote_check_ok = True
+
+                            # if there is one vote per candidate, list each candidates votes
+                            if len(list_of_votes) == len(list_of_options):
+                                add_ranks_votes_to_candidate(list_of_votes, dict_of_options)
+
+                                print(dict_of_options)
+
+                                # exit loop
+                                vote_check_ok = True
+
+                            while_counter += 1
 
 
                     best_key_option = extract_top_rank(list_of_votes)

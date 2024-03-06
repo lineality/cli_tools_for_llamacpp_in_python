@@ -2,8 +2,10 @@
     "signUp": {
         "Account": [
             [
-                "Ihr deutscher Account-Name",
-                "Dein deutscher Benutzername"
+                "Ihr_ACCOUNT_Name",
+                "Ihr_KontoName",
+                "YOUR_ACCOUNT_NAME",
+                "Ihr_KontoName"
             ]
         ],
         "FirstName": [],
