@@ -2,9 +2,7 @@
 """
 TODO:
 
-'''json vs. ```json ???
-
-can either be caught???
+maybe look for last json in list?
 
 
 maybe do a best-2/3
@@ -1661,10 +1659,30 @@ def remove_specific_strings(original_list, strings_to_remove):
     return [item for item in original_list if item not in strings_to_remove]
 
 
+
+def return_list_of_jsons_from_string(dict_str):
+    try:
+        # Define the pattern to match JSON blocks enclosed in triple backticks
+        pattern = r"```json\n([\s\S]*?)\n```"
+        matches = re.finditer(pattern, dict_str)
+
+        # Initialize an empty list to store extracted JSON strings
+        json_blocks = []
+
+        for match in matches:
+            # Extract the JSON string from the match and append it to the list
+            json_blocks.append(match.group(1))
+
+        # Return the list of JSON strings
+        return json_blocks
+
+    except Exception as e:
+        raise e
+
 # Helper Function
 def check_structure_of_response(dict_str):
     """
-    
+
     """
     print(
         f"\n\n Starting check_structure_of_response, dict_str -> {repr(dict_str)} {type(dict_str)}"
@@ -1718,6 +1736,7 @@ def check_structure_of_response(dict_str):
 """# Call api within: Check json structure against original"""
 
 
+
 def extract_values(dict_str):
 
     try:
@@ -1728,6 +1747,31 @@ def extract_values(dict_str):
         return values_list
     except Exception as e:
         raise e
+
+
+def return_list_of_jsons_from_string(dict_str):
+    try:
+
+        dict_str = dict_str.replace("\n", " ")
+
+        # Define the pattern to match JSON blocks enclosed in triple backticks
+        pattern = r'```json(.*?)```'
+        matches = re.finditer(pattern, dict_str)
+
+        # Initialize an empty list to store extracted JSON strings
+        json_blocks = []
+
+        for match in matches:
+            # Extract the JSON string from the match and append it to the list
+            json_blocks.append(match.group(1))
+
+        # Return the list of JSON strings
+        return json_blocks[-1]
+
+    except Exception as e:
+        raise e
+
+
 
 
 # Helper Function
@@ -1751,147 +1795,21 @@ def json_number_check_structure_of_response(dict_str):
     Returns:
     - str: The extracted JSON string, or an empty string if no JSON block is found.
     """
-    print(
-        f"\n\n Starting check_structure_of_response, dict_str -> {repr(dict_str)} {type(dict_str)}"
-    )
-
-    # input("breakpoint")
-
-    ########################
-    # Check Json Formatting
-    ########################
-
-    # # pre-check
-    #     # load
-    # try:
-    #     if "'" not in dict_str:
-
-    #         # Load the string into a Python dictionary
-    #         dict_data = json.loads(dict_str)
-
-    #         dict_str = dict_data['translation']
-
-    #         if dict_leaf_detection_boolean_true_means_defective(dict_str):
-    #             return dict_str
-
-    #         else:
-    #             print(f"Failed dict_str precheck")
-
-    # except:
-    #     print(f"Failed dict_str precheck")
-
-    # extraction 1
-    try:
-        if """```json""" in dict_str:
-
-            pattern = r"```json\n([\s\S]*?)\n```"
-            match = re.search(pattern, dict_str)
-            dict_str = match.group(1) if match else ""
-
-    except Exception as e:
-        print(
-            f"\nTRY AGAIN: check_structure_of_response() extraction from markdown failed: {e}"
-        )
-        print(f"Failed dict_str -> {repr(dict_str)}")
-        return False
-
-    print(
-        f"\n\n  extraction-1 from markdown dict_str -> {repr(dict_str)} {type(dict_str)}"
-    )
-
-    # ```json\n{\'translation\': "S\'inscrier"}\n```'
+    # print(
+    #     f"\n\n Starting check_structure_of_response, dict_str -> {repr(dict_str)} {type(dict_str)}"
+    # )
 
 
-    print(f" dict_str -> {repr(dict_str)} {type(dict_str)}")
-
-    dict_str = clean_and_convert_to_json(dict_str)
-    print(f" clean_and_convert_to_json dict_str -> {repr(dict_str)} {type(dict_str)}")
+    extracted_dict = return_list_of_jsons_from_string(input)
+    print( extracted_dict )
 
 
+    number_list = extract_values(extracted_dict) 
 
-    # clean
-    try:
-        """
-        Swap in and swap out escaped single commas
-        to avoid them being removed during reformatting
-        or the reformatting otherwise breaking the json
-        """
-
-        # if ("\'" in dict_str) or ("""\\'""" in dict_str):
-        #     print("escaped single quote found")
-
-        #     input_string = dict_str
-        #     target = "\'"
-        #     swapper = get_swap_in(input_string)
-
-        #     # Run before
-        #     swap_two(input_string, target, swapper)
-
-        #     # # This conflicted with free language in description section...
-        #     dict_str = dict_str.replace("'", '"')
-
-        #     # Run After
-        #     swap_two(input_string, target, swapper)
-
-        # else:
-        #     # # This conflicted with free language in description section...
-        #     dict_str = dict_str.replace("'", '"')
-
-        # try safety cleaning
-        dict_str = dict_str.replace("True", "true")
-        dict_str = dict_str.replace("False", "false")
-        dict_str = dict_str.replace("None", "null")
-
-        # remove trailing delimiter comma
-        print(f"{dict_str[:-6]}")
-        dict_str = dict_str.replace('",\n}', '"\n}')
-
-    except Exception as e:
-        print(f"\nTRY AGAIN:try safety cleaning: {e}")
-        print(f"Failed repr(dict_str) -> {repr(dict_str)}")
-        return False
-
-    # load
-    try:
-        # try converting
-        print(f"dict_str -> {repr(dict_str)} {type(dict_str)}")
-
-        # Load the string into a Python dictionary
-        dict_data = json.loads(dict_str)
-
-    except Exception as e:
-        print(f"\nTRY AGAIN: trying json.loads(dict_str) Dictionary load failed: {e}")
-        print(f"Failed repr(dict_str) -> {repr(dict_str)}")
-        return False
-
-    # extraction 2
-    try:
-        # Extract the value associated with the key 'translation'
-        dict_str = extract_values(dict_data)
-
-
-
-    except Exception as e:
-        print(
-            f"\nTRY AGAIN: check_structure_of_response() extraction 2 from translation = dict_data['translation'] failed: {e}"
-        )
-        print(f"Failed repr(dict_str) -> {repr(dict_str)}")
-        return False
-
-    # try:
-    #     # if test fails
-    #     if dict_leaf_detection_boolean_true_means_defective(dict_str):
-    #         return False
-
-    # except Exception as e:
-    #     print(f"\nTRY AGAIN: dict_leaf_detection_boolean_true_means_defective() empty or stub leaf found: {e}")
-    #     print(f"Failed dict_str -> {dict_str}")
-    #     return False
-
-    print(f"\n  final extracted from markdown, dict, etc. ->{repr(dict_str)}")
+    print(f"\n  final extracted from markdown, dict, etc. number_list ->{repr(number_list)}")
 
     # if ok...
-    return dict_str
+    return number_list
 
 
 # # Helper Function
@@ -3291,9 +3209,9 @@ def mini_translate_json(
                     Place your evaluations as a value to the key in Json format. Return your markdown json object 
                     listing each translation only as t-number 
                     as: 
-                    '''json 
+                    ```json 
                     {answer_form} 
-                    ''' 
+                    ``` 
                     No additional comments. A tasty reward awaits your accurate selection."""
 
                     # context_history = f"""

@@ -1101,9 +1101,9 @@ Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation f
 Place your evaluations as a value to the key in Json format. Return your markdown json object 
 listing each translation only as t-number 
 as: 
-'''json 
+```json 
 {answer_form} 
-''' 
+```
 No additional comments. A tasty reward awaits your accurate selection."""
 
 response = mini_gguf_api(conversation_history, parameter_dict, configies_dict)
