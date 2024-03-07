@@ -166,9 +166,20 @@ six parameters
 # # mistral_api_key = 'xxx'
 # openai_api_key = userdata.get("open_ai_key")
 
-"""# make a list of json files"""
-
+# from dotenv import load_dotenv
 import os
+import time
+
+
+"""# make a list of json files"""
+# import openai
+# from google.colab import userdata
+
+# Load environment variables from .env file
+# load_dotenv()
+openai_api_key = os.getenv("OPENAI_API_KEY") 
+mistral_api_key = os.getenv("mistral_api_key") 
+
 
 
 # Helper Function
@@ -1003,20 +1014,28 @@ def ask_mistral_tiny(context_history, use_this_model):
 # # functions to call openAI 2024 api
 
 
-# import openai
-# import time
-# from openai import AsyncOpenAI
+# # import openai
+# # import time
+# # from openai import AsyncOpenAI
 
-# # my_api_key = ""
+# # # openai_api_key = ""
 
-# from google.colab import userdata
-# my_api_key = userdata.get('open_ai_key')
+# # from google.colab import userdata
+# # openai_api_key = userdata.get('open_ai_key')
+
+# # python dotenv
+
+# from dotenv import load_dotenv
+# import os
+
+# load_dotenv()
+# api_key = os.getenv("OPENAI_API_KEY") 
 
 # from openai import OpenAI
 
 # client = OpenAI(
 #     # defaults to os.environ.get("OPENAI_API_KEY")
-#     api_key = my_api_key,
+#     api_key = openai_api_key,
 # )
 
 # """
@@ -1930,6 +1949,135 @@ def add_segment_to_absolute_base_path(additional_segment):
 
 # helper function
 def call_api_within_structure_check(context_history, use_this_model, mode_locale, skeleton_json):
+    retry_counter = 0
+    json_ok_flag = False
+
+
+    # see
+    mistal_model_list = [
+        "mistral-tiny",
+        "mistral-small",
+        "mistral-large-latest",
+    ]
+    # /home/oops/jan/models/mistral-ins-7b-q4/mistral-7b-instruct-v0.2.Q4_K_M.gguf
+
+    # see https://platform.openai.com/docs/guides/text-generation
+    open_ai_model_list = ["gpt-4", "gpt-4-turbo-preview", "gpt-3.5-turbo"]
+
+    gguf_model_list = ["jais", "tiny_llama", "mistral7b",]
+
+    while not json_ok_flag:
+
+        ####################
+        # get a translation
+        ####################
+
+        try:
+            # check json structure
+
+            ########################
+            # Select Model and Mode
+            ########################
+
+            # for off-line local mode
+            if mode_locale == "gguf":
+                print("Started gguf")
+
+                # get model path name-end
+                # use_this_model = get_model_path_by_name("/home/oops/jan/models/", use_this_model)
+
+                # inspection
+                print(f"use_this_model -> {use_this_model}")
+
+                #######################
+                # Tune Your Paramaters
+                #######################
+                parameter_dict = {
+                    "--temp": 0.8,  # (default value is 0.8)
+                    "--top-k": 40,  # (selection among N most probable. default: 40)
+                    "--top-p": 0.9,  # (probability above threshold P. default: 0.9)
+                    "--min-p": 0.05,  # (minimum probability threshold. default: 0.05)
+                    "--seed": -1,  # seed, =1 is random seed
+                    "--tfs": 1,  # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
+                    "--threads": 8,  # (~ set to number of physical CPU cores)
+                    "--typical": 1,  # (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
+                    "--mirostat": 2,  # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
+                    "--mirostat-lr": 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
+                    "--mirostat-ent": 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
+                    "--ctx-size": 500,  # Sets the size of the prompt context
+                }
+
+
+                configies_dict = {
+                    'model_path_base': add_segment_to_absolute_base_path("jan/models/"),
+                    'model_nickname': use_this_model,
+                    'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
+                    'pipeline_mode': mini_gguf_api,
+                }
+
+
+                print(f"configies_dict -> {configies_dict}")
+
+                # # breakpoint
+                # input("Breakpoint")
+
+                ######################
+                # local api with gguf
+                ######################
+                response = configies_dict["pipeline_mode"](context_history, parameter_dict, configies_dict)
+                print(response[0])
+                print(response[1])
+                print(response[2])
+                dict_str = response[2]
+
+            ################
+            # for cloud api
+            ################
+            elif use_this_model in mistal_model_list:
+                print(f"Mistral api selected...{use_this_model}")
+                dict_str = ask_mistral_tiny(context_history, use_this_model)
+
+            elif use_this_model in open_ai_model_list:
+                print(f"openAI api selected...{use_this_model}")
+                dict_str = openai_call_context_timeout(
+                    client,
+                    context_history,
+                    model=use_this_model,
+                    max_retries=10,
+                    temp=0.9,
+                    timeout_min=8,
+                )
+
+            else:
+                print(f"no known api selected...{use_this_model}")
+                raise f"No known model option chosen...use_this_model -> {use_this_model}"
+
+        except Exception as e:
+            jsonchecked_translation = None
+            print(f"Failed: {str(e)}")
+
+        jsonchecked_translation = check_structure_of_response(dict_str)
+
+        if jsonchecked_translation:
+            json_ok_flag = True
+
+        else:
+            retry_counter += 1
+            print(f"\n\nretry_counter -> {retry_counter}\n")
+
+            # # breakpoint
+            # input("Breakpoint")
+
+    print(f"retry_counter -> {retry_counter}")
+
+    return jsonchecked_translation
+
+
+""" call_api_within_number_check"""
+
+
+# helper function
+def call_api_within_number_structure_check(context_history, use_this_model, mode_locale, skeleton_json):
     retry_counter = 0
     json_ok_flag = False
 
@@ -2971,7 +3119,6 @@ def mini_translate_json(
                             also...
                             1. any complete duplicates can be filtered out...
                             2. any non-numbers filtered out
-
                             """
 
 

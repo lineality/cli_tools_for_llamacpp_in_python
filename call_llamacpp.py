@@ -52,6 +52,7 @@ import os
 from datetime import datetime, UTC
 
 
+
 def ensure_path_exists(path):
     """
     Check if the specified path exists.
@@ -79,6 +80,9 @@ def api_llamacapp(
     e.g. to use a local mode instead of an online-api (local, offline, private)
 
     """
+
+    prompt = re.sub(r'\s+', ' ', prompt.strip())
+
     prompt = prompt.replace("\\", "\\\\")  
     prompt = prompt.replace("\n", "")
     prompt = prompt.replace("\\n", "")
@@ -1000,6 +1004,9 @@ def set_translate__user_prompt(context_history, target_language, original_data):
     You can do it!!
     """
 
+
+
+
     # Remove duplicate spaces
     text_input = re.sub(r'\s+', ' ', text_input.strip())
 
@@ -1061,6 +1068,43 @@ conversation_history = f"""
 translate only '{phrase}'' into {language} with the translation formatted
 inside tripple pipes |||YOUR_TRANSLATION||| just that, no other commentary,
 and earn a treat"""
+
+conversation_history = f"""
+give two number separated by pipes, answer <= 20 characters"""
+
+
+conversation_history = f"""
+
+Evaluate (Score 0-10) German translations for "Your ACCOUNT name": ["your_translation","Dein Benutzername"]
+
+Score each (0-10) as being a good translation, then reply saying only |Score1|Score2|, no commentary please.
+"""
+
+target_language = "German"
+untranslated_leaf = "your account name"
+dict_of_options = {"your_translation": "score_here", 
+                   "Dein Benutzername": "score_here"}
+answer_form = {
+    "t-1": "score_here", 
+    "t-2": "score_here",
+    "t-3": "score_here"
+}
+
+
+"""
+ Evaluate (0-10, 10 is great) each German translation for 'your account name' from these options: {'your_translation': 'score_here', 'Dein Benutzername': 'score_here'}. Place your evaluations as a value to the key in Json format. Return your properly formatted dict listing each translation only as t-number as: '''json {'t-1': 'score_here', 't-2': 'score_here', 't-3': 'score_here'} ''' No additional comments. A tasty reward awaits your accurate selection.
+
+"""
+
+conversation_history = f"""
+Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
+Place your evaluations as a value to the key in Json format. Return your markdown json object 
+listing each translation only as t-number 
+as: 
+'''json 
+{answer_form} 
+''' 
+No additional comments. A tasty reward awaits your accurate selection."""
 
 response = mini_gguf_api(conversation_history, parameter_dict, configies_dict)
 

@@ -1,0 +1,17 @@
+{
+    "signUp": {
+        "Account": [
+            [
+                "your_translation",
+                "dein_Übersetzung",
+                "AliceSmith123_Deutsch",
+                "AliceSmith123\\_Deutsch",
+                "Deutsche_Übersetzung"
+            ]
+        ],
+        "FirstName": [],
+        "Password": [],
+        "ConfirmNewPassword": [],
+        "SignUp": []
+    }
+}
