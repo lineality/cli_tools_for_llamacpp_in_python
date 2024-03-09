@@ -1737,7 +1737,7 @@ def check_structure_of_response(dict_str):
 
 
 
-def extract_values(dict_str):
+def extract_values_from_dict(dict_str):
 
     try:
         # Parse the string into a Python dictionary
@@ -1775,7 +1775,7 @@ def return_list_of_jsons_from_string(dict_str):
 
 
 # Helper Function
-def json_number_check_structure_of_response(dict_str):
+def json_number_check_structure_of_response_to_list(dict_str) -> list:
     """
     This function CAN fail and should fail
     if the AI needs to retry at a task.
@@ -1795,16 +1795,16 @@ def json_number_check_structure_of_response(dict_str):
     Returns:
     - str: The extracted JSON string, or an empty string if no JSON block is found.
     """
-    # print(
-    #     f"\n\n Starting check_structure_of_response, dict_str -> {repr(dict_str)} {type(dict_str)}"
-    # )
+    print(
+        f"\n\n Starting check_structure_of_response, dict_str -> {repr(dict_str)} \nType -> {type(dict_str)}"
+    )
 
 
-    extracted_dict = return_list_of_jsons_from_string(input)
+    extracted_dict = return_list_of_jsons_from_string(dict_str)
     print( extracted_dict )
 
 
-    number_list = extract_values(extracted_dict) 
+    number_list = extract_values_from_dict(extracted_dict) 
 
     print(f"\n  final extracted from markdown, dict, etc. number_list ->{repr(number_list)}")
 
@@ -2282,12 +2282,12 @@ def number_call_api_within_structure_check(context_history, use_this_model, mode
                 raise f"No known model option chosen...use_this_model -> {use_this_model}"
 
         except Exception as e:
-            jsonchecked_translation = None
+            json_checked_value_list = None
             print(f"Failed: {str(e)}")
 
-        jsonchecked_translation = json_number_check_structure_of_response(dict_str)
+        json_checked_value_list = json_number_check_structure_of_response_to_list(dict_str)
 
-        if jsonchecked_translation:
+        if json_checked_value_list:
             json_ok_flag = True
 
         else:
@@ -2299,7 +2299,7 @@ def number_call_api_within_structure_check(context_history, use_this_model, mode
 
     print(f"retry_counter -> {retry_counter}")
 
-    return jsonchecked_translation
+    return json_checked_value_list
 
 
 """# Crawler model call"""
@@ -2943,6 +2943,7 @@ def translate_json(
             )
 
 
+
 def add_ranks_votes_to_candidate(vote_list, candidate_dictionary):
     """
     Adds each item from vote_list to the list in candidate_dictionary corresponding to the item's sequence position,
@@ -2962,7 +2963,9 @@ def add_ranks_votes_to_candidate(vote_list, candidate_dictionary):
         else:
             # Optionally handle or log if the index exceeds the available keys
             print(f"No key available for index {index} in candidate_dictionary.")
-            raise "x add_ranks_votes_to_candidate()"
+            raise Exception("Index exceeds the number of keys in candidate_dictionary.")
+
+    return candidate_dictionary
 
 
 def extract_top_rank(list_of_votes):
@@ -2984,18 +2987,30 @@ def extract_top_rank(list_of_votes):
 
 def filter_list_convert_to_int(input_list):
     """
+    Note: this needs to be able to fail without crashing and pass that on
+    so a new translation can be retried.
+
+    This also needs to be able to take in a list already as int
+    and say, ok, pass those 'int's back out as ok.
+
     Takes a list of strings, removes any items that contain non-digit characters,
     and converts the remaining items to integers.
 
     :param input_list: List of strings to process.
     :return: A list of integers after filtering out non-digit strings and converting.
     """
-    # Filter out non-digit strings and convert the rest to integers
-    result = [int(item) for item in input_list if item.isdigit()]
-
-    return result
+    try:
 
 
+        # Filter out non-digit strings and convert the rest to integers
+        # result = [int(item) for item in input_list if item.isdigit()]
+        result = [item if isinstance(item, int) else int(item) for item in input_list if isinstance(item, int) or item.isdigit()]
+
+
+        return result
+
+    except:
+        return False
 
 
 def mini_translate_json(
@@ -3171,6 +3186,9 @@ def mini_translate_json(
                     # turn list of options int dict
                     dict_of_options = {option: None for option in list_of_options}
 
+                    # turn list of options int dict
+                    list_dict_of_options = {option: [] for option in list_of_options}
+
                     # # System Instructions
                     # context_history = set_select_best__system_prompt(
                     #     context_history, target_language
@@ -3202,7 +3220,6 @@ def mini_translate_json(
                         "t-2": "score_here",
                         "t-3": "score_here"
                     }
-
 
                     context_history = f"""
                     Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
@@ -3259,7 +3276,7 @@ def mini_translate_json(
                             2. any non-numbers filtered out
                             """
                             print(f"while_counter -> {while_counter}")
-
+                            print("number_call_api_within_structure_check")
 
                             # get a list of votes and make sure it matches the list of candidates
                             list_of_votes = number_call_api_within_structure_check(
@@ -3273,26 +3290,37 @@ def mini_translate_json(
                             list_of_votes = filter_list_convert_to_int(list_of_votes)
 
                             print(f"list_of_votes -> {list_of_votes}")
+                            print(f"list_of_options -> {list_of_options}")
                             print(f"type list_of_votes -> {type(list_of_votes)}\n\n")
 
-                            print(f"dict_of_options -> {dict_of_options}")
+                            print(f"list_dict_of_options -> {list_dict_of_options}")
 
+                            if list_of_votes:
 
-                            # if there is one vote per candidate, list each candidates votes
-                            if len(list_of_votes) == len(list_of_options):
-                                add_ranks_votes_to_candidate(list_of_votes, dict_of_options)
+                                # if there is one vote per candidate, list each candidates votes
+                                if len(list_of_votes) == len(list_of_options):
+                                    add_ranks_votes_to_candidate(list_of_votes, list_dict_of_options)
 
-                                print(dict_of_options)
+                                    print(f"new list_dict_of_options -> {list_dict_of_options}")
 
-                                # exit loop
-                                vote_check_ok = True
+                                    # exit loop
+                                    vote_check_ok = True
 
-                            while_counter += 1
+                                else:  # if len of list is wrong
+                                    while_counter += 1
+                                    print("len of list is wrong")
 
+                            else:  # if no list at all!
+                                while_counter += 1
+                                print("no list at all!")
 
                     best_key_option = extract_top_rank(list_of_votes)
 
+                    print(f"best_key_option -> {best_key_option}")
+
                     selected_bestest_value = list_of_options[best_key_option]
+
+                    print(f"selected_bestest_value -> {selected_bestest_value}")
 
                     # add value to json
                     select_best_frame = insert_value_by_path(
