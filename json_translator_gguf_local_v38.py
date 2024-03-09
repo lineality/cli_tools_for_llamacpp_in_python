@@ -3620,17 +3620,13 @@ def mini_translate_json(
 
                     print(f"best_key_option -> {best_key_option}")
 
-                    # ensure choice is a candidate
-                    selected_bestest_value = list_of_options[best_key_option]
-
-                    print(f"selected_bestest_value -> {selected_bestest_value}")
 
                     # add value to json
                     insert_int_value_by_path(
-                        dict_of_selected_best, this_path, selected_bestest_value
+                        dict_of_selected_best, this_path, best_key_option
                     )
 
-
+                    print(f"dict_of_selected_best -> {dict_of_selected_best}")
             ##########################
             # per language: save file
             ##########################
