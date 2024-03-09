@@ -1,9 +1,9 @@
 {
     "signUp": {
         "Account": [
-            "Ihr Kontoname",
-            "Dein Kontoname",
-            "dein KONTENANAME"
+            "Deiner Benutzername",
+            "Dein Benutzername",
+            "Ihr Benutzername"
         ],
         "FirstName": [],
         "Password": [],

@@ -1681,6 +1681,31 @@ def remove_underscores_from_strings_in_list(list_of_strings):
     return cleaned_list_of_strings
 
 
+def adjust_capitalization(strings):
+    """
+    Modifies each string in the given list by ensuring that words
+    originally in all caps are changed so that only their first letter
+    is capitalized.
+
+    Args:
+    - strings (list of str): The list of strings to process.
+
+    Returns:
+    None; the modification is done in-place.
+    """
+    for i, s in enumerate(strings):
+        new_words = []
+        for word in s.split():
+            # Check if the word is in all caps (ignoring digits and punctuation)
+            if word.isupper():
+                # Change the word so only the first letter is capitalized
+                new_word = word.capitalize()
+                new_words.append(new_word)
+            else:
+                new_words.append(word)
+        # Join the processed words back into a string
+        strings[i] = ' '.join(new_words)
+
 # Helper Function
 def check_structure_of_response(dict_str):
     """
@@ -1723,6 +1748,9 @@ def check_structure_of_response(dict_str):
         # Remove duplicates
         translation_set = set(translation)
         translation_list = list(translation_set)
+
+        # adjust all-capitalized words to only starting with a capital letter
+        adjust_capitalization(translation_list)
 
         # inspection
         print(f"check_structure_of_response()  translation_list -> {translation_list}")
@@ -2556,24 +2584,53 @@ def generate_paths(json_object, current_path=None):
     return paths_list
 
 
-def extract_value_by_path(json_object, this_path):
+def extract_value_by_path(target_dict, this_path):
     """
     Extracts a single value from a JSON object based on a single this_path.
 
-    :param json_object: The JSON object from which to extract the value.
+    :param target_dict: The JSON object from which to extract the value.
     :param this_path: The this_path to the value as a list of keys/indexes.
     :return: The value at the specified this_path.
     """
-    json_object_copy = json_object.copy()
+    target_dict_copy = target_dict.copy()
     print("start: extract_value_by_path()")
-    print(f"json_object -> {json_object}")
+    print(f"target_dict -> {target_dict}")
     print(f"this_path -> {this_path}")
 
     for step in this_path:
         if isinstance(step, str) and step.isdigit():
             step = int(step)  # Convert to integer if it's a list index
-        json_object_copy = json_object_copy[step]
-    return json_object_copy
+        target_dict_copy = target_dict_copy[step]
+    return target_dict_copy
+
+
+def remove_duplicates_from_terminal_list(target_dictionary, this_path):
+    """
+    Removes duplicates from a terminal-leaf list in a JSON object based on a specified path.
+
+    :param target_dictionary: The JSON object to modify.
+    :param this_path: The path to the terminal list as a list of keys/indexes.
+    :return: None. The function modifies the JSON object in place.
+    """
+    # Navigate to the terminal-leaf list's parent
+    parent = target_dictionary
+    for step in this_path[:-1]:  # Exclude the last step to get to the parent of the terminal-leaf list
+        if isinstance(step, str) and step.isdigit():
+            step = int(step)  # Convert string digits to integer if necessary
+        parent = parent[step]
+
+    # Extract the last step, which is the key/index of the terminal-leaf list
+    last_step = this_path[-1]
+    if isinstance(last_step, str) and last_step.isdigit():
+        last_step = int(last_step)  # Convert string digits to integer if necessary
+
+    # Remove duplicates by converting the list to a set and back to a list
+    terminal_list = parent[last_step]
+    if isinstance(terminal_list, list):  # Ensure the terminal-leaf is indeed a list
+        parent[last_step] = list(dict.fromkeys(terminal_list))  # Remove duplicates, preserving order
+
+    print("Duplicates removed from terminal-leaf list.")
+
 
 
 def extract_string_value_by_path(json_object, this_path):
@@ -2769,9 +2826,10 @@ def insert_string_value_by_path(dict_tree_structure, path, new_value_or_list):
     print(f"start: insert_string_value_by_path() new_value_or_list -> {new_value_or_list}")
 
     cleaned_newvalue_or_list = lower_clean_string_or_list(new_value_or_list)
-
     existing_item_list = clean_extract_string_value_by_path(dict_tree_structure, path)
-    print(f"insert_string_value_by_path() existing_item_list -> {existing_item_list}")
+
+    print(f"insert_string_value_by_path() existing_item_list -> {existing_item_list}, ")
+    print(f"cleaned_newvalue_or_list->{cleaned_newvalue_or_list}")
 
     # Check if the value is a string
 
@@ -2781,8 +2839,10 @@ def insert_string_value_by_path(dict_tree_structure, path, new_value_or_list):
     # Check if the value is a list
     if isinstance(new_value_or_list, list):
         for this_new_value in new_value_or_list:
-            if cleaned_newvalue_or_list not in existing_item_list:
+            if lower_clean_string_or_list(this_new_value) not in existing_item_list:
                 core_insert_string_value_by_path(dict_tree_structure, path, this_new_value)
+            else:
+                print(f"item overlap: {lower_clean_string_or_list(this_new_value)}{existing_item_list}")
 
     else:
         print(f"warning: insert_string_value_by_path() no intput? {new_value_or_list}")
@@ -3421,6 +3481,8 @@ def mini_translate_json(
                     # # inspection breakpoint
                     # print(f"\n\n breakpoint 5: populated_skeleton -> {populated_skeleton}")
                     # # input("breakpoint") 
+
+                    remove_duplicates_from_terminal_list(populated_skeleton, this_path)
 
                     # set prompts to select best translation
                     list_of_options = extract_value_by_path(populated_skeleton, this_path)
