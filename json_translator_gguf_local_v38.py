@@ -2743,8 +2743,8 @@ def core_insert_string_value_by_path(json_structure, path, new_value):
         except TypeError as e:
             print(f"TypeError accessing {'/'.join(path[:i])}: {str(e)}")
 
-    # If for some reason the loop completes without appending (shouldn't happen if errors are caught)
-    print(f"\n\n\nwarning: core_insert_string_value_by_path() no intput? new_value -> {new_value}  \n\n\n")
+            # If for some reason the loop completes without appending (shouldn't happen if errors are caught)
+            print(f"\n\n\nwarning: core_insert_string_value_by_path() no intput? new_value -> {new_value}  \n\n\n")
 
 
 
