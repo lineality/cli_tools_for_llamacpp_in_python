@@ -1716,7 +1716,7 @@ def check_structure_of_response(dict_str):
         translation = matches_list
 
         # inspection
-        print(matches_list)
+        print(f"check_structure_of_response()  matches_list -> {matches_list}")
 
         if len(translation):
             return translation
@@ -2842,6 +2842,9 @@ def translate_json(
                         context_history, use_this_model, mode_locale, skeleton_json
                     )
 
+                    print(f"translated_value_list: {translated_value_list}")
+
+
                     for translated_value in translated_value_list:
 
                         # add-insert value to json
@@ -2850,6 +2853,7 @@ def translate_json(
                         skeleton_json = append_value_by_path(
                             skeleton_json, this_path, translated_value
                         )
+                        print(f"After appending: {skeleton_json}")
 
                 #####################################################
                 # Select Top Top Goodest Translation Star-Good-Prime
@@ -3224,8 +3228,7 @@ def mini_translate_json(
                     context_history = f"""
                     Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
                     Place your evaluations as a value to the key in Json format. Return your markdown json object 
-                    listing each translation only as t-number 
-                    as: 
+                    listing each translation only as t-number as: 
                     ```json 
                     {answer_form} 
                     ``` 
