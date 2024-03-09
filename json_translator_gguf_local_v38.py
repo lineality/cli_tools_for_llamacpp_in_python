@@ -67,7 +67,7 @@ Smalls Model & Crawler Mode
 
 
 """
-
+import string
 from module_llamacpp import gguf_api, mini_gguf_api, get_model_path_by_name
 
 # importing this runs the script (cludge)
@@ -927,7 +927,7 @@ def one_response_to_user(user_input, context_history, use_this_model):
     context_history = prompt_user(user_input, context_history)
 
     # prompt assistant
-    response = ask_mistral_tiny(context_history, use_this_model)
+    response = ask_mistral_model(context_history, use_this_model)
 
     return response
 
@@ -943,7 +943,7 @@ def counter(timeout=10):
 
 
 # Helper Function
-def ask_mistral_tiny(context_history, use_this_model):
+def ask_mistral_model(context_history, use_this_model):
     # Define the request body
     request_body = {"model": use_this_model, "messages": context_history}
 
@@ -2128,7 +2128,7 @@ def call_api_within_structure_check(context_history, use_this_model, parameter_d
             ################
             elif use_this_model in mistal_model_list:
                 print(f"Mistral api selected...{use_this_model}")
-                dict_str = ask_mistral_tiny(context_history, use_this_model)
+                dict_str = ask_mistral_model(context_history, use_this_model)
 
             elif use_this_model in open_ai_model_list:
                 print(f"openAI api selected...{use_this_model}")
@@ -2238,7 +2238,7 @@ def number_call_api_within_structure_check(context_history, use_this_model, para
             ################
             elif use_this_model in mistal_model_list:
                 print(f"Mistral api selected...{use_this_model}")
-                dict_str = ask_mistral_tiny(context_history, use_this_model)
+                dict_str = ask_mistral_model(context_history, use_this_model)
 
             elif use_this_model in open_ai_model_list:
                 print(f"openAI api selected...{use_this_model}")
@@ -2363,7 +2363,7 @@ def crawler_call_api_within_json_structure_check(
             ################
             elif use_this_model in mistal_model_list:
                 print(f"Mistral api selected...{use_this_model}")
-                dict_str = ask_mistral_tiny(context_history, use_this_model)
+                dict_str = ask_mistral_model(context_history, use_this_model)
 
             elif use_this_model in open_ai_model_list:
                 print(f"openAI api selected...{use_this_model}")
@@ -2560,17 +2560,119 @@ def extract_value_by_path(json_object, this_path):
     :param this_path: The this_path to the value as a list of keys/indexes.
     :return: The value at the specified this_path.
     """
-    
+    json_object_copy = json_object.copy()
     print("start: extract_value_by_path()")
     print(f"json_object -> {json_object}")
     print(f"this_path -> {this_path}")
-    
+
     for step in this_path:
         if isinstance(step, str) and step.isdigit():
             step = int(step)  # Convert to integer if it's a list index
-        json_object = json_object[step]
-    return json_object
+        json_object_copy = json_object_copy[step]
+    return json_object_copy
 
+
+def extract_string_value_by_path(json_object, this_path):
+    """
+    Extracts a single value from a JSON object based on a single this_path.
+
+    :param json_object: The JSON object from which to extract the value.
+    :param this_path: The this_path to the value as a list of keys/indexes.
+    :return: The value at the specified this_path.
+    """
+
+    json_object_copy = json_object.copy()
+
+    print("start: extract_string_value_by_path()")
+    print(f"json_object -> {json_object}")
+    print(f"this_path -> {this_path}")
+
+    for step in this_path:
+        json_object_copy = json_object_copy[step]
+
+    return json_object_copy
+
+
+def lower_clean_string(input_string):
+    """
+    Cleans the input string by converting it to lowercase, removing spaces,
+    and stripping all punctuation.
+
+    Parameters:
+    - input_string (str): The string to be cleaned.
+
+    Returns:
+    - str: The cleaned string.
+
+    elif isinstance(new_value_or_list, list):
+        for this_new_value in new_value_or_list:
+    """
+
+    # Convert to lowercase
+    lowercased = input_string.lower()
+    # Remove punctuation
+    no_punctuation = lowercased.translate(str.maketrans('', '', string.punctuation))
+    # Remove spaces
+    cleaned_string = no_punctuation.replace(" ", "")
+
+    return cleaned_string
+
+def lower_clean_string_or_list(input_string_or_list):
+    """
+    Cleans the input string by converting it to lowercase, removing spaces,
+    and stripping all punctuation.
+
+    Parameters:
+    - input_string_or_list (str): The string to be cleaned.
+
+    Returns:
+    - str: The cleaned string.
+
+    elif isinstance(new_value_or_list, list):
+        for this_new_value in new_value_or_list:
+    """
+    print(f"Starting lower_clean_string_or_list(input_string_or_list), input_string_or_list -> {input_string_or_list}")
+
+    if isinstance(input_string_or_list, str):
+        cleaned_string_or_list = lower_clean_string(input_string_or_list)
+        return cleaned_string_or_list
+
+    elif isinstance(input_string_or_list, list):
+        cleaned_string_or_list = []
+
+        # iterate and append
+        for this_here_string in input_string_or_list:
+
+            # clean
+            cleaned_string = lower_clean_string(this_here_string)
+
+            cleaned_string_or_list.append(cleaned_string)
+        return cleaned_string_or_list
+
+    else:
+        print("Warning: lower_clean_string_or_list() input not string or list")
+
+        return input_string_or_list
+
+
+def clean_extract_string_value_by_path(json_object, this_path):
+    """
+    Extracts a single value from a JSON object based on a single this_path.
+
+    :param json_object: The JSON object from which to extract the value.
+    :param this_path: The this_path to the value as a list of keys/indexes.
+    :return: The value at the specified this_path.
+    """
+    json_object_copy = json_object.copy()
+
+    print("start: clean_extract_string_value_by_path()")
+    print(f"json_object -> {json_object}")
+    print(f"this_path -> {this_path}")
+
+    for step in this_path:
+        json_object_copy = json_object_copy[step]
+        json_object_copy = lower_clean_string_or_list(json_object_copy)
+    return json_object_copy
 
 # def extract_values_by_paths(json_object, paths_list):
 #     values = []
@@ -2595,18 +2697,22 @@ def extract_value_by_path(json_object, this_path):
 #         target[final_step] = translated_value
 
 
-def insert_value_by_path(skeleton_json, this_path, translated_value):
-    target = skeleton_json
+def insert_int_value_by_path(target_dictionary, this_path, translated_value):
+    """
+    Alters dictionary in place
+
+    I really don't like this code.
+    """
+    target = target_dictionary
     for step in this_path[:-1]:  # Navigate through the path except for the last step
         step = int(step) if step.isdigit() else step
         target = target[step]
     final_step = this_path[-1]
     final_step = int(final_step) if final_step.isdigit() else final_step
     target[final_step] = translated_value
-    return skeleton_json  # Return the modified object explicitly
 
 
-def core_append_value_by_path(json_structure, path, new_value):
+def core_insert_string_value_by_path(json_structure, path, new_value):
     """
     Attempts to append a value to a list at the specified path within the json_structure.
     Provides more detailed error messages if the path is not found.
@@ -2634,57 +2740,54 @@ def core_append_value_by_path(json_structure, path, new_value):
             print(f"TypeError accessing {'/'.join(path[:i])}: {str(e)}")
 
     # If for some reason the loop completes without appending (shouldn't happen if errors are caught)
-    print("warning: append_value_by_path() no intput?")
+    print("warning: insert_string_value_by_path() no intput?")
 
 
 
-    
-
-                            # set prompts to select best translation
-                            
-
-
-def append_value_by_path(json_structure, path, new_value):
+def insert_string_value_by_path(json_structure, path, new_value_or_list):
     """
-    wrapper for core_append_value_by_path()
-    
+    wrapper for core_insert_string_value_by_path()
+
     accepts list of items 
     or single string items
-    
-    checks to see if they are already in the dict
-    
-    if not,
-    
-    it add them.
-    
-    """
-    print("start: append_value_by_path()")
-    
-    
-    existing_item_list = extract_value_by_path(json_structure, path)
-    
-    # Check if the value is a string
-     
-    if isinstance(new_value, str):
 
-        if new_value not in existing_item_list:
-            core_append_value_by_path(json_structure, path, new_value)
+    checks to see if they are already in the dict
+
+    if not,
+
+    it add them.
+    check if matches pre-translated
+    """
+
+    print("start: insert_string_value_by_path()")
+
+    cleaned_newvalue_or_list = lower_clean_string_or_list(new_value_or_list)
+
+    existing_item_list = clean_extract_string_value_by_path(json_structure, path)
+    print(f"insert_string_value_by_path() existing_item_list -> {existing_item_list}")
+
+    # Check if the value is a string
+
+    if isinstance(new_value_or_list, str):
+
+        if cleaned_newvalue_or_list not in existing_item_list:
+            core_insert_string_value_by_path(json_structure, path, new_value_or_list)
 
         # Check if the value is a list
-    elif isinstance(new_value, list):
-        for this_new_value in new_value:
-            if this_new_value not in existing_item_list:
-                core_append_value_by_path(json_structure, path, this_new_value)
-        
-    else:
-        print("warning: append_value_by_path() no intput?")
+    elif isinstance(new_value_or_list, list):
+        for this_new_value in new_value_or_list:
+            if cleaned_newvalue_or_list not in existing_item_list:
+                core_insert_string_value_by_path(json_structure, path, this_new_value)
 
-    
+    else:
+        print("warning: insert_string_value_by_path() no intput?")
+
+
     # # If for some reason the loop completes without appending (shouldn't happen if errors are caught)
     # raise ValueError("Failed to append the value: Path processing error.")
 
 
-# def append_value_by_path(json_structure, path, new_value):
+# def insert_string_value_by_path(json_structure, path, new_value):
 #     """
 #     Attempts to append a value to a list at the specified path within the json_structure.
 #     Provides more detailed error messages if the path is not found.
@@ -2739,13 +2842,13 @@ def append_value_by_path(json_structure, path, new_value):
 #                     raise TypeError(f"TypeError accessing {'/'.join(path[:i])}: {str(e)}")
     
 #     else:
-#         print ("warning: append_value_by_path() no intput?")
+#         print ("warning: insert_string_value_by_path() no intput?")
 #         return False
     
 #     # If for some reason the loop completes without appending (shouldn't happen if errors are caught)
 #     raise ValueError("Failed to append the value: Path processing error.")
 
-# def append_value_by_path(json_structure, path, new_value):
+# def insert_string_value_by_path(json_structure, path, new_value):
 #     """
 #     Appends a value to a list at the specified path within the json_structure.
 
@@ -2831,11 +2934,11 @@ def replace_leaf_by_path(json_structure, path, new_value):
 #             original_data, name_of_skeleton_saved_file
 #         )
 
-#         name_of_EMPTY_select_best_frame_saved_file = (
+#         name_of_EMPTY_dict_of_selected_best_saved_file = (
 #             "empty_string_best_" + "_" + this_original_json_file
 #         )
-#         select_best_frame = create_empty_selectbest_frame(
-#             original_data, name_of_EMPTY_select_best_frame_saved_file
+#         dict_of_selected_best = create_empty_selectbest_frame(
+#             original_data, name_of_EMPTY_dict_of_selected_best_saved_file
 #         )
 
 #         #########################################
@@ -2844,13 +2947,13 @@ def replace_leaf_by_path(json_structure, path, new_value):
 
 #         paths_list = generate_paths(original_data)
 #         check_paths_list = generate_paths(skeleton_json)
-#         select_best_frame_paths_list = generate_paths(select_best_frame)
+#         dict_of_selected_best_paths_list = generate_paths(dict_of_selected_best)
 
 #         print(
 #             f"""
 #         paths_list                   {paths_list}
 #         check_paths_list             {check_paths_list}
-#         select_best_frame_paths_list {select_best_frame_paths_list}
+#         dict_of_selected_best_paths_list {dict_of_selected_best_paths_list}
 #         """
 #         )
 
@@ -2858,7 +2961,7 @@ def replace_leaf_by_path(json_structure, path, new_value):
 #         # input("breakpoint")
 
 #         # Sanity check
-#         if paths_list != select_best_frame_paths_list:
+#         if paths_list != dict_of_selected_best_paths_list:
 #             error_message = "Error: Path lists between the original JSON and its skeleton do not match."
 #             print(error_message)
 #             raise ValueError(error_message)
@@ -2918,8 +3021,8 @@ def replace_leaf_by_path(json_structure, path, new_value):
 #                     1. make list of paths   generate_paths(json_object)
 #                     2. extrac path value    extract_value_by_path(original_data, this_path)
 #                      (translate)
-#                     3. add to list          append_value_by_path(json_structure, path, new_value)
-#                     4. write final value    insert_value_by_path(skeleton_json, paths_list, translated_values)
+#                     3. add to list          insert_string_value_by_path(json_structure, path, new_value)
+#                     4. write final value    insert_int_value_by_path(skeleton_json, paths_list, translated_values)
 
 #                     """
 
@@ -2938,7 +3041,7 @@ def replace_leaf_by_path(json_structure, path, new_value):
 #                         # add-insert value to json
 #                         print(f"Before appending: {skeleton_json}")
 #                         print(f"this_path -> {this_path}")
-#                         skeleton_json = append_value_by_path(
+#                         skeleton_json = insert_string_value_by_path(
 #                             skeleton_json, this_path, translated_value
 #                         )
 #                         print(f"After appending: {skeleton_json}")
@@ -3010,8 +3113,8 @@ def replace_leaf_by_path(json_structure, path, new_value):
 #                         print(f"\n\n\nfail_counter -> {fail_counter}")
 
 #                 # add value to json
-#                 select_best_frame = insert_value_by_path(
-#                     select_best_frame, this_path, selected_bestest_value
+#                 dict_of_selected_best = insert_int_value_by_path(
+#                     dict_of_selected_best, this_path, selected_bestest_value
 #                 )
 
 #             ##########################
@@ -3021,17 +3124,17 @@ def replace_leaf_by_path(json_structure, path, new_value):
 
 #             # try:
 #             #     # if test fails
-#             #     if dict_leaf_detection_boolean_true_means_defective(select_best_frame):
+#             #     if dict_leaf_detection_boolean_true_means_defective(dict_of_selected_best):
 #             #         return False
 
 #             # except Exception as e:
 #             #     print(f"\nTRY AGAIN: dict_leaf_detection_boolean_true_means_defective() empty or stub leaf found: {e}")
-#             #     print(f"Failed dict_str -> {select_best_frame}")
+#             #     print(f"Failed dict_str -> {dict_of_selected_best}")
 #             #     return False
 
 #             # add value to json
 #             save_json_to_file(
-#                 select_best_frame, this_original_json_file, target_language, "selected_"
+#                 dict_of_selected_best, this_original_json_file, target_language, "selected_"
 #             )
 
 
@@ -3060,16 +3163,17 @@ def add_ranks_votes_to_candidate(vote_list, candidate_dictionary):
     return candidate_dictionary
 
 
-def extract_top_rank(list_of_votes):
+def extract_top_rank(list_dict_of_options):
     # # Assuming 'ranked_votes' is your dictionary where each key is an item and each value is a list of ranks
     # ranked_votes = {
     #     'item1': [1, 2, 3],
     #     'item2': [2, 1, 3],
     #     'item3': [3, 3, 1]
     # }
+    print(f"extract_top_rank(), list_dict_of_options -> {list_dict_of_options}")
 
     # Calculate the sum of ranks for each item
-    sum_of_ranks = {item: sum(ranks) for item, ranks in list_of_votes.items()}
+    sum_of_ranks = {item: sum(ranks) for item, ranks in list_dict_of_options.items()}
 
     # Determine the item with the highest sum of ranks
     highest_ranked_item = max(sum_of_ranks, key=sum_of_ranks.get)
@@ -3097,7 +3201,6 @@ def filter_list_convert_to_int(input_list):
         # Filter out non-digit strings and convert the rest to integers
         # result = [int(item) for item in input_list if item.isdigit()]
         result = [item if isinstance(item, int) else int(item) for item in input_list if isinstance(item, int) or item.isdigit()]
-
 
         return result
 
@@ -3132,8 +3235,8 @@ def mini_translate_json(
             "--mirostat-ent": 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
             "--ctx-size": 500,  # Sets the size of the prompt context
         }
-        
-    
+
+
     ######################
     # Translation Factory
     ######################
@@ -3160,12 +3263,13 @@ def mini_translate_json(
             original_data, name_of_skeleton_saved_file
         )
 
-        name_of_EMPTY_select_best_frame_saved_file = (
+        name_of_EMPTY_dict_of_selected_best_saved_file = (
             "empty_string_best_" + "_" + this_original_json_file
         )
-        select_best_frame = create_empty_selectbest_frame(
-            original_data, name_of_EMPTY_select_best_frame_saved_file
+        dict_of_selected_best = create_empty_selectbest_frame(
+            original_data, name_of_EMPTY_dict_of_selected_best_saved_file
         )
+
 
         #########################################
         # Crawler: Make preliminary Translations
@@ -3173,7 +3277,7 @@ def mini_translate_json(
 
         paths_list = generate_paths(original_data)
         check_paths_list = generate_paths(skeleton_json)
-        select_best_frame_paths_list = generate_paths(select_best_frame)
+        dict_of_selected_best_paths_list = generate_paths(dict_of_selected_best)
 
         print(
             f"""
@@ -3182,7 +3286,7 @@ def mini_translate_json(
         this_original_json_file      -> {this_original_json_file}
         paths_list                   -> {paths_list}
         check_paths_list             -> {check_paths_list}
-        select_best_frame_paths_list -> {select_best_frame_paths_list}
+        dict_of_selected_best_paths_list -> {dict_of_selected_best_paths_list}
         """
         )
 
@@ -3190,7 +3294,7 @@ def mini_translate_json(
         # input("breakpoint")
 
         # Sanity check
-        if paths_list != select_best_frame_paths_list:
+        if paths_list != dict_of_selected_best_paths_list:
             error_message = "Error: Path lists between the original JSON and its skeleton do not match."
             print(error_message)
             raise ValueError(error_message)
@@ -3215,7 +3319,7 @@ def mini_translate_json(
                     if leaf_fail_counter > 10:
                         raise f"leaf_fail_counter > 10 -> {leaf_fail_counter}"
 
-                    untranslated_leaf = extract_value_by_path(original_data, this_path)
+                    untranslated_leaf = extract_string_value_by_path(original_data, this_path)
 
                     # # breakpoint
                     # print(f"\n\n breakpoint 5: untranslated_leaf -> {untranslated_leaf}")
@@ -3258,8 +3362,8 @@ def mini_translate_json(
                         1. make list of paths   generate_paths(json_object)
                         2. extrac path value    extract_value_by_path(original_data, this_path)
                         (translate)
-                        3. add to list          append_value_by_path(json_structure, path, new_value)
-                        4. write final value    insert_value_by_path(skeleton_json, paths_list, translated_values)
+                        3. add to list          insert_string_value_by_path(json_structure, path, new_value)
+                        4. write final value    insert_int_value_by_path(skeleton_json, paths_list, translated_values)
 
                         """
 
@@ -3274,6 +3378,12 @@ def mini_translate_json(
                             skeleton_json
                         )
 
+                        # remove overt duplicates
+                        # Convert list to set to remove duplicates
+                        unique_set = set(translated_value)
+                        # Convert set back to list
+                        translated_value = list(unique_set)
+
                         # add-insert value to json
                         print(f"populated_skeleton Before appending: {populated_skeleton}")
                         print(f"skeleton_json -> {skeleton_json}")
@@ -3283,10 +3393,10 @@ def mini_translate_json(
                         print(f"translated_value -> {translated_value}")
 
                         # adds to dict IF not already there:
-                        append_value_by_path(
+                        insert_string_value_by_path(
                             populated_skeleton, 
                             this_path, 
-                            translated_value
+                            translated_value,
                         )
 
                         print(f"populated_skeleton After appending: {populated_skeleton}")
@@ -3408,7 +3518,20 @@ def mini_translate_json(
                     ```
                     Just fill in the score, that's all. One key-value pair per translation (one generic key, one value which is your score -> "translation-1": "score_here", not nested). No additional comments. A tasty reward awaits your accurate selection.
                     """
-                    
+
+                    context_history = f"""
+                    Evaluate each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
+                    If the translation is not even in {target_language}, it should get a zero. 
+                    Place your evaluations  (0-10, 0 is bad, 10 is good) as the value to a key in Json format. Return your markdown json object 
+                    listing each translation only as "translation-number" 
+                    as: 
+                    ```json 
+                    {answer_form} 
+                    ```
+                    Just fill in the score, that's all. One key-value pair per translation (one generic key, one value which is your score -> "translation-1": "score_here", not nested). 
+                    No additional comments. A tasty reward awaits your accurate selection. 
+                    """
+
                     # context_history = f"""
                     # Evaluate (0-10, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
                     # Place your evaluations as value to the key in Json format. Return your properly formatted dict as:
@@ -3492,17 +3615,19 @@ def mini_translate_json(
                                 while_counter += 1
                                 print("no list at all!")
 
-                    best_key_option = extract_top_rank(list_of_votes)
+                    # tally the ranked votes and pick the winner
+                    best_key_option = extract_top_rank(list_dict_of_options)
 
                     print(f"best_key_option -> {best_key_option}")
 
+                    # ensure choice is a candidate
                     selected_bestest_value = list_of_options[best_key_option]
 
                     print(f"selected_bestest_value -> {selected_bestest_value}")
 
                     # add value to json
-                    select_best_frame = insert_value_by_path(
-                        select_best_frame, this_path, selected_bestest_value
+                    insert_int_value_by_path(
+                        dict_of_selected_best, this_path, selected_bestest_value
                     )
 
 
@@ -3513,17 +3638,17 @@ def mini_translate_json(
 
             # try:
             #     # if test fails
-            #     if dict_leaf_detection_boolean_true_means_defective(select_best_frame):
+            #     if dict_leaf_detection_boolean_true_means_defective(dict_of_selected_best):
             #         return False
 
             # except Exception as e:
             #     print(f"\nTRY AGAIN: dict_leaf_detection_boolean_true_means_defective() empty or stub leaf found: {e}")
-            #     print(f"Failed dict_str -> {select_best_frame}")
+            #     print(f"Failed dict_str -> {dict_of_selected_best}")
             #     return False
 
             # add value to json
             save_json_to_file(
-                select_best_frame, this_original_json_file, target_language, "selected_"
+                dict_of_selected_best, this_original_json_file, target_language, "selected_"
             )
 
             return 0
