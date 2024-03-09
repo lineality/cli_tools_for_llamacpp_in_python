@@ -352,7 +352,7 @@ def save_json_to_file(input_text, file_name, target_language, optional_tag=""):
     #     json.dump(data, file, indent=4)
 
     # make readable time
-    date_time = datetime.utcnow()
+    date_time = datetime.now(datetime.UTC)
     clean_timestamp = date_time.strftime("%Y%m%d%H%M%S%f")
 
     new_title = f"{target_language}_{clean_timestamp}_{file_name}"
@@ -2119,7 +2119,7 @@ def call_api_within_structure_check(context_history, use_this_model, mode_locale
                     "--mirostat": 2,  # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
                     "--mirostat-lr": 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
                     "--mirostat-ent": 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
-                    "--ctx-size": 500,  # Sets the size of the prompt context
+                    "--ctx-size": 100,  # Sets the size of the prompt context
                 }
 
 
@@ -2642,6 +2642,86 @@ def insert_value_by_path(skeleton_json, this_path, translated_value):
     return skeleton_json  # Return the modified object explicitly
 
 
+def core_append_value_by_path(json_structure, path, new_value):
+    """
+    Attempts to append a value to a list at the specified path within the json_structure.
+    Provides more detailed error messages if the path is not found.
+
+    :param json_structure: The JSON structure to update.
+    :param path: The path to the target list as a list of keys.
+    :param new_value: The value to append.
+    """
+    target = json_structure
+    for i, step in enumerate(path):
+        try:
+            if isinstance(target, dict) and step in target:
+                if i == len(path) - 1:  # If it's the final step, append new_value
+                    if isinstance(target[step], list):
+                        target[step].append(new_value)
+                        return json_structure  # Return updated structure
+                    else:
+                        raise ValueError(
+                            f"Target at path {'/'.join(path)} is not a list."
+                        )
+                else:  # Not the final step, move deeper into the structure
+                    target = target[step]
+            else:
+                raise ValueError(f"Path error: {'/'.join(path[:i+1])} not found.")
+        except TypeError as e:
+            raise TypeError(f"TypeError accessing {'/'.join(path[:i])}: {str(e)}")
+
+    # If for some reason the loop completes without appending (shouldn't happen if errors are caught)
+    raise ValueError("Failed to append the value: Path processing error.")
+
+
+    
+
+                            # set prompts to select best translation
+                            
+
+
+def append_value_by_path(json_structure, path, new_value):
+    """
+    wrapper for core_append_value_by_path()
+    
+    accepts list of items 
+    or single string items
+    
+    checks to see if they are already in the dict
+    
+    if not,
+    
+    it add them.
+    
+    """
+    
+    
+    existing_item_list = extract_value_by_path(skeleton_json, this_path)
+    
+    target = json_structure
+    
+
+    # Check if the value is a string
+     
+    if isinstance(new_value, str):
+
+        if new_value not in existing_item_list:
+            core_append_value_by_path(json_structure, path, new_value)
+
+        # Check if the value is a list
+    elif isinstance(new_value, list):
+        for this_new_value in new_value:
+            if this_new_value not in existing_item_list:
+                core_append_value_by_path(json_structure, path, this_new_value)
+        
+    else:
+        print ("warning: append_value_by_path() no intput?")
+        return False
+    
+    # If for some reason the loop completes without appending (shouldn't happen if errors are caught)
+    raise ValueError("Failed to append the value: Path processing error.")
+
+
 # def append_value_by_path(json_structure, path, new_value):
 #     """
 #     Attempts to append a value to a list at the specified path within the json_structure.
@@ -2652,89 +2732,56 @@ def insert_value_by_path(skeleton_json, this_path, translated_value):
 #     :param new_value: The value to append.
 #     """
 #     target = json_structure
-#     for i, step in enumerate(path):
-#         try:
-#             if isinstance(target, dict) and step in target:
-#                 if i == len(path) - 1:  # If it's the final step, append new_value
-#                     if isinstance(target[step], list):
-#                         target[step].append(new_value)
-#                         return json_structure  # Return updated structure
-#                     else:
-#                         raise ValueError(
-#                             f"Target at path {'/'.join(path)} is not a list."
-#                         )
-#                 else:  # Not the final step, move deeper into the structure
-#                     target = target[step]
-#             else:
-#                 raise ValueError(f"Path error: {'/'.join(path[:i+1])} not found.")
-#         except TypeError as e:
-#             raise TypeError(f"TypeError accessing {'/'.join(path[:i])}: {str(e)}")
+    
 
+#     # Check if the value is a string
+     
+#     if isinstance(new_value, str):
+#         for i, step in enumerate(path):
+#             try:
+#                 if isinstance(target, dict) and step in target:
+#                     if i == len(path) - 1:  # If it's the final step, append new_value
+#                         if isinstance(target[step], list):
+#                             target[step].append(new_value)
+#                             return json_structure  # Return updated structure
+#                         else:
+#                             raise ValueError(
+#                                 f"Target at path {'/'.join(path)} is not a list."
+#                             )
+#                     else:  # Not the final step, move deeper into the structure
+#                         target = target[step]
+#                 else:
+#                     raise ValueError(f"Path error: {'/'.join(path[:i+1])} not found.")
+#             except TypeError as e:
+#                 raise TypeError(f"TypeError accessing {'/'.join(path[:i])}: {str(e)}")
+
+#         # Check if the value is a list
+#     elif isinstance(new_value, list):
+#         for this_new_value in new_value:
+#             for i, step in enumerate(path):
+#                 try:
+#                     if isinstance(target, dict) and step in target:
+#                         if i == len(path) - 1:  # If it's the final step, append new_value
+#                             if isinstance(target[step], list):
+#                                 target[step].append(this_new_value)
+#                                 return json_structure  # Return updated structure
+#                             else:
+#                                 raise ValueError(
+#                                     f"Target at path {'/'.join(path)} is not a list."
+#                                 )
+#                         else:  # Not the final step, move deeper into the structure
+#                             target = target[step]
+#                     else:
+#                         raise ValueError(f"Path error: {'/'.join(path[:i+1])} not found.")
+#                 except TypeError as e:
+#                     raise TypeError(f"TypeError accessing {'/'.join(path[:i])}: {str(e)}")
+    
+#     else:
+#         print ("warning: append_value_by_path() no intput?")
+#         return False
+    
 #     # If for some reason the loop completes without appending (shouldn't happen if errors are caught)
 #     raise ValueError("Failed to append the value: Path processing error.")
-
-
-
-def append_value_by_path(json_structure, path, new_value):
-    """
-    Attempts to append a value to a list at the specified path within the json_structure.
-    Provides more detailed error messages if the path is not found.
-
-    :param json_structure: The JSON structure to update.
-    :param path: The path to the target list as a list of keys.
-    :param new_value: The value to append.
-    """
-    target = json_structure
-    
-
-    # Check if the value is a string
-     
-    if isinstance(new_value, str):
-        for i, step in enumerate(path):
-            try:
-                if isinstance(target, dict) and step in target:
-                    if i == len(path) - 1:  # If it's the final step, append new_value
-                        if isinstance(target[step], list):
-                            target[step].append(new_value)
-                            return json_structure  # Return updated structure
-                        else:
-                            raise ValueError(
-                                f"Target at path {'/'.join(path)} is not a list."
-                            )
-                    else:  # Not the final step, move deeper into the structure
-                        target = target[step]
-                else:
-                    raise ValueError(f"Path error: {'/'.join(path[:i+1])} not found.")
-            except TypeError as e:
-                raise TypeError(f"TypeError accessing {'/'.join(path[:i])}: {str(e)}")
-
-        # Check if the value is a list
-    elif isinstance(new_value, list):
-        for this_new_value in new_value:
-            for i, step in enumerate(path):
-                try:
-                    if isinstance(target, dict) and step in target:
-                        if i == len(path) - 1:  # If it's the final step, append new_value
-                            if isinstance(target[step], list):
-                                target[step].append(this_new_value)
-                                return json_structure  # Return updated structure
-                            else:
-                                raise ValueError(
-                                    f"Target at path {'/'.join(path)} is not a list."
-                                )
-                        else:  # Not the final step, move deeper into the structure
-                            target = target[step]
-                    else:
-                        raise ValueError(f"Path error: {'/'.join(path[:i+1])} not found.")
-                except TypeError as e:
-                    raise TypeError(f"TypeError accessing {'/'.join(path[:i])}: {str(e)}")
-    
-    else:
-        print ("warning: append_value_by_path() no intput?")
-        return False
-    
-    # If for some reason the loop completes without appending (shouldn't happen if errors are caught)
-    raise ValueError("Failed to append the value: Path processing error.")
 
 # def append_value_by_path(json_structure, path, new_value):
 #     """
@@ -3191,10 +3238,10 @@ def mini_translate_json(
                     # make empty conversation
                     # reset context history for new 'conversation' about translation
                     # context_history = f"translate '{untranslated_leaf}'' into {target_language} with the translation in pipes |||YOUR_TRANSLATION||| no other commentary needed, just a translation please"
-                    context_history = f"""
-                    translate only '{untranslated_leaf}'' into {target_language} with the translation formatted
-                    inside tripple pipes |||YOUR_TRANSLATION||| just that. no other commentary, no underscores _, not all caps.
-                    translate and earn a treat"""
+                    # context_history = f"""
+                    # translate only '{untranslated_leaf}'' into {target_language} with the translation formatted
+                    # inside tripple pipes |||YOUR_TRANSLATION||| just that. no other commentary, no underscores _, not all caps.
+                    # translate and earn a treat"""
 
                     context_history = f"""
                     translate only '{untranslated_leaf}' into {target_language} formatted 
@@ -3244,6 +3291,10 @@ def mini_translate_json(
                         print("\n\nTRANSLATION:")
                         print(f"translated_value -> {translated_value}")
 
+                                
+
+                        
+                        # adds to dict IF not already there:
                         skeleton_json = append_value_by_path(
                             skeleton_json, this_path, translated_value
                         )
@@ -3270,8 +3321,9 @@ def mini_translate_json(
                     # set prompts to select best translation
                     list_of_options_nested = extract_value_by_path(skeleton_json, this_path)
 
-                    # Combine into one list of strings using list comprehension
-                    list_of_options = [item for sublist in list_of_options_nested for item in sublist]
+                    # # Combine into one list of strings using list comprehension
+                    # list_of_options = [item for sublist in list_of_options_nested for item in sublist]
+                    list_of_options = list_of_options_nested
 
                     # turn list of options int dict
                     dict_of_options = {option: "score_here" for option in list_of_options}
@@ -3334,27 +3386,27 @@ def mini_translate_json(
                         "translation-3": "score_here"
                     }
 
+                    # context_history = f"""
+                    # Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
+                    # Place your evaluations as a value to the key in Json format. Return your markdown json object 
+                    # listing each translation only as t-number as: 
+                    # ```json 
+                    # {answer_form} 
+                    # ``` 
+                    # No additional comments. A tasty reward awaits your accurate selection."""
+
+                    # context_history = f"""
+                    # Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
+                    # Place your evaluations as a value to the key in Json format. Return your markdown json object 
+                    # listing each translation only as t-number 
+                    # as: 
+                    # ```json 
+                    # {answer_form} 
+                    # ```
+                    # One key-value pair per translation (one key, one value -> "translation-1": "score_here", not nested). No additional comments. A tasty reward awaits your accurate selection.
+                    # """
+
                     context_history = f"""
-                    Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
-                    Place your evaluations as a value to the key in Json format. Return your markdown json object 
-                    listing each translation only as t-number as: 
-                    ```json 
-                    {answer_form} 
-                    ``` 
-                    No additional comments. A tasty reward awaits your accurate selection."""
-
-                    conversation_history = f"""
-                    Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
-                    Place your evaluations as a value to the key in Json format. Return your markdown json object 
-                    listing each translation only as t-number 
-                    as: 
-                    ```json 
-                    {answer_form} 
-                    ```
-                    One key-value pair per translation (one key, one value -> "translation-1": "score_here", not nested). No additional comments. A tasty reward awaits your accurate selection.
-                    """
-
-                    conversation_history = f"""
                     Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
                     Place your evaluations as the value to a key in Json format. Return your markdown json object 
                     listing each translation only as t-number 

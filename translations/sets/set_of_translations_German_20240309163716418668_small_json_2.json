@@ -1,0 +1,12 @@
+{
+    "signUp": {
+        "Account": [
+            "Ihr Benutzername",
+            "Ihr Übersetzung"
+        ],
+        "FirstName": [],
+        "Password": [],
+        "ConfirmNewPassword": [],
+        "SignUp": []
+    }
+}
