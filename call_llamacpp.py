@@ -746,7 +746,7 @@ def gguf_api(conversation_history_context_list, parameter_dict, configies_dict):
 
     print(f"exit_code - > {exit_code}")
     print(f"message - > {message}")
-    print(f"assistant_says - > {assistant_says}")
+    print(f"len(assistant_says) - > {len(assistant_says)}")
 
     ###########################
     # Clean up and return
@@ -817,7 +817,6 @@ def mini_gguf_api(conversation_history_context_list, parameter_dict, configies_d
     # Setting up and formatting single, line prompt
     ################################################
 
-    print(f"conversation_history_context_list -> {conversation_history_context_list}")
 
     # make whole prompt
     prompt = conversation_history_context_list
@@ -838,8 +837,10 @@ def mini_gguf_api(conversation_history_context_list, parameter_dict, configies_d
     # point to where model is, ideally: ~models/model_name/model.gguf 
     model_path = get_model_path_by_name(model_path_base, model_nickname)
 
-    print(f"model_path - > {model_path}")
-    print(f"parameter_dict - > {parameter_dict}")
+    # inspection
+    # print(f"conversation_history_context_list -> {conversation_history_context_list}")    
+    # print(f"model_path - > {model_path}")
+    # print(f"parameter_dict - > {parameter_dict}")
 
 
     ###########################
@@ -856,7 +857,7 @@ def mini_gguf_api(conversation_history_context_list, parameter_dict, configies_d
 
     print(f"exit_code - > {exit_code}")
     print(f"message - > {message}")
-    print(f"assistant_says - > {assistant_says}")
+    print(f"len(assistant_says) - > {len(assistant_says)}")
 
     ###########################
     # Clean up and return

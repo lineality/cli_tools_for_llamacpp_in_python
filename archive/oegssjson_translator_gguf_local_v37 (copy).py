@@ -1809,9 +1809,7 @@ def json_number_check_structure_of_response_to_list(dict_str) -> list:
     Returns:
     - str: The extracted JSON string, or an empty string if no JSON block is found.
     """
-    print(
-        f"\n\n Starting check_structure_of_response, dict_str -> {repr(dict_str)} \nType -> {type(dict_str)}"
-    )
+    print(f"\n\n json_number_check_structure_of_response_to_list -> {repr(dict_str)} \nType -> {type(dict_str)}")
 
 
     extracted_dict = return_list_of_jsons_from_string(dict_str)
@@ -2062,7 +2060,7 @@ def add_segment_to_absolute_base_path(additional_segment):
 
 
 # helper function
-def call_api_within_structure_check(context_history, use_this_model, mode_locale, skeleton_json):
+def call_api_within_structure_check(context_history, use_this_model, parameter_dict, mode_locale, skeleton_json):
     retry_counter = 0
     json_ok_flag = False
 
@@ -2102,25 +2100,6 @@ def call_api_within_structure_check(context_history, use_this_model, mode_locale
 
                 # inspection
                 print(f"use_this_model -> {use_this_model}")
-
-                #######################
-                # Tune Your Paramaters
-                #######################
-                parameter_dict = {
-                    "--temp": 0.8,  # (default value is 0.8)
-                    "--top-k": 40,  # (selection among N most probable. default: 40)
-                    "--top-p": 0.9,  # (probability above threshold P. default: 0.9)
-                    "--min-p": 0.05,  # (minimum probability threshold. default: 0.05)
-                    "--seed": -1,  # seed, =1 is random seed
-                    "--tfs": 1,  # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
-                    "--threads": 8,  # (~ set to number of physical CPU cores)
-                    "--typical": 1,  # (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
-                    "--mirostat": 2,  # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
-                    "--mirostat-lr": 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
-                    "--mirostat-ent": 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
-                    "--ctx-size": 100,  # Sets the size of the prompt context
-                }
-
 
                 configies_dict = {
                     'model_path_base': add_segment_to_absolute_base_path("jan/models/"),
@@ -2191,7 +2170,7 @@ def call_api_within_structure_check(context_history, use_this_model, mode_locale
 
 
 # helper function
-def number_call_api_within_structure_check(context_history, use_this_model, mode_locale, skeleton_json):
+def number_call_api_within_structure_check(context_history, use_this_model, parameter_dict, mode_locale, skeleton_json):
     retry_counter = 0
     json_ok_flag = False
 
@@ -2231,25 +2210,6 @@ def number_call_api_within_structure_check(context_history, use_this_model, mode
 
                 # inspection
                 print(f"use_this_model -> {use_this_model}")
-
-                #######################
-                # Tune Your Paramaters
-                #######################
-                parameter_dict = {
-                    "--temp": 0.8,  # (default value is 0.8)
-                    "--top-k": 40,  # (selection among N most probable. default: 40)
-                    "--top-p": 0.9,  # (probability above threshold P. default: 0.9)
-                    "--min-p": 0.05,  # (minimum probability threshold. default: 0.05)
-                    "--seed": -1,  # seed, =1 is random seed
-                    "--tfs": 1,  # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
-                    "--threads": 8,  # (~ set to number of physical CPU cores)
-                    "--typical": 1,  # (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
-                    "--mirostat": 2,  # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
-                    "--mirostat-lr": 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
-                    "--mirostat-ent": 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
-                    "--ctx-size": 500,  # Sets the size of the prompt context
-                }
-
 
                 configies_dict = {
                     'model_path_base': add_segment_to_absolute_base_path("jan/models/"),
@@ -2320,7 +2280,7 @@ def number_call_api_within_structure_check(context_history, use_this_model, mode
 
 
 # helper function
-def crawlwer_call_api_within_json_structure_check(
+def crawler_call_api_within_json_structure_check(
     context_history, use_this_model, mode_locale, skeleton_json
 ):
     retry_counter = 0
@@ -2600,6 +2560,11 @@ def extract_value_by_path(json_object, this_path):
     :param this_path: The this_path to the value as a list of keys/indexes.
     :return: The value at the specified this_path.
     """
+    
+    print("start: extract_value_by_path()")
+    print(f"json_object -> {json_object}")
+    print(f"this_path -> {this_path}")
+    
     for step in this_path:
         if isinstance(step, str) and step.isdigit():
             step = int(step)  # Convert to integer if it's a list index
@@ -2679,7 +2644,7 @@ def core_append_value_by_path(json_structure, path, new_value):
                             
 
 
-def append_value_by_path(json_structure, skeleton_json, path, new_value):
+def append_value_by_path(json_structure, path, new_value):
     """
     wrapper for core_append_value_by_path()
     
@@ -2693,9 +2658,10 @@ def append_value_by_path(json_structure, skeleton_json, path, new_value):
     it add them.
     
     """
+    print("start: append_value_by_path()")
     
     
-    existing_item_list = extract_value_by_path(skeleton_json, path)
+    existing_item_list = extract_value_by_path(json_structure, path)
     
     target = json_structure
     
@@ -2717,8 +2683,8 @@ def append_value_by_path(json_structure, skeleton_json, path, new_value):
         print ("warning: append_value_by_path() no intput?")
         return False
     
-    # If for some reason the loop completes without appending (shouldn't happen if errors are caught)
-    raise ValueError("Failed to append the value: Path processing error.")
+    # # If for some reason the loop completes without appending (shouldn't happen if errors are caught)
+    # raise ValueError("Failed to append the value: Path processing error.")
 
 
 # def append_value_by_path(json_structure, path, new_value):
@@ -2835,239 +2801,241 @@ def replace_leaf_by_path(json_structure, path, new_value):
 # Main Function
 
 
-def translate_json(
-    list_of_targeted_languages,
-    use_this_model,
-    mode_locale,
-    number_of_preliminary_translations,
-):
+# def translate_json(
+#     list_of_targeted_languages,
+#     use_this_model,
+#     mode_locale,
+#     number_of_preliminary_translations,
+# ):
 
-    ######################
-    # Translation Factory
-    ######################
+#     ######################
+#     # Translation Factory
+#     ######################
 
-    # Example usage
-    json_files_list = list_json_files_in_cwd()
+#     # Example usage
+#     json_files_list = list_json_files_in_cwd()
 
-    if not json_files_list:
-        print("Error: You missed a step, No Json files were provided.")
-        raise "No Json files were provided."
+#     if not json_files_list:
+#         print("Error: You missed a step, No Json files were provided.")
+#         raise "No Json files were provided."
 
-    # inspection
-    print("JSON files in the CWD:", json_files_list)
+#     # inspection
+#     print("JSON files in the CWD:", json_files_list)
 
-    for this_original_json_file in json_files_list:
+#     for this_original_json_file in json_files_list:
 
-        # Load the original JSON file
-        original_data = load_json_file(this_original_json_file)
+#         # Load the original JSON file
+#         original_data = load_json_file(this_original_json_file)
 
-        # Create a new JSON file with the deep empty structure
-        name_of_skeleton_saved_file = "empty_lists_" + "_" + this_original_json_file
+#         # Create a new JSON file with the deep empty structure
+#         name_of_skeleton_saved_file = "empty_lists_" + "_" + this_original_json_file
 
-        skeleton_json = create_empty_json_file(
-            original_data, name_of_skeleton_saved_file
-        )
+#         skeleton_json = create_empty_json_file(
+#             original_data, name_of_skeleton_saved_file
+#         )
 
-        name_of_EMPTY_select_best_frame_saved_file = (
-            "empty_string_best_" + "_" + this_original_json_file
-        )
-        select_best_frame = create_empty_selectbest_frame(
-            original_data, name_of_EMPTY_select_best_frame_saved_file
-        )
+#         name_of_EMPTY_select_best_frame_saved_file = (
+#             "empty_string_best_" + "_" + this_original_json_file
+#         )
+#         select_best_frame = create_empty_selectbest_frame(
+#             original_data, name_of_EMPTY_select_best_frame_saved_file
+#         )
 
-        #########################################
-        # Crawler: Make preliminary Translations
-        #########################################
+#         #########################################
+#         # Crawler: Make preliminary Translations
+#         #########################################
 
-        paths_list = generate_paths(original_data)
-        check_paths_list = generate_paths(skeleton_json)
-        select_best_frame_paths_list = generate_paths(select_best_frame)
+#         paths_list = generate_paths(original_data)
+#         check_paths_list = generate_paths(skeleton_json)
+#         select_best_frame_paths_list = generate_paths(select_best_frame)
 
-        print(
-            f"""
-        paths_list                   {paths_list}
-        check_paths_list             {check_paths_list}
-        select_best_frame_paths_list {select_best_frame_paths_list}
-        """
-        )
+#         print(
+#             f"""
+#         paths_list                   {paths_list}
+#         check_paths_list             {check_paths_list}
+#         select_best_frame_paths_list {select_best_frame_paths_list}
+#         """
+#         )
 
-        # # breakpoint
-        # input("breakpoint")
+#         # # breakpoint
+#         # input("breakpoint")
 
-        # Sanity check
-        if paths_list != select_best_frame_paths_list:
-            error_message = "Error: Path lists between the original JSON and its skeleton do not match."
-            print(error_message)
-            raise ValueError(error_message)
+#         # Sanity check
+#         if paths_list != select_best_frame_paths_list:
+#             error_message = "Error: Path lists between the original JSON and its skeleton do not match."
+#             print(error_message)
+#             raise ValueError(error_message)
 
-        # for this language
-        for target_language in list_of_targeted_languages:
+#         # for this language
+#         for target_language in list_of_targeted_languages:
 
-            # make a blank frame of lists for the translations
-            populated_skeleton = skeleton_json
+#             # make a blank frame of lists for the translations
+#             populated_skeleton = skeleton_json
 
-            # for this leaf
-            for this_path in paths_list:
+#             # for this leaf
+#             for this_path in paths_list:
             
-                print("starting path")
+#                 print("starting path")
 
-                untranslated_leaf = extract_value_by_path(original_data, this_path)
+#                 untranslated_leaf = extract_value_by_path(original_data, this_path)
 
-                # breakpoint
-                print(f"\n\n breakpoint 5: untranslated_leaf -> {untranslated_leaf}")
-                # input("breakpoint")
+#                 # breakpoint
+#                 print(f"\n\n breakpoint 5: untranslated_leaf -> {untranslated_leaf}")
+#                 # input("breakpoint")
 
-                # make empty conversation
-                # reset context history for new 'conversation' about translation
-                context_history = []
+#                 # make empty conversation
+#                 # reset context history for new 'conversation' about translation
+#                 context_history = []
 
-                # Set Prompts per one language
-                # System Instructions
-                context_history = set_translator__system_prompt(
-                    context_history, target_language
-                )
-                # User Prompt
-                context_history = set_translate__user_prompt(
-                    context_history, target_language, untranslated_leaf
-                )
+#                 # Set Prompts per one language
+#                 # System Instructions
+#                 context_history = set_translator__system_prompt(
+#                     context_history, target_language
+#                 )
+#                 # User Prompt
+#                 context_history = set_translate__user_prompt(
+#                     context_history, target_language, untranslated_leaf
+#                 )
 
-                # breakpoint
-                print(f"\n\n breakpoint 5: context_history -> {context_history}")
-                # input("breakpoint")
+#                 # breakpoint
+#                 print(f"\n\n breakpoint 5: context_history -> {context_history}")
+#                 # input("breakpoint")
 
-                # making N translation-versions
-                for i in range(number_of_preliminary_translations):
-                    """
-                    using both the populated skeleton and the original file:
-                    - tree-search through both (original and blank-list-skeleton) in the same way
-                    - check and guarantee that the dict-address (often nested)
-                      is the same for the original and where the answers are recorded
-                    - part 1: extract just the next terminal leaf, return this.
-                    separate step next ->
-                    - part 2: put a new (language translated value) in the corresponding
-                    place in blank-skeleton list.
-                    """
-                    """
-                    ####################
-                    # Crawler functions
-                    ####################
+#                 # making N translation-versions
+#                 for i in range(number_of_preliminary_translations):
+#                     """
+#                     using both the populated skeleton and the original file:
+#                     - tree-search through both (original and blank-list-skeleton) in the same way
+#                     - check and guarantee that the dict-address (often nested)
+#                       is the same for the original and where the answers are recorded
+#                     - part 1: extract just the next terminal leaf, return this.
+#                     separate step next ->
+#                     - part 2: put a new (language translated value) in the corresponding
+#                     place in blank-skeleton list.
+#                     """
+#                     """
+#                     ####################
+#                     # Crawler functions
+#                     ####################
 
-                    1. make list of paths   generate_paths(json_object)
-                    2. extrac path value    extract_value_by_path(original_data, this_path)
-                     (translate)
-                    3. add to list          append_value_by_path(json_structure, path, new_value)
-                    4. write final value    insert_value_by_path(skeleton_json, paths_list, translated_values)
+#                     1. make list of paths   generate_paths(json_object)
+#                     2. extrac path value    extract_value_by_path(original_data, this_path)
+#                      (translate)
+#                     3. add to list          append_value_by_path(json_structure, path, new_value)
+#                     4. write final value    insert_value_by_path(skeleton_json, paths_list, translated_values)
 
-                    """
+#                     """
 
-                    ############
-                    # Translate
-                    ############
-                    translated_value_list = call_api_within_structure_check(
-                        context_history, use_this_model, mode_locale, skeleton_json
-                    )
+#                     ############
+#                     # Translate
+#                     ############
+#                     translated_value_list = call_api_within_structure_check(
+#                         context_history, use_this_model, mode_locale, skeleton_json
+#                     )
 
-                    print(f"\nTranslated: translated_value_list: {translated_value_list}")
-
-
-                    for translated_value in translated_value_list:
-
-                        # add-insert value to json
-                        print(f"Before appending: {skeleton_json}")
-                        print(f"this_path -> {this_path}")
-                        skeleton_json = append_value_by_path(json_structure, skeleton_json, path, new_value)
-                        print(f"After appending: {skeleton_json}")
-
-                #####################################################
-                # Select Top Top Goodest Translation Star-Good-Prime
-                #####################################################
-
-                set_save_json_to_file(
-                    populated_skeleton,
-                    this_original_json_file,
-                    target_language,
-                    "set_of_translations_",
-                )
-
-                # reset context history for new 'conversation' about selection
-                context_history = []
-
-                print("\n\n\nSelect Top Top Goodest Translation Star-Good-Prime")
-                # # inspection breakpoint
-                # print(f"\n\n breakpoint 5: populated_skeleton -> {populated_skeleton}")
-                # # input("breakpoint")
-
-                # set prompts to select best translation
-                list_of_options = extract_value_by_path(skeleton_json, this_path)
-
-                # System Instructions
-                context_history = set_select_best__system_prompt(
-                    context_history, target_language
-                )
-                # User Prompt
-                context_history = set_select_best__user_prompt(
-                    context_history, target_language, list_of_options, untranslated_leaf
-                )
-
-                #################
-                #################
-                # Select Bestest
-                #################
-                #################
-                # selected_bestest_value = call_api_within_structure_check(
-                #     context_history, use_this_model, mode_locale, skeleton_json
-                # )
+#                     print(f"\nTranslated: translated_value_list: {translated_value_list}")
 
 
-                selected_is_in_list_ok = False
-                fail_counter = 0
+#                     for translated_value in translated_value_list:
 
-                while not selected_is_in_list_ok:
+#                         # add-insert value to json
+#                         print(f"Before appending: {skeleton_json}")
+#                         print(f"this_path -> {this_path}")
+#                         skeleton_json = append_value_by_path(
+#                             skeleton_json, this_path, translated_value
+#                         )
+#                         print(f"After appending: {skeleton_json}")
+
+#                 #####################################################
+#                 # Select Top Top Goodest Translation Star-Good-Prime
+#                 #####################################################
+
+#                 set_save_json_to_file(
+#                     populated_skeleton,
+#                     this_original_json_file,
+#                     target_language,
+#                     "set_of_translations_",
+#                 )
+
+#                 # reset context history for new 'conversation' about selection
+#                 context_history = []
+
+#                 print("\n\n\nSelect Top Top Goodest Translation Star-Good-Prime")
+#                 # # inspection breakpoint
+#                 # print(f"\n\n breakpoint 5: populated_skeleton -> {populated_skeleton}")
+#                 # # input("breakpoint")
+
+#                 # set prompts to select best translation
+#                 list_of_options = extract_value_by_path(skeleton_json, this_path)
+
+#                 # System Instructions
+#                 context_history = set_select_best__system_prompt(
+#                     context_history, target_language
+#                 )
+#                 # User Prompt
+#                 context_history = set_select_best__user_prompt(
+#                     context_history, target_language, list_of_options, untranslated_leaf
+#                 )
+
+#                 #################
+#                 #################
+#                 # Select Bestest
+#                 #################
+#                 #################
+#                 # selected_bestest_value = call_api_within_structure_check(
+#                 #     context_history, use_this_model, mode_locale, skeleton_json
+#                 # )
+
+
+#                 selected_is_in_list_ok = False
+#                 fail_counter = 0
+
+#                 while not selected_is_in_list_ok:
 
 
 
-                    selected_bestest_value = call_api_within_structure_check(
-                        context_history, use_this_model, mode_locale, skeleton_json
-                    )
+#                     selected_bestest_value = call_api_within_structure_check(
+#                         context_history, use_this_model, mode_locale, skeleton_json
+#                     )
 
-                    print(type(selected_bestest_value))
+#                     print(type(selected_bestest_value))
 
-                    selected_bestest_value = selected_bestest_value[0]
+#                     selected_bestest_value = selected_bestest_value[0]
 
-                    print(f"selected_bestest_value -> {selected_bestest_value} vs. list_of_options -> {list_of_options}")
+#                     print(f"selected_bestest_value -> {selected_bestest_value} vs. list_of_options -> {list_of_options}")
 
-                    # Make sure selected item is in the list (and not a new halucination or mutation)
-                    if selected_bestest_value in list_of_options:
-                        selected_is_in_list_ok = True
+#                     # Make sure selected item is in the list (and not a new halucination or mutation)
+#                     if selected_bestest_value in list_of_options:
+#                         selected_is_in_list_ok = True
 
-                    else:
-                        fail_counter += 1
-                        print(f"\n\n\nfail_counter -> {fail_counter}")
+#                     else:
+#                         fail_counter += 1
+#                         print(f"\n\n\nfail_counter -> {fail_counter}")
 
-                # add value to json
-                select_best_frame = insert_value_by_path(
-                    select_best_frame, this_path, selected_bestest_value
-                )
+#                 # add value to json
+#                 select_best_frame = insert_value_by_path(
+#                     select_best_frame, this_path, selected_bestest_value
+#                 )
 
-            ##########################
-            # per language: save file
-            ##########################
-            print("trying to save file...")
+#             ##########################
+#             # per language: save file
+#             ##########################
+#             print("trying to save file...")
 
-            # try:
-            #     # if test fails
-            #     if dict_leaf_detection_boolean_true_means_defective(select_best_frame):
-            #         return False
+#             # try:
+#             #     # if test fails
+#             #     if dict_leaf_detection_boolean_true_means_defective(select_best_frame):
+#             #         return False
 
-            # except Exception as e:
-            #     print(f"\nTRY AGAIN: dict_leaf_detection_boolean_true_means_defective() empty or stub leaf found: {e}")
-            #     print(f"Failed dict_str -> {select_best_frame}")
-            #     return False
+#             # except Exception as e:
+#             #     print(f"\nTRY AGAIN: dict_leaf_detection_boolean_true_means_defective() empty or stub leaf found: {e}")
+#             #     print(f"Failed dict_str -> {select_best_frame}")
+#             #     return False
 
-            # add value to json
-            save_json_to_file(
-                select_best_frame, this_original_json_file, target_language, "selected_"
-            )
+#             # add value to json
+#             save_json_to_file(
+#                 select_best_frame, this_original_json_file, target_language, "selected_"
+#             )
 
 
 
@@ -3145,8 +3113,30 @@ def mini_translate_json(
     use_this_model,
     mode_locale,
     number_of_preliminary_translations,
+    parameter_dict=None,
 ):
 
+    # set parameters to defaults if none are given
+    if not parameter_dict:
+        #######################
+        # Tune Your Paramaters
+        #######################
+        parameter_dict = {
+            "--temp": 0.8,  # (default value is 0.8)
+            "--top-k": 40,  # (selection among N most probable. default: 40)
+            "--top-p": 0.9,  # (probability above threshold P. default: 0.9)
+            "--min-p": 0.05,  # (minimum probability threshold. default: 0.05)
+            "--seed": -1,  # seed, =1 is random seed
+            "--tfs": 1,  # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
+            "--threads": 8,  # (~ set to number of physical CPU cores)
+            "--typical": 1,  # (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
+            "--mirostat": 2,  # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
+            "--mirostat-lr": 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
+            "--mirostat-ent": 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
+            "--ctx-size": 500,  # Sets the size of the prompt context
+        }
+        
+    
     ######################
     # Translation Factory
     ######################
@@ -3212,7 +3202,8 @@ def mini_translate_json(
         for target_language in list_of_targeted_languages:
 
             # make a blank frame of lists for the translations
-            populated_skeleton = skeleton_json
+            # make a copy!
+            populated_skeleton = skeleton_json.copy()
 
             # for this leaf
             for this_path in paths_list:
@@ -3278,19 +3269,23 @@ def mini_translate_json(
                         # Translate
                         ############
                         translated_value = call_api_within_structure_check(
-                            context_history, use_this_model, mode_locale, skeleton_json
+                            context_history, use_this_model, parameter_dict, mode_locale, skeleton_json
                         )
 
                         # add-insert value to json
-                        print(f"Before appending: {skeleton_json}")
+                        print(f"populated_skeleton Before appending: {populated_skeleton}")
                         print(f"this_path -> {this_path}")
                         print(f"untranslated_leaf -> {untranslated_leaf}")
                         print("\n\nTRANSLATION:")
                         print(f"translated_value -> {translated_value}")
 
+                        
                         # adds to dict IF not already there:
-                        skeleton_json = append_value_by_path(json_structure, skeleton_json, path, new_value)
+                        populated_skeleton = append_value_by_path(
+                            populated_skeleton, this_path, translated_value
+                        )
 
+                        print(f"populated_skeleton After appending: {populated_skeleton}")
 
                     #####################################################
                     # Select Top Top Goodest Translation Star-Good-Prime
@@ -3459,7 +3454,7 @@ def mini_translate_json(
 
                             # get a list of votes and make sure it matches the list of candidates
                             list_of_votes = number_call_api_within_structure_check(
-                                context_history, use_this_model, mode_locale, skeleton_json
+                                context_history, use_this_model, parameter_dict, mode_locale, skeleton_json
                             )
 
                             print(f"\n\nlist_of_votes -> {list_of_votes}")
@@ -3578,6 +3573,27 @@ use_this_model = "mistral-tiny"
 "gguf"
 """
 
+
+#######################
+# Tune Your Paramaters
+#######################
+parameter_dict = {
+    "--temp": 0.8,  # (default value is 0.8)
+    "--top-k": 40,  # (selection among N most probable. default: 40)
+    "--top-p": 0.9,  # (probability above threshold P. default: 0.9)
+    "--min-p": 0.05,  # (minimum probability threshold. default: 0.05)
+    "--seed": -1,  # seed, =1 is random seed
+    "--tfs": 1,  # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
+    "--threads": 8,  # (~ set to number of physical CPU cores)
+    "--typical": 1,  # (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
+    "--mirostat": 2,  # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
+    "--mirostat-lr": 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
+    "--mirostat-ent": 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
+    "--ctx-size": 500,  # Sets the size of the prompt context
+}
+
+
+
 mode_locale = "cloud_api"
 
 """# Choices:"""
@@ -3614,6 +3630,7 @@ mini_translate_json(
     use_this_model,
     mode_locale,
     number_of_preliminary_translations,
+    parameter_dict,
 )
 
 
