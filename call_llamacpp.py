@@ -1131,6 +1131,18 @@ as:
 ```
 One key-value pair per translation (one key, one value -> "translation-1": "score_here", not nested). No additional comments. A tasty reward awaits your accurate selection."""
 
+conversation_history = f"""
+Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
+Place your evaluations as the value to a key in Json format. Return your markdown json object 
+listing each translation only as t-number 
+as: 
+```json 
+{answer_form} 
+```
+Just fill in the score, that's all. One key-value pair per translation (one generic key, one value which is your score -> "translation-1": "score_here", not nested). No additional comments. A tasty reward awaits your accurate selection.
+"""
+
+
 response = mini_gguf_api(conversation_history, parameter_dict, configies_dict)
 
 print(response[0])
