@@ -817,7 +817,7 @@ def mini_gguf_api(conversation_history_context_list, parameter_dict, configies_d
     # Setting up and formatting single, line prompt
     ################################################
 
-    print(conversation_history_context_list)
+    print(f"conversation_history_context_list -> {conversation_history_context_list}")
 
     # make whole prompt
     prompt = conversation_history_context_list
@@ -825,8 +825,8 @@ def mini_gguf_api(conversation_history_context_list, parameter_dict, configies_d
     prompt = prompt.replace("\n", "")
     prompt = prompt.replace("\\n", "")
 
-    # inspection
-    print(f"prompt -> {repr(prompt)}")
+    # # inspection
+    # print(f"prompt -> {repr(prompt)}")
 
     # # set your local jan path
     model_path_base = configies_dict["model_path_base"]
@@ -1019,95 +1019,15 @@ def set_translate__user_prompt(context_history, target_language, original_data):
 
     return context_history
 
-"""# json inspection"""
-context_history = []
+
+################
+################
+################
+################
+# Run & Testing
+################
+################
+################
+################
 
 
-target_language = "Dutch"
-original_data = "use the door"
-
-conversation_history = set_translator__system_prompt(context_history, target_language)
-conversation_history = set_translate__user_prompt(context_history, target_language, original_data)
-
-# print(conversation_history)
-
-# a local api function that acts like cloud api functions
-# response = gguf_api(conversation_history, parameter_dict, configies_dict)
-
-
-
-#######################
-# Tune Your Paramaters
-#######################
-parameter_dict = {
-    "--temp": 0.8,  # (default value is 0.8)
-    "--top-k": 40,  # (selection among N most probable. default: 40)
-    "--top-p": 0.9,  # (probability above threshold P. default: 0.9)
-    "--min-p": 0.05,  # (minimum probability threshold. default: 0.05)
-    "--seed": -1,  # seed, =1 is random seed
-    "--tfs": 1,  # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
-    "--threads": 8,  # (~ set to number of physical CPU cores)
-    "--typical": 1,  # (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
-    "--mirostat": 2,  # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
-    "--mirostat-lr": 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
-    "--mirostat-ent": 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
-    "--ctx-size": 500,  # Sets the size of the prompt context
-}
-
-
-configies_dict = {
-    'model_path_base': add_segment_to_absolute_base_path("jan/models/"),
-    'model_nickname': "mistral-7b-instruct-v0.2.Q4_K_M",
-    'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
-}
-
-
-phrase = 'cat'
-language = 'spanish'
-conversation_history = f"""
-translate only '{phrase}'' into {language} with the translation formatted
-inside tripple pipes |||YOUR_TRANSLATION||| just that, no other commentary,
-and earn a treat"""
-
-conversation_history = f"""
-give two number separated by pipes, answer <= 20 characters"""
-
-
-conversation_history = f"""
-
-Evaluate (Score 0-10) German translations for "Your ACCOUNT name": ["your_translation","Dein Benutzername"]
-
-Score each (0-10) as being a good translation, then reply saying only |Score1|Score2|, no commentary please.
-"""
-
-target_language = "German"
-untranslated_leaf = "your account name"
-dict_of_options = {"your_translation": "score_here", 
-                   "Dein Benutzername": "score_here"}
-answer_form = {
-    "t-1": "score_here", 
-    "t-2": "score_here",
-    "t-3": "score_here"
-}
-
-
-"""
- Evaluate (0-10, 10 is great) each German translation for 'your account name' from these options: {'your_translation': 'score_here', 'Dein Benutzername': 'score_here'}. Place your evaluations as a value to the key in Json format. Return your properly formatted dict listing each translation only as t-number as: '''json {'t-1': 'score_here', 't-2': 'score_here', 't-3': 'score_here'} ''' No additional comments. A tasty reward awaits your accurate selection.
-
-"""
-
-conversation_history = f"""
-Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
-Place your evaluations as a value to the key in Json format. Return your markdown json object 
-listing each translation only as t-number 
-as: 
-```json 
-{answer_form} 
-```
-No additional comments. A tasty reward awaits your accurate selection."""
-
-# response = mini_gguf_api(conversation_history, parameter_dict, configies_dict)
-
-# print(response[0])
-# print(response[1])
-# print(response[2])

@@ -817,7 +817,7 @@ def mini_gguf_api(conversation_history_context_list, parameter_dict, configies_d
     # Setting up and formatting single, line prompt
     ################################################
 
-    print(conversation_history_context_list)
+    print(f"conversation_history_context_list -> {conversation_history_context_list}")
 
     # make whole prompt
     prompt = conversation_history_context_list
@@ -825,8 +825,8 @@ def mini_gguf_api(conversation_history_context_list, parameter_dict, configies_d
     prompt = prompt.replace("\n", "")
     prompt = prompt.replace("\\n", "")
 
-    # inspection
-    print(f"prompt -> {repr(prompt)}")
+    # # inspection
+    # print(f"prompt -> {repr(prompt)}")
 
     # # set your local jan path
     model_path_base = configies_dict["model_path_base"]
@@ -1019,6 +1019,20 @@ def set_translate__user_prompt(context_history, target_language, original_data):
 
     return context_history
 
+
+################
+################
+################
+################
+# Run & Testing
+################
+################
+################
+################
+
+
+
+
 """# json inspection"""
 context_history = []
 
@@ -1084,17 +1098,28 @@ target_language = "German"
 untranslated_leaf = "your account name"
 dict_of_options = {"your_translation": "score_here", 
                    "Dein Benutzername": "score_here"}
+                   
+# dict_of_options = {
+#     "Ihr_Kontenname": "score_here",
+#     }     
+
 answer_form = {
     "t-1": "score_here", 
     "t-2": "score_here",
     "t-3": "score_here"
 }
-
+answer_form = {
+    "translation-1": "score_here", 
+    "translation-2": "score_here",
+    "translation-3": "score_here"
+}
 
 """
  Evaluate (0-10, 10 is great) each German translation for 'your account name' from these options: {'your_translation': 'score_here', 'Dein Benutzername': 'score_here'}. Place your evaluations as a value to the key in Json format. Return your properly formatted dict listing each translation only as t-number as: '''json {'t-1': 'score_here', 't-2': 'score_here', 't-3': 'score_here'} ''' No additional comments. A tasty reward awaits your accurate selection.
 
 """
+
+
 
 conversation_history = f"""
 Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
@@ -1104,7 +1129,7 @@ as:
 ```json 
 {answer_form} 
 ```
-No additional comments. A tasty reward awaits your accurate selection."""
+One key-value pair per translation (one key, one value -> "translation-1": "score_here", not nested). No additional comments. A tasty reward awaits your accurate selection."""
 
 response = mini_gguf_api(conversation_history, parameter_dict, configies_dict)
 
