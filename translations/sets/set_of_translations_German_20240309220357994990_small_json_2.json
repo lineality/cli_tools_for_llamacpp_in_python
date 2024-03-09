@@ -1,9 +1,10 @@
 {
     "signUp": {
         "Account": [
-            "Ihr Konto Name",
-            ") zu übersetzen: ",
-            "Benutzername"
+            "Ihr Kontenname",
+            "Ihr Kontoname de",
+            "DeinBenutzername",
+            "DeinBenutzername"
         ],
         "FirstName": [],
         "Password": [],

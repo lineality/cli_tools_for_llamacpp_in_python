@@ -1717,21 +1717,25 @@ def check_structure_of_response(dict_str):
         matches_list = remove_specific_strings(matches_list, strings_to_remove)
 
         cleaned_matches_list = remove_underscores_from_strings_in_list(matches_list)
-        
+
         translation = cleaned_matches_list
 
-        # inspection
-        print(f"check_structure_of_response()  matches_list -> {matches_list}")
+        # Remove duplicates
+        translation_set = set(translation)
+        translation_list = list(translation_set)
 
-        if len(translation):
-            return translation
+        # inspection
+        print(f"check_structure_of_response()  translation_list -> {translation_list}")
+
+        if len(translation_list):
+            return translation_list
 
         else:
-            print(f"check_structure_of_response error parsing ai translation {str(e)}")
+            print(f"check_structure_of_response error parsing ai translation_list")
             return False
 
     except Exception as e:
-        print(f"check_structure_of_response error parsing ai translation {str(e)}")
+        print(f"check_structure_of_response error parsing ai translation_list {str(e)}")
         return False
 
 
@@ -2650,7 +2654,7 @@ def lower_clean_string_or_list(input_string_or_list):
         return cleaned_string_or_list
 
     else:
-        print("Warning: lower_clean_string_or_list() input not string or list")
+        print(f"Warning: lower_clean_string_or_list() input not string or list input_string_or_list -> {type(input_string_or_list)}{input_string_or_list}")
 
         return input_string_or_list
 
@@ -2740,51 +2744,49 @@ def core_insert_string_value_by_path(json_structure, path, new_value):
             print(f"TypeError accessing {'/'.join(path[:i])}: {str(e)}")
 
     # If for some reason the loop completes without appending (shouldn't happen if errors are caught)
-    print("warning: insert_string_value_by_path() no intput?")
+    print(f"\n\n\nwarning: core_insert_string_value_by_path() no intput? new_value -> {new_value}  \n\n\n")
 
 
 
-def insert_string_value_by_path(json_structure, path, new_value_or_list):
+def insert_string_value_by_path(dict_tree_structure, path, new_value_or_list):
     """
     wrapper for core_insert_string_value_by_path()
 
     accepts list of items 
     or single string items
 
-    checks to see if they are already in the dict
+    checks to see if they are already in the dict (not working)
 
     if not,
 
     it add them.
     check if matches pre-translated
+
+    todo:
+    make sure the value does not already exist in destination list
     """
 
-    print("start: insert_string_value_by_path()")
+    print(f"start: insert_string_value_by_path() new_value_or_list -> {new_value_or_list}")
 
     cleaned_newvalue_or_list = lower_clean_string_or_list(new_value_or_list)
 
-    existing_item_list = clean_extract_string_value_by_path(json_structure, path)
+    existing_item_list = clean_extract_string_value_by_path(dict_tree_structure, path)
     print(f"insert_string_value_by_path() existing_item_list -> {existing_item_list}")
 
     # Check if the value is a string
 
     if isinstance(new_value_or_list, str):
+        new_value_or_list = [new_value_or_list]
 
-        if cleaned_newvalue_or_list not in existing_item_list:
-            core_insert_string_value_by_path(json_structure, path, new_value_or_list)
-
-        # Check if the value is a list
-    elif isinstance(new_value_or_list, list):
+    # Check if the value is a list
+    if isinstance(new_value_or_list, list):
         for this_new_value in new_value_or_list:
             if cleaned_newvalue_or_list not in existing_item_list:
-                core_insert_string_value_by_path(json_structure, path, this_new_value)
+                core_insert_string_value_by_path(dict_tree_structure, path, this_new_value)
 
     else:
-        print("warning: insert_string_value_by_path() no intput?")
+        print(f"warning: insert_string_value_by_path() no intput? {new_value_or_list}")
 
-
-    # # If for some reason the loop completes without appending (shouldn't happen if errors are caught)
-    # raise ValueError("Failed to append the value: Path processing error.")
 
 
 # def insert_string_value_by_path(json_structure, path, new_value):
@@ -3421,11 +3423,11 @@ def mini_translate_json(
                     # # input("breakpoint") 
 
                     # set prompts to select best translation
-                    list_of_options_nested = extract_value_by_path(skeleton_json, this_path)
+                    list_of_options = extract_value_by_path(populated_skeleton, this_path)
 
                     # # Combine into one list of strings using list comprehension
                     # list_of_options = [item for sublist in list_of_options_nested for item in sublist]
-                    list_of_options = list_of_options_nested
+                    # list_of_options = list_of_options_nested
 
                     # turn list of options int dict
                     dict_of_options = {option: "score_here" for option in list_of_options}
@@ -3437,8 +3439,6 @@ def mini_translate_json(
                     print(
                         f"""
                     mini_translate_json() Select Top Top
-
-                    list_of_options_nested -> {list_of_options_nested}
                     list_of_options        -> {list_of_options}
                     dict_of_options        -> {dict_of_options}
                     list_dict_of_options   -> {list_dict_of_options}
@@ -3552,6 +3552,8 @@ def mini_translate_json(
                     ###################
                     ###################
 
+
+
                     # turn list of options int dict
                     dict_of_options = {option: None for option in list_of_options}
                     # get highest ranked item:
@@ -3559,7 +3561,6 @@ def mini_translate_json(
 
                     while_counter = 0
 
-                    # 
                     for i in range(3):
 
                         print(f"while_counter -> {while_counter}")
@@ -3627,6 +3628,7 @@ def mini_translate_json(
                     )
 
                     print(f"dict_of_selected_best -> {dict_of_selected_best}")
+
             ##########################
             # per language: save file
             ##########################
@@ -3646,8 +3648,6 @@ def mini_translate_json(
             save_json_to_file(
                 dict_of_selected_best, this_original_json_file, target_language, "selected_"
             )
-
-            return 0
 
 
 """# Tranlate Json Files
