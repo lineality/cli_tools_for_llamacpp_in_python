@@ -715,7 +715,7 @@ def gguf_api(conversation_history_context_list, parameter_dict, configies_dict):
     prompt = prompt.replace("\\n", "")
 
     # inspection
-    print(f"prompt -> {repr(prompt)}")
+    print(f"repr(prompt) -> {repr(prompt)}")
 
     # # set your local jan path
     model_path_base = configies_dict["model_path_base"]

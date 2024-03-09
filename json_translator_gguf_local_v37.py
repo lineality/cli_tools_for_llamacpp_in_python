@@ -1686,9 +1686,8 @@ def check_structure_of_response(dict_str):
     """
 
     """
-    print(
-        f"\n\n Starting check_structure_of_response, dict_str -> {repr(dict_str)} {type(dict_str)}"
-    )
+    # print(f"\n\n Starting check_structure_of_response, dict_str -> {repr(dict_str)} {type(dict_str)}")
+    print(f"\n\n Starting check_structure_of_response, dict_str ")
 
     try:
         # Define the regex pattern to match text between triple pipes
@@ -2680,7 +2679,7 @@ def core_append_value_by_path(json_structure, path, new_value):
                             
 
 
-def append_value_by_path(json_structure, path, new_value):
+def append_value_by_path(json_structure, skeleton_json, path, new_value):
     """
     wrapper for core_append_value_by_path()
     
@@ -2696,7 +2695,7 @@ def append_value_by_path(json_structure, path, new_value):
     """
     
     
-    existing_item_list = extract_value_by_path(skeleton_json, this_path)
+    existing_item_list = extract_value_by_path(skeleton_json, path)
     
     target = json_structure
     
@@ -2976,9 +2975,7 @@ def translate_json(
                         # add-insert value to json
                         print(f"Before appending: {skeleton_json}")
                         print(f"this_path -> {this_path}")
-                        skeleton_json = append_value_by_path(
-                            skeleton_json, this_path, translated_value
-                        )
+                        skeleton_json = append_value_by_path(json_structure, skeleton_json, path, new_value)
                         print(f"After appending: {skeleton_json}")
 
                 #####################################################
@@ -3291,13 +3288,9 @@ def mini_translate_json(
                         print("\n\nTRANSLATION:")
                         print(f"translated_value -> {translated_value}")
 
-                                
-
-                        
                         # adds to dict IF not already there:
-                        skeleton_json = append_value_by_path(
-                            skeleton_json, this_path, translated_value
-                        )
+                        skeleton_json = append_value_by_path(json_structure, skeleton_json, path, new_value)
+
 
                     #####################################################
                     # Select Top Top Goodest Translation Star-Good-Prime
