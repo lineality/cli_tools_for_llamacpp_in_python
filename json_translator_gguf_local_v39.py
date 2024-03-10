@@ -1610,6 +1610,222 @@ def ask_mistral_model(context_history, use_this_model):
 
 
 # Helper Function
+def task_check_function_description_keys(dict_str):
+    """
+    TODO or final_answer
+
+
+    This function CAN fail and should fail
+    if the AI needs to retry at a task.
+    Do not stop server when this this triggers an exception.
+
+    edge case: before there is a populated output_log
+
+    if passing, this function will return a valid json object
+    """
+
+    """
+    Extracts JSON string enclosed between ```json and ``` markers.
+
+    Parameters:
+    - text (str): The input text containing the JSON block.
+
+    Returns:
+    - str: The extracted JSON string, or an empty string if no JSON block is found.
+    """
+    print(f"\n\n Starting check_function_description_keys, dict_str -> {repr(dict_str)} {type(dict_str)}")
+
+    # input("breakpoint")
+
+
+
+    ########################
+    # Check Json Formatting
+    ########################
+
+
+    # pre-check
+        # load
+    try:
+        if "'" not in dict_str:
+
+            # Load the string into a Python dictionary
+            dict_data = json.loads(dict_str)
+
+            dict_str = dict_data['translation']
+
+            if dict_leaf_detection_boolean_true_means_defective(dict_str):
+                return dict_str
+
+            else:
+                print(f"Failed dict_str precheck")
+
+    except:
+        print(f"Failed dict_str precheck")
+
+
+
+
+    # extraction 1
+    try:
+        if """```json""" in dict_str:
+
+
+            pattern = r'```json\n([\s\S]*?)\n```'
+            match = re.search(pattern, dict_str)
+            dict_str =  match.group(1) if match else ''
+
+    except Exception as e:
+        print(f"\nTRY AGAIN: check_function_description_keys() extraction from markdown failed: {e}")
+        print(f"Failed dict_str -> {repr(dict_str)}")
+        return False
+
+    print(f"\n  extraction-1 from markdown dict_str -> {repr(dict_str)} {type(dict_str)}")
+
+
+    try:
+        # if ("""{'final_answer': '""" in dict_str) and ("""'}""" in dict_str):
+        #     dict_str.replace( """{'final_answer':""", """{"final_answer":"""  )
+        #     dict_str.replace( """'}""", """"}"""  )
+
+        # if ("""{\'final_answer\': \'""" in dict_str) and ("""\'}""" in dict_str):
+        #     dict_str.replace( """{\'final_answer\':""", """{"final_answer":"""  )
+        #     dict_str.replace( """\'}""", """"}"""  )
+
+        if ("""{\'final_answer\':""" in dict_str):
+            dict_str = dict_str.replace( """{\'final_answer\':""", """{"final_answer":"""  )
+
+        if ("""{'final_answer':""" in dict_str):
+            dict_str = dict_str.replace( """{'final_answer':""", """{"final_answer":"""  )
+
+        if ("""{\\'final_answer\\':""" in dict_str):
+            dict_str = dict_str.replace( """{\\'final_answer\\':""", """{"final_answer":"""  )
+
+    except Exception as e:
+        print(f"Failed dict_str -> {repr(dict_str)}")
+        return False
+
+    print(f" dict_str -> {repr(dict_str)} {type(dict_str)}")
+
+
+    dict_str = clean_and_convert_to_json(dict_str)
+    print(f" clean_and_convert_to_json dict_str -> {repr(dict_str)} {type(dict_str)}")
+
+
+    try:
+        # if ("""{'final_answer': '""" in dict_str) and ("""'}""" in dict_str):
+        #     dict_str.replace( """{'final_answer':""", """{"final_answer":"""  )
+        #     dict_str.replace( """'}""", """"}"""  )
+
+        # if ("""{\'final_answer\': \'""" in dict_str) and ("""\'}""" in dict_str):
+        #     dict_str.replace( """{\'final_answer\':""", """{"final_answer":"""  )
+        #     dict_str.replace( """\'}""", """"}"""  )
+
+        if ("""{\'final_answer\':""" in dict_str):
+            dict_str = dict_str.replace( """{\'final_answer\':""", """{"final_answer":"""  )
+
+        if ("""{'final_answer':""" in dict_str):
+            dict_str = dict_str.replace( """{'final_answer':""", """{"final_answer":"""  )
+
+        if ("""{\\'final_answer\\':""" in dict_str):
+            dict_str = dict_str.replace( """{\\'final_answer\\':""", """{"final_answer":"""  )
+
+    except Exception as e:
+        print(f"Failed dict_str -> {repr(dict_str)}")
+        return False
+
+
+
+    # clean
+    try:
+        """
+        Swap in and swap out escaped single commas
+        to avoid them being removed during reformatting
+        or the reformatting otherwise breaking the json
+        """
+
+
+        # if ("\'" in dict_str) or ("""\\'""" in dict_str):
+        #     print("escaped single quote found")
+
+        #     input_string = dict_str
+        #     target = "\'"
+        #     swapper = get_swap_in(input_string)
+
+        #     # Run before
+        #     swap_two(input_string, target, swapper)
+
+        #     # # This conflicted with free language in description section...
+        #     dict_str = dict_str.replace("'", '"')
+
+        #     # Run After
+        #     swap_two(input_string, target, swapper)
+
+
+        # else:
+        #     # # This conflicted with free language in description section...
+        #     dict_str = dict_str.replace("'", '"')
+
+
+        # try safety cleaning
+        dict_str = dict_str.replace("True", "true")
+        dict_str = dict_str.replace("False", "false")
+        dict_str = dict_str.replace("None", "null")
+
+
+        # remove trailing delimiter comma
+        print(f"{dict_str[:-6]}")
+        dict_str = dict_str.replace('",\n}', '"\n}')
+
+    except Exception as e:
+        print(f"\nTRY AGAIN:try safety cleaning: {e}")
+        print(f"Failed repr(dict_str) -> {repr(dict_str)}")
+        return False
+
+    # load
+    try:
+        # try converting
+        print(f"dict_str -> {repr(dict_str)} {type(dict_str)}")
+
+        # Load the string into a Python dictionary
+        dict_data = json.loads(dict_str)
+
+    except Exception as e:
+        print(f"\nTRY AGAIN: trying json.loads(dict_str) Dictionary load failed: {e}")
+        print(f"Failed repr(dict_str) -> {repr(dict_str)}")
+        return False
+
+
+    # extraction 2
+    try:
+        # Extract the value associated with the key 'translation'
+        dict_str = dict_data['translation']
+
+    except Exception as e:
+        print(f"\nTRY AGAIN: check_function_description_keys() extraction 2 from translation = dict_data['translation'] failed: {e}")
+        print(f"Failed repr(dict_str) -> {repr(dict_str)}")
+        return False
+
+
+    # try:
+    #     # if test fails
+    #     if dict_leaf_detection_boolean_true_means_defective(dict_str):
+    #         return False
+
+    # except Exception as e:
+    #     print(f"\nTRY AGAIN: dict_leaf_detection_boolean_true_means_defective() empty or stub leaf found: {e}")
+    #     print(f"Failed dict_str -> {dict_str}")
+    #     return False
+
+
+    print(f"\n  final extracted from markdown, dict, etc. ->{repr(dict_str)}")
+
+    # if ok...
+    return dict_str
+
+
+
+# Helper Function
 def set_translator__system_prompt(context_history, target_language):
 
     ################
@@ -1867,6 +2083,115 @@ def check_structure_of_response(dict_str):
         return False
 
 
+# Helper Function
+def task_check_structure_of_response(task_mode, dict_str):
+    """
+    for tasks, see modes json or |||
+
+    """
+
+    try:
+        # print(f"\n\n Starting check_structure_of_response, dict_str -> {repr(dict_str)} {type(dict_str)}")
+        print(f"\n\n Starting check_structure_of_response, dict_str ")
+
+        if "simple" in task_mode:
+
+
+            # if "task_mode == "open_task"":
+
+            #     json_format = {
+            #         "solution":        
+            #         {
+            #             "solution_plan_outline": "",
+            #             "draft_revisions_and_comments": "",
+            #             "final_answer": "",
+            #         }
+            #     }
+
+
+
+            # elif task_mode == "multiple_choice":
+            #     json_format = {
+            #         "solution":        
+            #         {
+            #             "solution_plan_outline": "",
+            #             "draft_revisions_and_comments": "",
+            #             "final_answer": int,
+            #         }
+            #     }
+
+
+
+
+            # Define the regex pattern to match text between triple pipes
+            pattern = r"\|\|\|(.+?)\|\|\|"
+
+            # Use re.findall to find all occurrences that match the pattern
+            matches_list = re.findall(pattern, dict_str)
+
+            # matches_list is a list of all captured groups in the text
+            # If you expect only one match and want to return just that, you can adjust the code accordingly
+
+            strings_to_remove = [
+                "final answer option number",
+            ]
+
+
+            matches_list = remove_specific_strings(matches_list, strings_to_remove)
+
+            response_to_task = matches_list[0]
+
+            # cleaned_matches_list = remove_underscores_from_strings_in_list(matches_list)
+
+            # translation = cleaned_matches_list
+
+            # # Remove duplicates
+            # translation_set = set(translation)
+            # response_to_task = list(translation_set)
+
+            # # adjust all-capitalized words to only starting with a capital letter
+            # adjust_capitalization(response_to_task)
+
+            # inspection
+            print(f"task_check_structure_of_response()  response_to_task -> {response_to_task}")
+
+            if len(response_to_task):
+                return response_to_task
+
+            else:
+                print(f"check_structure_of_response error parsing ai response_to_task")
+                return False
+
+
+        else:
+
+            response_to_task = task_check_function_description_keys(dict_str)
+
+            # cleaned_matches_list = remove_underscores_from_strings_in_list(matches_list)
+
+            # translation = cleaned_matches_list
+
+            # # Remove duplicates
+            # translation_set = set(translation)
+            # response_to_task = list(translation_set)
+
+            # # adjust all-capitalized words to only starting with a capital letter
+            # adjust_capitalization(response_to_task)
+
+            # inspection
+            print(f"task_check_structure_of_response()  response_to_task -> {response_to_task}")
+
+            if len(response_to_task):
+                return response_to_task
+
+            else:
+                print(f"check_structure_of_response error parsing ai response_to_task")
+                return False
+
+
+    except Exception as e:
+        print(f"check_structure_of_response error parsing ai response_to_task {str(e)}")
+        return False
 
 
 
@@ -2191,7 +2516,11 @@ def add_segment_to_absolute_base_path(additional_segment):
 
 
 # helper function
-def call_api_within_structure_check(context_history, use_this_model, parameter_dict, ai_local_or_cloud_mode, skeleton_json):
+def call_api_within_structure_check(context_history, 
+                                    use_this_model, 
+                                    parameter_dict, 
+                                    ai_local_or_cloud_mode, 
+                                    skeleton_json):
     retry_counter = 0
     json_ok_flag = False
 
@@ -2281,6 +2610,122 @@ def call_api_within_structure_check(context_history, use_this_model, parameter_d
             print(f"Failed: {str(e)}")
 
         jsonchecked_translation = check_structure_of_response(dict_str)
+
+        if jsonchecked_translation:
+            json_ok_flag = True
+
+        else:
+            retry_counter += 1
+            print(f"\n\nretry_counter -> {retry_counter}\n")
+
+            # # breakpoint
+            # input("Breakpoint")
+
+    print(f"retry_counter -> {retry_counter}")
+
+    return jsonchecked_translation
+
+
+""" call_api_within_number_check"""
+
+
+
+# helper function
+def general_task_call_api_within_structure_check(context_history, 
+                                                 use_this_model, 
+                                                 parameter_dict, 
+                                                 ai_local_or_cloud_mode,
+                                                 task_mode,
+                                                 ):
+    retry_counter = 0
+    json_ok_flag = False
+
+
+    # see
+    mistal_model_list = [
+        "mistral-tiny",
+        "mistral-small",
+        "mistral-large-latest",
+    ]
+    # /home/oops/jan/models/mistral-ins-7b-q4/mistral-7b-instruct-v0.2.Q4_K_M.gguf
+
+    # see https://platform.openai.com/docs/guides/text-generation
+    open_ai_model_list = ["gpt-4", "gpt-4-turbo-preview", "gpt-3.5-turbo"]
+
+    gguf_model_list = ["jais", "tiny_llama", "mistral7b",]
+
+    while not json_ok_flag:
+
+        ####################
+        # get a translation
+        ####################
+
+        try:
+            # check json structure
+
+            ########################
+            # Select Model and Mode
+            ########################
+
+            # for off-line local mode
+            if ai_local_or_cloud_mode == "gguf":
+                print("Started gguf")
+
+                # get model path name-end
+                # use_this_model = get_model_path_by_name("/home/oops/jan/models/", use_this_model)
+
+                # inspection
+                print(f"use_this_model -> {use_this_model}")
+
+                configies_dict = {
+                    'model_path_base': add_segment_to_absolute_base_path("jan/models/"),
+                    'model_nickname': use_this_model,
+                    'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
+                    'pipeline_mode': mini_gguf_api,
+                }
+
+
+                print(f"configies_dict -> {configies_dict}")
+
+                # # breakpoint
+                # input("Breakpoint")
+
+                ######################
+                # local api with gguf
+                ######################
+                response = configies_dict["pipeline_mode"](context_history, parameter_dict, configies_dict)
+                print(response[0])
+                print(response[1])
+                print(response[2])
+                dict_str = response[2]
+
+            ################
+            # for cloud api
+            ################
+            elif use_this_model in mistal_model_list:
+                print(f"Mistral api selected...{use_this_model}")
+                dict_str = ask_mistral_model(context_history, use_this_model)
+
+            elif use_this_model in open_ai_model_list:
+                print(f"openAI api selected...{use_this_model}")
+                dict_str = openai_call_context_timeout(
+                    client,
+                    context_history,
+                    model=use_this_model,
+                    max_retries=10,
+                    temp=0.9,
+                    timeout_min=8,
+                )
+
+            else:
+                print(f"no known api selected...{use_this_model}")
+                raise f"No known model option chosen...use_this_model -> {use_this_model}"
+
+        except Exception as e:
+            jsonchecked_translation = None
+            print(f"Failed: {str(e)}")
+
+        jsonchecked_translation = task_check_structure_of_response(dict_str, task_mode)
 
         if jsonchecked_translation:
             json_ok_flag = True
@@ -2729,6 +3174,42 @@ def remove_duplicates_from_terminal_list(target_dictionary, this_path):
         parent[last_step] = list(dict.fromkeys(terminal_list))  # Remove duplicates, preserving order
 
     print("Duplicates removed from terminal-leaf list.")
+
+
+
+def extract_row_from_csv(this_row, this_path):
+    """
+    Extracts a specific row from a CSV file.
+
+    Parameters:
+        this_row (int): The index of the row to extract from the CSV.
+        this_path (str): The path to the CSV file.
+
+    Returns:
+        list: The extracted row as a list of strings. Returns an empty list if the row
+              does not exist or the file cannot be opened.
+    """
+    try:
+        with open(this_path, newline='') as csvfile:
+            reader = csv.reader(csvfile)
+            for i, row in enumerate(reader):
+                if i == this_row:
+                    return row
+    except FileNotFoundError:
+        print(f"File not found: {this_path}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+    # Return empty list if the row was not found or an error occurred
+    print("\n\n\nWARNING: NOW ROW FOUND!!! extract_row_from_csv()")
+    return []
+
+# Example usage
+# Assuming the CSV file and the row index you want to extract
+# row_index = 5
+# file_path = 'path_to_your_file.csv'
+# extracted_row = extract_row_from_csv(row_index, file_path)
+# print(extracted_row)
 
 
 
@@ -3819,10 +4300,12 @@ def mini_translate_json(
 
 def do_task_please(
     task_mode,
-    use_this_model,
+    list_of_models,
     ai_local_or_cloud_mode,
     number_of_preliminary_drafts,
     number_of_ranked_votes,
+    index_of_task=0,
+    index_of_options=1,
     parameter_dict=None,
 ):
 
@@ -3835,8 +4318,6 @@ def do_task_please(
             "draft_revisions_and_comments":
             "final_answer":
         }
-
-
     """
 
 
@@ -3886,133 +4367,114 @@ def do_task_please(
 
     if not task_files_list:
         print("Error: You missed a step, No task files were provided.")
-        raise "No Json files were provided."
+        raise "No task files were provided."
 
     # inspection
     print(f"Task files in folder -> {task_files_list}")
 
     for this_original_task_file in task_files_list:
 
-        ###
-        # Make answers file pathway.
-        ###
-        answer_file_path = make_answers_directory_and_csv_path(this_original_task_file, use_this_model)
+        for use_this_model in list_of_models:
+            ###
+            # Make answers file pathway.
+            ###
+            answer_file_path = make_answers_directory_and_csv_path(this_original_task_file, use_this_model)
 
-        print(f"answer_file_path -> {answer_file_path}")
-
-
-        # Load the original JSON file
-        original_data = load_json_file(this_original_task_file)
-
-        # Create a new JSON file with the deep empty structure
-        name_of_skeleton_saved_file = "empty_lists_" + "_" + this_original_task_file
-
-        skeleton_json = create_empty_json_file(
-            original_data, name_of_skeleton_saved_file
-        )
-
-        name_of_EMPTY_dict_of_selected_best_saved_file = (
-            "empty_string_best_" + "_" + this_original_task_file
-        )
-        dict_of_selected_best = create_empty_selectbest_frame(
-            original_data, name_of_EMPTY_dict_of_selected_best_saved_file
-        )
+            print(f"answer_file_path -> {answer_file_path}")
 
 
-        #########################################
-        # Crawler: Make preliminary Translations
-        #########################################
-
-        paths_list = generate_paths(original_data)
-        check_paths_list = generate_paths(skeleton_json)
-        dict_of_selected_best_paths_list = generate_paths(dict_of_selected_best)
-
-        print(
-            f"""
-        mini_translate_json()
-        Starting this file: 
-        this_original_json_file      -> {this_original_task_file}
-        paths_list                   -> {paths_list}
-        check_paths_list             -> {check_paths_list}
-        dict_of_selected_best_paths_list -> {dict_of_selected_best_paths_list}
-        """
-        )
-
-        # # breakpoint
-        # input("breakpoint")
-
-        # Sanity check
-        if paths_list != dict_of_selected_best_paths_list:
-            error_message = "Error: Path lists between the original JSON and its skeleton do not match."
-            print(error_message)
-            raise ValueError(error_message)
-
-        """
-        To stay lite:
-        - get the number of rows in the csv
-        - for each row, access that row only
-        (note...a csv might be a little mega huge)
+            #########################################
+            # Crawler: Make preliminary Translations
+            #########################################
 
 
-        FOrmat
+            print(
+                f"""
+            do_task_please()
+            Starting this file: 
+            this_original_task_file      -> {this_original_task_file}
+            """
+            )
 
-        """
+            # # breakpoint
+            # input("breakpoint")
 
-        def get_csv_len_in_rows(path):
-            try:
-                with open(path, 'r') as f:
-                    reader = csv.reader(f)
-                    row_count = sum(1 for _ in reader)
-                return row_count
+            """
+            To stay lite:
+            - get the number of rows in the csv
+            - for each row, access that row only
+            (note...a csv might be a little mega huge)
 
-            except Exception as e:
-                raise e
+            """
 
-        this_original_task_file_length = get_csv_len_in_rows(this_original_task_file)
+            def get_csv_len_in_rows(path):
+                try:
+                    with open(path, 'r') as f:
+                        reader = csv.reader(f)
+                        row_count = sum(1 for _ in reader)
+                    return row_count
+
+                except Exception as e:
+                    raise e
+
+            this_original_task_file_length = get_csv_len_in_rows(this_original_task_file)
 
 
-        # for this language
-        for this_row in range(0, this_original_task_file_length):
 
-            # make a blank frame of lists for the translations
-            # make a copy!
-            populated_skeleton = skeleton_json.copy()
-            print(f"\n\n\nInitial populated_skeleton -> {populated_skeleton}\n\n\n")
+            # for this language
+            # NON-header mode, skip first row
+            for this_row in range(this_original_task_file_length - 1):
 
-            # for this leaf
-            for this_path in paths_list:
+                print(f"this_row -> {this_row}")
+
 
                 """
                 get task from csv
                 """
                 task_from_instructions = ""
 
-                leaf_ok_flag = False
-                leaf_fail_counter = 0
+                task_ok_flag = False
+                task_fail_counter = 0
 
-                while not leaf_ok_flag:
+                while not task_ok_flag:
 
-                    if leaf_fail_counter > 10:
-                        raise f"leaf_fail_counter > 10 -> {leaf_fail_counter}"
+                    if task_fail_counter > 10:
+                        raise f"task_fail_counter > 10 -> {task_fail_counter}"
 
-                    untranslated_leaf = extract_string_value_by_path(original_data, this_path)
+                    """
+                    TODO
+                    Handling headers...
+                    (setting?)
+
+                    process csv assuming
+                    this row = index
+                    question is first item
+                    string of options is second
+
+                    "What is 2+2?", [4, 2^2, 2**2, 2*2, all of the above]
+                    """
+
+                    row_as_list = extract_row_from_csv(this_row, this_original_task_file)
+
+                    this_task = row_as_list[index_of_task]
+                    these_options = row_as_list[index_of_options]
 
                     # # breakpoint
-                    # print(f"\n\n breakpoint 5: untranslated_leaf -> {untranslated_leaf}")
+                    # print(f"\n\n breakpoint 5: untranslated_task -> {untranslated_task}")
                     # input("breakpoint")
 
                     # make empty conversation
                     # reset context history for new 'conversation' about translation
-                    # context_history = f"translate '{untranslated_leaf}'' into {target_language} with the translation in pipes |||YOUR_TRANSLATION||| no other commentary needed, just a translation please"
+                    # context_history = f"translate '{untranslated_task}'' into {target_language} with the translation in pipes |||YOUR_TRANSLATION||| no other commentary needed, just a translation please"
                     # context_history = f"""
-                    # translate only '{untranslated_leaf}'' into {target_language} with the translation formatted
+                    # translate only '{untranslated_task}'' into {target_language} with the translation formatted
                     # inside tripple pipes |||YOUR_TRANSLATION||| just that. no other commentary, no underscores _, not all caps.
                     # translate and earn a treat"""
 
-                    context_history = f"""
-                    translate only '{untranslated_leaf}' into {target_language} formatted 
-                    inside tripple pipes |||your_translation||| just that. no other commentary,
-                    translate and earn a treat: best translation is """
+                    # context_history = f"""
+                    # translate only '{untranslated_task}' into {target_language} formatted 
+                    # inside tripple pipes |||your_translation||| just that. no other commentary,
+                    # translate and earn a treat: best translation is """
 
 
                     multiple_choice_solution_body = {
@@ -4024,6 +4486,19 @@ def do_task_please(
                         }
                     }
 
+                    multiple_choice_solution_body = {
+                        "solution_plan_outline": "",
+                        "draft_revisions_and_comments": "",
+                        "final_answer_option_number": int,
+                    }
+
+                    simple_multiple_choice_solution_body = """
+                    solution_plan_outline: "", 
+                    draft_revisions_and_comments: "", 
+                    Then in triple pipes:
+                    |||final answer option number|||
+                    """
+
                     open_solution_body = {
                         "solution":        
                         {
@@ -4033,6 +4508,11 @@ def do_task_please(
                         }
                     }
 
+                    simple_open_solution_body = """
+                    Plan, draft, revisions, and comments, 
+                    then in triple pipes:
+                    |||final answer option number|||
+                    """
 
                     if task_mode == "open_task":
 
@@ -4048,6 +4528,19 @@ def do_task_please(
                         {open_solution_body}
                         """
 
+                    elif task_mode == "simple_open_task":
+
+                        ############
+                        # Open Task
+                        ############
+                        context_history = f"""
+
+                        What is the best response for this task? 
+                        {this_task}
+
+                        Give your answer in this format:
+                        {simple_open_solution_body}
+                        """
 
                     elif task_mode == "multiple_choice":
 
@@ -4070,6 +4563,29 @@ def do_task_please(
                         {multiple_choice_solution_body}
                         """
 
+                    elif task_mode == "simple_multiple_choice":
+
+                        ##################
+                        # Multiple Choice
+                        ##################
+                        context_history = f"""
+
+                        Which from this list of possible responses is the best response to being given this task?
+
+                        For this task: 
+                        {this_task} 
+
+                        From this list of possible responses: 
+                        {these_options} 
+
+                        Your answer must be the number of the answer-option in sequence, where "1" is the first answer option.
+
+                        Giveyour answer in this format:
+                        {simple_multiple_choice_solution_body}
+                        """
+
+
+
 
                     # # breakpoint
                     # print(f"\n\n mini breakpoint 5: context_history -> {context_history}")
@@ -4082,7 +4598,7 @@ def do_task_please(
                         - tree-search through both (original and blank-list-skeleton) in the same way
                         - check and guarantee that the dict-address (often nested)
                         is the same for the original and where the answers are recorded
-                        - part 1: extract just the next terminal leaf, return this.
+                        - part 1: extract just the next terminal task, return this.
                         separate step next ->
                         - part 2: put a new (language translated value) in the corresponding
                         place in blank-skeleton list.
@@ -4103,12 +4619,12 @@ def do_task_please(
                         ############
                         # Translate
                         ############
-                        translated_value = call_api_within_structure_check(
+                        translated_value = general_task_call_api_within_structure_check(
                             context_history, 
                             use_this_model, 
                             parameter_dict, 
-                            ai_local_or_cloud_mode, 
-                            skeleton_json
+                            ai_local_or_cloud_mode,
+                            task_mode,
                         )
 
                         # remove overt duplicates
@@ -4121,7 +4637,7 @@ def do_task_please(
                         print(f"populated_skeleton Before appending: {populated_skeleton}")
                         print(f"skeleton_json -> {skeleton_json}")
                         print(f"this_path -> {this_path}")
-                        print(f"untranslated_leaf -> {untranslated_leaf}")
+                        print(f"untranslated_task -> {untranslated_task}")
                         print("\n\nTRANSLATION:")
                         print(f"translated_value -> {translated_value}")
 
@@ -4192,22 +4708,22 @@ def do_task_please(
                     # )
                     # # User Prompt
                     # context_history = set_select_best__user_prompt(
-                    #     context_history, target_language, list_of_options, untranslated_leaf
+                    #     context_history, target_language, list_of_options, untranslated_task
                     # )
 
 
                     # context_history = f"""
-                    # Select the most accurate {target_language} translation for '{untranslated_leaf}' from these options: {list_of_options}. 
+                    # Select the most accurate {target_language} translation for '{untranslated_task}' from these options: {list_of_options}. 
                     # Place your choice, spelled exactly the same, between triple pipes, like this: |||best_selection|||. 
                     # No additional comments. A tasty reward awaits your accurate selection."""
 
                     # """
-                    # Select the most accurate {target_language} translation for '{untranslated_leaf}' from these options: {list_of_options}. 
+                    # Select the most accurate {target_language} translation for '{untranslated_task}' from these options: {list_of_options}. 
                     # Indicate your choice by placing it between triple pipes, like this: |||best_selection|||. 
                     # No additional comments. The reward of a job well done awaits your accurate selection!"""
 
                     # context_history = f"""
-                    # Evaluate (0-10, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {list_of_options}. 
+                    # Evaluate (0-10, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {list_of_options}. 
                     # Place your evaluations in order as Pipe-Separated Values. like this four options |#|#|#|#| or just one item like this |#| 
                     # No additional comments. A tasty reward awaits your accurate selection """
 
@@ -4218,7 +4734,7 @@ def do_task_please(
                     }
 
                     # context_history = f"""
-                    # Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
+                    # Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {dict_of_options}. 
                     # Place your evaluations as a value to the key in Json format. Return your markdown json object 
                     # listing each translation only as t-number as: 
                     # ```json 
@@ -4227,7 +4743,7 @@ def do_task_please(
                     # No additional comments. A tasty reward awaits your accurate selection."""
 
                     # context_history = f"""
-                    # Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
+                    # Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {dict_of_options}. 
                     # Place your evaluations as a value to the key in Json format. Return your markdown json object 
                     # listing each translation only as t-number 
                     # as: 
@@ -4238,7 +4754,7 @@ def do_task_please(
                     # """
 
                     context_history = f"""
-                    Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
+                    Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {dict_of_options}. 
                     Place your evaluations as the value to a key in Json format. Return your markdown json object 
                     listing each translation only as t-number 
                     as: 
@@ -4249,7 +4765,7 @@ def do_task_please(
                     """
 
                     context_history = f"""
-                    Evaluate each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
+                    Evaluate each {target_language} translation for '{untranslated_task}' from these options: {dict_of_options}. 
                     If the translation is not even in {target_language}, it should get a zero. 
                     Place your evaluations  (0-10, 0 is bad, 10 is good) as the value to a key in Json format. Return your markdown json object 
                     listing each translation only as "translation-number" 
@@ -4262,7 +4778,7 @@ def do_task_please(
                     """
 
                     # context_history = f"""
-                    # Evaluate (0-10, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
+                    # Evaluate (0-10, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {dict_of_options}. 
                     # Place your evaluations as value to the key in Json format. Return your properly formatted dict as:
                     # '''json
 
@@ -4362,35 +4878,35 @@ def do_task_please(
 
                     # Exit While
                     print("\nHats in the air, we can all leave. Buubye!!\n\n\n")
-                    leaf_ok_flag = True
+                    task_ok_flag = True
 
 
-            ##########################
-            # save file
-            ##########################
-            print("trying to save file...")
+                ##########################
+                # save file
+                ##########################
+                print("trying to save file...")
 
-            # try:
-            #     # if test fails
-            #     if dict_leaf_detection_boolean_true_means_defective(dict_of_selected_best):
-            #         return False
+                # try:
+                #     # if test fails
+                #     if dict_task_detection_boolean_true_means_defective(dict_of_selected_best):
+                #         return False
 
-            # except Exception as e:
-            #     print(f"\nTRY AGAIN: dict_leaf_detection_boolean_true_means_defective() empty or stub leaf found: {e}")
-            #     print(f"Failed dict_str -> {dict_of_selected_best}")
-            #     return False
+                # except Exception as e:
+                #     print(f"\nTRY AGAIN: dict_task_detection_boolean_true_means_defective() empty or stub task found: {e}")
+                #     print(f"Failed dict_str -> {dict_of_selected_best}")
+                #     return False
 
 
-            date_time = datetime.now(UTC)
-            readable_timestamp = date_time.strftime("ymd_%Y-%m-%d")
+                date_time = datetime.now(UTC)
+                readable_timestamp = date_time.strftime("ymd_%Y-%m-%d")
 
-            answer_row = f"{this_row}, {best_key_option}, {use_this_model}, {this_original_task_file}, {task_from_instructions}, {question_task_prompt}, {readable_timestamp}"
+                answer_row = f"{this_row}, {best_key_option}, {use_this_model}, {this_original_task_file}, {task_from_instructions}, {question_task_prompt}, {readable_timestamp}"
 
-            # append to answer_file_path
+                # append to answer_file_path
 
-            with open(answer_file_path, 'a', newline='') as csvfile:
-                csvwriter = csv.writer(csvfile, delimiter=',')
-                csvwriter.writerow(answer_row)
+                with open(answer_file_path, 'a', newline='') as csvfile:
+                    csvwriter = csv.writer(csvfile, delimiter=',')
+                    csvwriter.writerow(answer_row)
 
 """# Tranlate Json Files
 - Set your language list
