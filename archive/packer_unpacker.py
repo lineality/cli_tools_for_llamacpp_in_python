@@ -263,7 +263,7 @@ def dict_package_keys_generator(dict_list, key_quantity=3):
 
 import json
 import os
-from datetime import datetime
+from datetime import datetime, UTC
 
 def pack_unpack_python_objects(dict_list, key_list=None):
     """

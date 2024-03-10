@@ -336,7 +336,7 @@ def populate_skeleton_json_with_data(skeleton_json, source_data):
 """## save json utility"""
 
 import os
-from datetime import datetime
+from datetime import datetime, UTC
 import json  # Added missing import
 
 
@@ -395,7 +395,7 @@ def set_save_json_to_file(input_text, file_name, target_language, optional_tag="
     #     json.dump(data, file, indent=4)
 
     # make readable time
-    date_time = datetime.utcnow()
+    date_time = datetime.now(UTC)
     clean_timestamp = date_time.strftime("%Y%m%d%H%M%S%f")
 
     new_title = f"{target_language}_{clean_timestamp}_{file_name}"
