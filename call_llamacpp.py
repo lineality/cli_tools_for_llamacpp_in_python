@@ -1134,10 +1134,12 @@ translate only '{untranslated_leaf}' into {target_language} formatted
 inside tripple pipes |||your_translation||| just that. no other commentary,
 translate and earn a treat: best translation is """
 
+context_history = "translate only \'First Name\' into French formatted inside tripple pipes |||your_translation||| just that. no other commentary, translate and earn a treat: best translation is |||"
+
 ai_model = "deepcode"
 ai_model = "estopian"
 ai_model = "zephyr"
-# ai_model = "mistral-7b-instruct-v0.2.Q4_K_M"
+ai_model = "mistral-7b-instruct-v0.2.Q4_K_M"
 # ai_model = "gemma"
 
 configies_dict = {

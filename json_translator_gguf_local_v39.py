@@ -3498,7 +3498,7 @@ def mini_translate_json(
                     context_history = f"""
                     translate only '{untranslated_leaf}' into {target_language} formatted 
                     inside tripple pipes |||your_translation||| just that. no other commentary,
-                    translate and earn a treat: best translation is """
+                    translate and earn a treat: best translation is |||"""
 
                     # # breakpoint
                     # print(f"\n\n mini breakpoint 5: context_history -> {context_history}")
@@ -4347,10 +4347,6 @@ def answer_questions_please(
             #     print(f"Failed dict_str -> {dict_of_selected_best}")
             #     return False
 
-            # add value to json
-            save_json_to_file(
-                dict_of_selected_best, this_original_task_file, target_language, "selected_"
-            )
 
             date_time = datetime.now(UTC)
             readable_timestamp = date_time.strftime("ymd_%Y-%m-%d")
@@ -4457,12 +4453,12 @@ list_of_targeted_languages = [
     "Arabic",
 ]
 
-list_of_targeted_languages = ["German", "French"]
+list_of_targeted_languages = ["French", "German",]
 
 # list_of_targeted_languages = ["French"]
 
 number_of_preliminary_translations = 2
-number_of_ranked_votes = 2
+number_of_ranked_votes = 1
 
 mini_translate_json(
     list_of_targeted_languages,
