@@ -1,0 +1,12 @@
+{
+    "signUp": {
+        "FirstName": [
+            "Prénom",
+            "Vorname"
+        ],
+        "SignUp": [
+            "S'inscrire",
+            "Anmelden"
+        ]
+    }
+}

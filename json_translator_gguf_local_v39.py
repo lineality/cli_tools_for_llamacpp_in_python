@@ -2191,7 +2191,7 @@ def add_segment_to_absolute_base_path(additional_segment):
 
 
 # helper function
-def call_api_within_structure_check(context_history, use_this_model, parameter_dict, mode_locale, skeleton_json):
+def call_api_within_structure_check(context_history, use_this_model, parameter_dict, ai_local_or_cloud_mode, skeleton_json):
     retry_counter = 0
     json_ok_flag = False
 
@@ -2223,7 +2223,7 @@ def call_api_within_structure_check(context_history, use_this_model, parameter_d
             ########################
 
             # for off-line local mode
-            if mode_locale == "gguf":
+            if ai_local_or_cloud_mode == "gguf":
                 print("Started gguf")
 
                 # get model path name-end
@@ -2301,7 +2301,7 @@ def call_api_within_structure_check(context_history, use_this_model, parameter_d
 
 
 # helper function
-def number_call_api_within_structure_check(context_history, use_this_model, parameter_dict, mode_locale, skeleton_json):
+def number_call_api_within_structure_check(context_history, use_this_model, parameter_dict, ai_local_or_cloud_mode, skeleton_json):
     retry_counter = 0
     json_ok_flag = False
 
@@ -2333,7 +2333,7 @@ def number_call_api_within_structure_check(context_history, use_this_model, para
             ########################
 
             # for off-line local mode
-            if mode_locale == "gguf":
+            if ai_local_or_cloud_mode == "gguf":
                 print("Started gguf")
 
                 # get model path name-end
@@ -2412,7 +2412,7 @@ def number_call_api_within_structure_check(context_history, use_this_model, para
 
 # helper function
 def crawler_call_api_within_json_structure_check(
-    context_history, use_this_model, mode_locale, skeleton_json
+    context_history, use_this_model, ai_local_or_cloud_mode, skeleton_json
 ):
     retry_counter = 0
     json_ok_flag = False
@@ -2445,7 +2445,7 @@ def crawler_call_api_within_json_structure_check(
             ########################
 
             # for off-line local mode
-            if mode_locale == "gguf":
+            if ai_local_or_cloud_mode == "gguf":
                 print("Started gguf")
 
                 # get model path name-end
@@ -3065,7 +3065,7 @@ def replace_leaf_by_path(json_structure, path, new_value):
 # def translate_json(
 #     list_of_targeted_languages,
 #     use_this_model,
-#     mode_locale,
+#     ai_local_or_cloud_mode,
 #     number_of_preliminary_translations,
 # ):
 
@@ -3191,7 +3191,7 @@ def replace_leaf_by_path(json_structure, path, new_value):
 #                     # Translate
 #                     ############
 #                     translated_value_list = call_api_within_structure_check(
-#                         context_history, use_this_model, mode_locale, skeleton_json
+#                         context_history, use_this_model, ai_local_or_cloud_mode, skeleton_json
 #                     )
 
 #                     print(f"\nTranslated: translated_value_list: {translated_value_list}")
@@ -3244,7 +3244,7 @@ def replace_leaf_by_path(json_structure, path, new_value):
 #                 #################
 #                 #################
 #                 # selected_bestest_value = call_api_within_structure_check(
-#                 #     context_history, use_this_model, mode_locale, skeleton_json
+#                 #     context_history, use_this_model, ai_local_or_cloud_mode, skeleton_json
 #                 # )
 
 
@@ -3256,7 +3256,7 @@ def replace_leaf_by_path(json_structure, path, new_value):
 
 
 #                     selected_bestest_value = call_api_within_structure_check(
-#                         context_history, use_this_model, mode_locale, skeleton_json
+#                         context_history, use_this_model, ai_local_or_cloud_mode, skeleton_json
 #                     )
 
 #                     print(type(selected_bestest_value))
@@ -3372,7 +3372,7 @@ def filter_list_convert_to_int(input_list):
 def mini_translate_json(
     list_of_targeted_languages,
     use_this_model,
-    mode_locale,
+    ai_local_or_cloud_mode,
     number_of_preliminary_translations,
     number_of_ranked_votes,
     parameter_dict=None,
@@ -3536,7 +3536,7 @@ def mini_translate_json(
                             context_history, 
                             use_this_model, 
                             parameter_dict, 
-                            mode_locale, 
+                            ai_local_or_cloud_mode, 
                             skeleton_json
                         )
 
@@ -3744,7 +3744,7 @@ def mini_translate_json(
 
                             # get a list of votes and make sure it matches the list of candidates
                             list_of_votes = number_call_api_within_structure_check(
-                                context_history, use_this_model, parameter_dict, mode_locale, skeleton_json
+                                context_history, use_this_model, parameter_dict, ai_local_or_cloud_mode, skeleton_json
                             )
 
                             print(f"\n\nlist_of_votes -> {list_of_votes}")
@@ -3817,11 +3817,11 @@ def mini_translate_json(
 
 
 
-def answer_questions_please(
-    list_of_targeted_languages,
+def do_task_please(
+    task_mode,
     use_this_model,
-    mode_locale,
-    number_of_preliminary_translations,
+    ai_local_or_cloud_mode,
+    number_of_preliminary_drafts,
     number_of_ranked_votes,
     parameter_dict=None,
 ):
@@ -3862,7 +3862,7 @@ def answer_questions_please(
 
 
     ##################################
-    # answer_questions_please Factory
+    # do_task_please Factory
     ##################################
     """
     Maybe modified to only look at each question one at a time.
@@ -4015,35 +4015,68 @@ def answer_questions_please(
                     translate and earn a treat: best translation is """
 
 
-                    solution_body = {
+                    multiple_choice_solution_body = {
                         "solution":        
                         {
                             "solution_plan_outline": "",
                             "draft_revisions_and_comments": "",
-                            "final_answer": int,
+                            "final_answer_option_number": int,
                         }
                     }
 
-                    context_history = f"""
+                    open_solution_body = {
+                        "solution":        
+                        {
+                            "solution_plan_outline": "",
+                            "draft_revisions_and_comments": "",
+                            "final_answer": "",
+                        }
+                    }
 
-                    Determine the best answer for this question:
-                    {this_question}
-                    
-                    from among these answers:
-                    {answers}
-                    
-                    Your answer must be the number of the answer-option in sequence, where "1" is the first answer option.
-                    
-                    Giveyour answer in this format:
-                    {solution_body}
-                    """
+
+                    if task_mode == "open_task":
+
+                        ############
+                        # Open Task
+                        ############
+                        context_history = f"""
+
+                        What is the best response for this task? 
+                        {this_task}
+
+                        Give your answer in this format:
+                        {open_solution_body}
+                        """
+
+
+                    elif task_mode == "multiple_choice":
+
+                        ##################
+                        # Multiple Choice
+                        ##################
+                        context_history = f"""
+
+                        Which from this list of possible responses is the best response to being given this task?
+
+                        For this task: 
+                        {this_task} 
+
+                        From this list of possible responses: 
+                        {these_options} 
+
+                        Your answer must be the number of the answer-option in sequence, where "1" is the first answer option.
+
+                        Giveyour answer in this format:
+                        {multiple_choice_solution_body}
+                        """
+
 
                     # # breakpoint
                     # print(f"\n\n mini breakpoint 5: context_history -> {context_history}")
                     # input("breakpoint")
 
                     # making N translation-versions
-                    for i in range(number_of_preliminary_translations):
+                    for i in range(number_of_preliminary_drafts):
                         """
                         using both the populated skeleton and the original file:
                         - tree-search through both (original and blank-list-skeleton) in the same way
@@ -4074,7 +4107,7 @@ def answer_questions_please(
                             context_history, 
                             use_this_model, 
                             parameter_dict, 
-                            mode_locale, 
+                            ai_local_or_cloud_mode, 
                             skeleton_json
                         )
 
@@ -4280,7 +4313,7 @@ def answer_questions_please(
 
                             # get a list of votes and make sure it matches the list of candidates
                             list_of_votes = number_call_api_within_structure_check(
-                                context_history, use_this_model, parameter_dict, mode_locale, skeleton_json
+                                context_history, use_this_model, parameter_dict, ai_local_or_cloud_mode, skeleton_json
                             )
 
                             print(f"\n\nlist_of_votes -> {list_of_votes}")
@@ -4428,7 +4461,7 @@ parameter_dict = {
 
 
 
-mode_locale = "cloud_api"
+ai_local_or_cloud_mode = "cloud_api"
 
 """# Choices:"""
 
@@ -4439,7 +4472,7 @@ use_this_model = "mistral-7b-instruct"
 # use_this_model = "mistral-small"
 # use_this_model = "tinyllama"
 
-mode_locale = "gguf"
+ai_local_or_cloud_mode = "gguf"
 
 # list_of_targeted_languages = ["Italian", "Spanish", "German", "Czech", "Arabic", "Hindi", "Portuguese", "French"]
 
@@ -4457,14 +4490,14 @@ list_of_targeted_languages = ["French", "German",]
 
 # list_of_targeted_languages = ["French"]
 
-number_of_preliminary_translations = 2
+number_of_preliminary_drafts = 2
 number_of_ranked_votes = 1
 
 mini_translate_json(
     list_of_targeted_languages,
     use_this_model,
-    mode_locale,
-    number_of_preliminary_translations,
+    ai_local_or_cloud_mode,
+    number_of_preliminary_drafts,
     number_of_ranked_votes,
     parameter_dict,
 )
