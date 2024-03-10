@@ -234,15 +234,18 @@ def list_files_in_aitaskfiles_dir(file_type_list=None):
             # List all files in the current working directory
             files_in_cwd = os.listdir("ai_task_files/.")
         
-            # Filter the list to include only .json files
-            json_files = [file for file in files_in_cwd if file.endswith(this_file_type)]
+            # Filter the list to include only requested
+            task_files = [file for file in files_in_cwd if file.endswith(this_file_type)]
         
-            clipped_json_files = [item for item in json_files if not item.startswith('empty_')]
+            clipped_task_files = [item for item in task_files if not item.startswith('empty_')]
         
-            output_list.append(clipped_json_files)
+            output_list.append(clipped_task_files)
 
         # remove empty lists 
         output_list = [item for item in output_list if item]
+        
+        # flattened_list
+        output_list = [item for sublist in output_list for item in sublist]
         
         print(output_list)
         if not output_list:
@@ -406,7 +409,7 @@ def save_json_to_file(input_text, file_name, target_language, optional_tag=""):
     #     json.dump(data, file, indent=4)
 
     # make readable time
-    date_time = datetime.now(datetime.UTC)
+    date_time = datetime.now()
     clean_timestamp = date_time.strftime("%Y%m%d%H%M%S%f")
 
     new_title = f"{target_language}_{clean_timestamp}_{file_name}"
@@ -449,7 +452,7 @@ def set_save_json_to_file(input_text, file_name, target_language, optional_tag="
     #     json.dump(data, file, indent=4)
 
     # make readable time
-    date_time = datetime.now(UTC)
+    date_time = datetime.now()
     clean_timestamp = date_time.strftime("%Y%m%d%H%M%S%f")
 
     new_title = f"{target_language}_{clean_timestamp}_{file_name}"
@@ -3826,9 +3829,19 @@ def answer_questions_please(
     but still a dict or list of possible answers
     to rank later.
     
+    how to manage...writing answer each time to file....
+    
+    maybe keep a list of optional answers 
+    then for each question write answer to
+    the answer_(original_name)_model_name_(timestamp)_file 
+    
     
     """
 
+    ###
+    Make answers file pathway.
+    ###
+    
     # Example usage
     task_files_list = list_files_in_aitaskfiles_dir()
 
@@ -3839,20 +3852,20 @@ def answer_questions_please(
     # inspection
     print(f"Task files in folder -> {task_files_list}")
 
-    for this_original_json_file in task_files_list:
+    for this_original_task_file in task_files_list:
 
         # Load the original JSON file
-        original_data = load_json_file(this_original_json_file)
+        original_data = load_json_file(this_original_task_file)
 
         # Create a new JSON file with the deep empty structure
-        name_of_skeleton_saved_file = "empty_lists_" + "_" + this_original_json_file
+        name_of_skeleton_saved_file = "empty_lists_" + "_" + this_original_task_file
 
         skeleton_json = create_empty_json_file(
             original_data, name_of_skeleton_saved_file
         )
 
         name_of_EMPTY_dict_of_selected_best_saved_file = (
-            "empty_string_best_" + "_" + this_original_json_file
+            "empty_string_best_" + "_" + this_original_task_file
         )
         dict_of_selected_best = create_empty_selectbest_frame(
             original_data, name_of_EMPTY_dict_of_selected_best_saved_file

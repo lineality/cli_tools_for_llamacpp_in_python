@@ -206,7 +206,7 @@ def pack_unpack_python_objects(dict_list, key_list=None):
                 ###############
                 # make readable time
                 # from datetime import datetime, UTC
-                date_time = datetime.now(UTC)
+                date_time = datetime.now()
                 clean_timestamp = date_time.strftime('%Y%m%d%H%M%S%f')
 
                 filename = f"dict_{i}_{clean_timestamp}.txt"
