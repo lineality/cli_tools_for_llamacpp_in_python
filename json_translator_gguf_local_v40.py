@@ -3884,8 +3884,8 @@ def mini_translate_json(
     # Translation Factory
     ######################
 
-    # Example usage
-    json_files_list = list_files_in_aitaskfiles_dir()
+    # json .... because focusing on json?
+    json_files_list = list_files_in_aitaskfiles_dir(".json")
 
     if not json_files_list:
         print("Error: You missed a step, No Json files were provided.")
@@ -4302,6 +4302,7 @@ def do_task_please(
     task_mode,
     list_of_models,
     ai_local_or_cloud_mode,
+    file_type_list,
     number_of_preliminary_drafts,
     number_of_ranked_votes,
     index_of_task=0,
@@ -4363,7 +4364,7 @@ def do_task_please(
 
 
     # Example usage
-    task_files_list = list_files_in_aitaskfiles_dir()
+    task_files_list = list_files_in_aitaskfiles_dir(file_type_list)
 
     if not task_files_list:
         print("Error: You missed a step, No task files were provided.")
@@ -4585,11 +4586,13 @@ def do_task_please(
                         """
 
 
-
+                    old_history = context_history
 
                     # # breakpoint
                     # print(f"\n\n mini breakpoint 5: context_history -> {context_history}")
                     # input("breakpoint")
+
+                    list_of_options = []
 
                     # making N translation-versions
                     for i in range(number_of_preliminary_drafts):
@@ -4619,7 +4622,7 @@ def do_task_please(
                         ############
                         # Translate
                         ############
-                        translated_value = general_task_call_api_within_structure_check(
+                        task_response_string = general_task_call_api_within_structure_check(
                             context_history, 
                             use_this_model, 
                             parameter_dict, 
@@ -4627,29 +4630,20 @@ def do_task_please(
                             task_mode,
                         )
 
-                        # remove overt duplicates
-                        # Convert list to set to remove duplicates
-                        unique_set = set(translated_value)
-                        # Convert set back to list
-                        translated_value = list(unique_set)
+                        # # remove overt duplicates
+                        # # Convert list to set to remove duplicates
+                        # unique_set = set(task_response_string)
+                        # # Convert set back to list
+                        # task_response_string = list(unique_set)
 
-                        # add-insert value to json
-                        print(f"populated_skeleton Before appending: {populated_skeleton}")
-                        print(f"skeleton_json -> {skeleton_json}")
-                        print(f"this_path -> {this_path}")
-                        print(f"untranslated_task -> {untranslated_task}")
-                        print("\n\nTRANSLATION:")
-                        print(f"translated_value -> {translated_value}")
 
-                        # adds to dict IF not already there:
-                        insert_string_value_by_path(
-                            populated_skeleton, 
-                            this_path, 
-                            translated_value,
-                        )
+                        print(f"task_response_string -> {task_response_string}")
+                        print(f"type task_response_string -> {type(task_response_string)}")
 
-                        print(f"populated_skeleton After appending: {populated_skeleton}")
+                        task_response_string = str_to_int_or_none(task_response_string)
 
+                        if task_response_string:
+                            list_of_options.append(int(task_response_string))
 
                     #####################################################
                     # Select Top Top Goodest Translation Star-Good-Prime
@@ -4663,14 +4657,9 @@ def do_task_please(
                     # print(f"\n\n breakpoint 5: populated_skeleton -> {populated_skeleton}")
                     # # input("breakpoint") 
 
-                    remove_duplicates_from_terminal_list(populated_skeleton, this_path)
-
-                    # set prompts to select best translation
-                    list_of_options = extract_value_by_path(populated_skeleton, this_path)
-
-                    # # Combine into one list of strings using list comprehension
-                    # list_of_options = [item for sublist in list_of_options_nested for item in sublist]
-                    # list_of_options = list_of_options_nested
+                    # Combine into one list of strings using list comprehension
+                    set_list_of_options = set(list_of_options)
+                    list_of_options = list(set_list_of_options)
 
                     # turn list of options int dict
                     dict_of_options = {option: "score_here" for option in list_of_options}
@@ -4753,27 +4742,26 @@ def do_task_please(
                     # One key-value pair per translation (one key, one value -> "translation-1": "score_here", not nested). No additional comments. A tasty reward awaits your accurate selection.
                     # """
 
-                    context_history = f"""
-                    Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {dict_of_options}. 
-                    Place your evaluations as the value to a key in Json format. Return your markdown json object 
-                    listing each translation only as t-number 
-                    as: 
-                    ```json 
-                    {answer_form} 
-                    ```
-                    Just fill in the score, that's all. One key-value pair per translation (one generic key, one value which is your score -> "translation-1": "score_here", not nested). No additional comments. A tasty reward awaits your accurate selection.
-                    """
+                    # context_history = f"""
+                    # Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {dict_of_options}. 
+                    # Place your evaluations as the value to a key in Json format. Return your markdown json object 
+                    # listing each translation only as t-number 
+                    # as: 
+                    # ```json 
+                    # {answer_form} 
+                    # ```
+                    # Just fill in the score, that's all. One key-value pair per translation (one generic key, one value which is your score -> "translation-1": "score_here", not nested). No additional comments. A tasty reward awaits your accurate selection.
+                    # """
 
                     context_history = f"""
-                    Evaluate each {target_language} translation for '{untranslated_task}' from these options: {dict_of_options}. 
-                    If the translation is not even in {target_language}, it should get a zero. 
+                    Evaluate each solution for this task'{old_history}' from these options: {dict_of_options}. 
                     Place your evaluations  (0-10, 0 is bad, 10 is good) as the value to a key in Json format. Return your markdown json object 
-                    listing each translation only as "translation-number" 
+                    listing each option only as "option-number" 
                     as: 
                     ```json 
                     {answer_form} 
                     ```
-                    Just fill in the score, that's all. One key-value pair per translation (one generic key, one value which is your score -> "translation-1": "score_here", not nested). 
+                    Just fill in the score, that's all. One key-value pair per option (one generic key, one value which is your score -> "option-1": "score_here", not nested). 
                     No additional comments. A tasty reward awaits your accurate selection. 
                     """
 
@@ -4829,7 +4817,7 @@ def do_task_please(
 
                             # get a list of votes and make sure it matches the list of candidates
                             list_of_votes = number_call_api_within_structure_check(
-                                context_history, use_this_model, parameter_dict, ai_local_or_cloud_mode, skeleton_json
+                                context_history, use_this_model, parameter_dict, ai_local_or_cloud_mode
                             )
 
                             print(f"\n\nlist_of_votes -> {list_of_votes}")
@@ -4868,13 +4856,17 @@ def do_task_please(
 
                     print(f"best_key_option -> {best_key_option}")
 
+                    date_time = datetime.now(UTC)
+                    readable_timestamp = date_time.strftime("ymd_%Y-%m-%d")
 
-                    # add value to json
-                    insert_int_value_by_path(
-                        dict_of_selected_best, this_path, best_key_option
-                    )
+                    answer_row = f"{this_row}, {best_key_option}, {use_this_model}, {this_original_task_file}, {task_from_instructions}, {question_task_prompt}, {readable_timestamp}"
 
-                    print(f"dict_of_selected_best -> {dict_of_selected_best}")
+                    # append to answer_file_path
+
+                    with open(answer_file_path, 'a', newline='') as csvfile:
+                        csvwriter = csv.writer(csvfile, delimiter=',')
+                        csvwriter.writerow(answer_row)
+
 
                     # Exit While
                     print("\nHats in the air, we can all leave. Buubye!!\n\n\n")
@@ -4884,7 +4876,7 @@ def do_task_please(
                 ##########################
                 # save file
                 ##########################
-                print("trying to save file...")
+                print("All done? Anyone here...hello? What was that? Is someone")
 
                 # try:
                 #     # if test fails
@@ -4897,16 +4889,6 @@ def do_task_please(
                 #     return False
 
 
-                date_time = datetime.now(UTC)
-                readable_timestamp = date_time.strftime("ymd_%Y-%m-%d")
-
-                answer_row = f"{this_row}, {best_key_option}, {use_this_model}, {this_original_task_file}, {task_from_instructions}, {question_task_prompt}, {readable_timestamp}"
-
-                # append to answer_file_path
-
-                with open(answer_file_path, 'a', newline='') as csvfile:
-                    csvwriter = csv.writer(csvfile, delimiter=',')
-                    csvwriter.writerow(answer_row)
 
 """# Tranlate Json Files
 - Set your language list
@@ -5006,6 +4988,7 @@ list_of_targeted_languages = ["French", "German",]
 
 # list_of_targeted_languages = ["French"]
 
+
 number_of_preliminary_drafts = 2
 number_of_ranked_votes = 1
 
@@ -5017,10 +5000,6 @@ mini_translate_json(
     number_of_ranked_votes,
     parameter_dict,
 )
-
-
-
-
 
 # #############################
 # # Use model select + history
@@ -5035,3 +5014,25 @@ mini_translate_json(
 # print(response[0])
 # print(response[1])
 # print(response[2])
+
+
+
+task_mode = "csv"
+list_of_models = ["tiny", "mistral-7b-instruct"]
+
+
+number_of_preliminary_drafts = 2
+number_of_ranked_votes = 1
+file_type_list = ".csv"
+
+do_task_please(
+    task_mode,
+    list_of_models,
+    ai_local_or_cloud_mode,
+    file_type_list,
+    number_of_preliminary_drafts,
+    number_of_ranked_votes,
+    index_of_task=0,
+    index_of_options=1,
+    parameter_dict=parameter_dict,
+)
