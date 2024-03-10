@@ -1070,12 +1070,6 @@ parameter_dict = {
 }
 
 
-configies_dict = {
-    'model_path_base': add_segment_to_absolute_base_path("jan/models/"),
-    'model_nickname': "mistral-7b-instruct-v0.2.Q4_K_M",
-    'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
-}
-
 
 phrase = 'cat'
 language = 'spanish'
@@ -1099,16 +1093,11 @@ target_language = "German"
 untranslated_leaf = "your account name"
 dict_of_options = {"your_translation": "score_here", 
                    "Dein Benutzername": "score_here"}
-                   
+
 # dict_of_options = {
 #     "Ihr_Kontenname": "score_here",
 #     }     
 
-answer_form = {
-    "t-1": "score_here", 
-    "t-2": "score_here",
-    "t-3": "score_here"
-}
 answer_form = {
     "translation-1": "score_here", 
     "translation-2": "score_here",
@@ -1117,10 +1106,7 @@ answer_form = {
 
 """
  Evaluate (0-10, 10 is great) each German translation for 'your account name' from these options: {'your_translation': 'score_here', 'Dein Benutzername': 'score_here'}. Place your evaluations as a value to the key in Json format. Return your properly formatted dict listing each translation only as t-number as: '''json {'t-1': 'score_here', 't-2': 'score_here', 't-3': 'score_here'} ''' No additional comments. A tasty reward awaits your accurate selection.
-
 """
-
-
 
 context_history = f"""
 Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
@@ -1143,9 +1129,24 @@ as:
 Just fill in the score, that's all. One key-value pair per translation (one generic key, one value which is your score -> "translation-1": "score_here", not nested). No additional comments. A tasty reward awaits your accurate selection.
 """
 
+context_history = f"""
+translate only '{untranslated_leaf}' into {target_language} formatted 
+inside tripple pipes |||your_translation||| just that. no other commentary,
+translate and earn a treat: best translation is """
+
+ai_model = "deepcode"
+ai_model = "estopian"
+ai_model = "zephyr"
+# ai_model = "mistral-7b-instruct-v0.2.Q4_K_M"
+# ai_model = "gemma"
+
+configies_dict = {
+    'model_path_base': add_segment_to_absolute_base_path("jan/models/"),
+    'model_nickname': ai_model,
+    'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
+}
 
 response = mini_gguf_api(context_history, parameter_dict, configies_dict)
-
 print(response[0])
 print(response[1])
 print(response[2])
