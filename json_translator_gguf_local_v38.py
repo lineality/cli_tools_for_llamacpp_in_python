@@ -3275,6 +3275,7 @@ def mini_translate_json(
     use_this_model,
     mode_locale,
     number_of_preliminary_translations,
+    number_of_ranked_votes,
     parameter_dict=None,
 ):
 
@@ -3512,7 +3513,7 @@ def mini_translate_json(
                     # System Instructions
                     #######################
                     #######################
-                    
+
                     # context_history = set_select_best__system_prompt(
                     #     context_history, target_language
                     # )
@@ -3623,7 +3624,7 @@ def mini_translate_json(
 
                     while_counter = 0
 
-                    for i in range(3):
+                    for i in range(number_of_ranked_votes):
 
                         print(f"while_counter -> {while_counter}")
 
@@ -3690,6 +3691,10 @@ def mini_translate_json(
                     )
 
                     print(f"dict_of_selected_best -> {dict_of_selected_best}")
+
+                    # Exit While
+                    print("Hats in the air, we can all leave. Bubye!!")
+                    leaf_ok_flag = True
 
             ##########################
             # per language: save file
@@ -3811,12 +3816,14 @@ list_of_targeted_languages = ["German", "French"]
 # list_of_targeted_languages = ["French"]
 
 number_of_preliminary_translations = 2
+number_of_ranked_votes = 2
 
 mini_translate_json(
     list_of_targeted_languages,
     use_this_model,
     mode_locale,
     number_of_preliminary_translations,
+    number_of_ranked_votes,
     parameter_dict,
 )
 
