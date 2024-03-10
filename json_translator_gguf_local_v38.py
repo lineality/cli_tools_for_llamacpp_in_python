@@ -190,19 +190,73 @@ mistral_api_key = os.getenv("mistral_api_key")
 
 
 # Helper Function
-def list_json_files_in_cwd():
+def list_files_in_aitaskfiles_dir(file_type_list=None):
     """
     Returns a list of .json files in the current working directory.
     """
-    # List all files in the current working directory
-    files_in_cwd = os.listdir(".")
+    file_path = "ai_task_files"
+    output_list = None
+    
+    # make path absolute
+    file_path = os.path.abspath(file_path)
+    
+    # Check if the directory exists
+    if not os.path.exists(file_path):
 
-    # Filter the list to include only .json files
-    json_files = [file for file in files_in_cwd if file.endswith(".json")]
+        # If it does not exist, create it
+        # Ensure the directory exists
+        try:
+            os.makedirs(
+                file_path, exist_ok=True
+            )  # Ensure the directory is created if it does not exist
+        except Exception as e:
+            print(f"Error creating directory {file_path}: {e}")
+            return  # Exit the function if directory creation fails
 
-    clipped_json_files = [item for item in json_files if not item.startswith('empty_')]
+    # make path absolute, belts and suspenders
+    file_path = os.path.abspath(file_path)
+    
+    try:
+        if file_type_list is None:
+            # default to:
+            file_type_list = [".json",".csv"]
+            print("No files types specified, defaulting to: .json and .csv")
 
-    return clipped_json_files
+
+        output_list = []
+    
+        # if not a list already, then make it a list
+        if  isinstance(file_type_list, str):
+            file_type_list = [file_type_list]
+        
+        for this_file_type in file_type_list:
+    
+            # List all files in the current working directory
+            files_in_cwd = os.listdir("ai_task_files/.")
+        
+            # Filter the list to include only .json files
+            json_files = [file for file in files_in_cwd if file.endswith(this_file_type)]
+        
+            clipped_json_files = [item for item in json_files if not item.startswith('empty_')]
+        
+            output_list.append(clipped_json_files)
+
+        # remove empty lists 
+        output_list = [item for item in output_list if item]
+        
+        print(output_list)
+        if not output_list:
+            message = f"\n\nExit Dungeon: Your file list in /{file_path}/ is empty, add a file and try!\n\n"
+            sys.exit(message)
+        
+        # remove duplicates
+        output_list_set = set(output_list)
+        output_list = list(output_list_set)
+        
+        return output_list
+
+    except Exception as e:
+        raise e
 
 
 """# Process Json
@@ -2975,7 +3029,7 @@ def replace_leaf_by_path(json_structure, path, new_value):
 #     ######################
 
 #     # Example usage
-#     json_files_list = list_json_files_in_cwd()
+#     json_files_list = list_files_in_aitaskfiles_dir()
 
 #     if not json_files_list:
 #         print("Error: You missed a step, No Json files were provided.")
@@ -3305,7 +3359,7 @@ def mini_translate_json(
     ######################
 
     # Example usage
-    json_files_list = list_json_files_in_cwd()
+    json_files_list = list_files_in_aitaskfiles_dir()
 
     if not json_files_list:
         print("Error: You missed a step, No Json files were provided.")
@@ -3400,6 +3454,500 @@ def mini_translate_json(
                     translate only '{untranslated_leaf}' into {target_language} formatted 
                     inside tripple pipes |||your_translation||| just that. no other commentary,
                     translate and earn a treat: best translation is """
+
+                    # # breakpoint
+                    # print(f"\n\n mini breakpoint 5: context_history -> {context_history}")
+                    # input("breakpoint")
+
+                    # making N translation-versions
+                    for i in range(number_of_preliminary_translations):
+                        """
+                        using both the populated skeleton and the original file:
+                        - tree-search through both (original and blank-list-skeleton) in the same way
+                        - check and guarantee that the dict-address (often nested)
+                        is the same for the original and where the answers are recorded
+                        - part 1: extract just the next terminal leaf, return this.
+                        separate step next ->
+                        - part 2: put a new (language translated value) in the corresponding
+                        place in blank-skeleton list.
+                        """
+                        """
+                        ####################
+                        # Crawler functions
+                        ####################
+
+                        1. make list of paths   generate_paths(json_object)
+                        2. extrac path value    extract_value_by_path(original_data, this_path)
+                        (translate)
+                        3. add to list          insert_string_value_by_path(json_structure, path, new_value)
+                        4. write final value    insert_int_value_by_path(skeleton_json, paths_list, translated_values)
+
+                        """
+
+                        ############
+                        # Translate
+                        ############
+                        translated_value = call_api_within_structure_check(
+                            context_history, 
+                            use_this_model, 
+                            parameter_dict, 
+                            mode_locale, 
+                            skeleton_json
+                        )
+
+                        # remove overt duplicates
+                        # Convert list to set to remove duplicates
+                        unique_set = set(translated_value)
+                        # Convert set back to list
+                        translated_value = list(unique_set)
+
+                        # add-insert value to json
+                        print(f"populated_skeleton Before appending: {populated_skeleton}")
+                        print(f"skeleton_json -> {skeleton_json}")
+                        print(f"this_path -> {this_path}")
+                        print(f"untranslated_leaf -> {untranslated_leaf}")
+                        print("\n\nTRANSLATION:")
+                        print(f"translated_value -> {translated_value}")
+
+                        # adds to dict IF not already there:
+                        insert_string_value_by_path(
+                            populated_skeleton, 
+                            this_path, 
+                            translated_value,
+                        )
+
+                        print(f"populated_skeleton After appending: {populated_skeleton}")
+
+
+                    #####################################################
+                    # Select Top Top Goodest Translation Star-Good-Prime
+                    #####################################################
+                    set_save_json_to_file(
+                        populated_skeleton,
+                        this_original_json_file,
+                        target_language,
+                        "set_of_translations_",
+                    )
+
+                    # reset context history for new 'conversation' about selection
+                    context_history = []
+
+                    print("\n\n\nSelect Top Top Goodest Translation Star-Good-Prime")
+                    # # inspection breakpoint
+                    # print(f"\n\n breakpoint 5: populated_skeleton -> {populated_skeleton}")
+                    # # input("breakpoint") 
+
+                    remove_duplicates_from_terminal_list(populated_skeleton, this_path)
+
+                    # set prompts to select best translation
+                    list_of_options = extract_value_by_path(populated_skeleton, this_path)
+
+                    # # Combine into one list of strings using list comprehension
+                    # list_of_options = [item for sublist in list_of_options_nested for item in sublist]
+                    # list_of_options = list_of_options_nested
+
+                    # turn list of options int dict
+                    dict_of_options = {option: "score_here" for option in list_of_options}
+
+                    # turn list of options int dict
+                    list_dict_of_options = {option: [] for option in list_of_options}
+
+
+                    print(
+                        f"""
+                    mini_translate_json() Select Top Top
+                    list_of_options        -> {list_of_options}
+                    dict_of_options        -> {dict_of_options}
+                    list_dict_of_options   -> {list_dict_of_options}
+                    """
+                    )
+
+                    #######################
+                    #######################
+                    # System Instructions
+                    #######################
+                    #######################
+
+                    # context_history = set_select_best__system_prompt(
+                    #     context_history, target_language
+                    # )
+                    # # User Prompt
+                    # context_history = set_select_best__user_prompt(
+                    #     context_history, target_language, list_of_options, untranslated_leaf
+                    # )
+
+
+                    # context_history = f"""
+                    # Select the most accurate {target_language} translation for '{untranslated_leaf}' from these options: {list_of_options}. 
+                    # Place your choice, spelled exactly the same, between triple pipes, like this: |||best_selection|||. 
+                    # No additional comments. A tasty reward awaits your accurate selection."""
+
+                    # """
+                    # Select the most accurate {target_language} translation for '{untranslated_leaf}' from these options: {list_of_options}. 
+                    # Indicate your choice by placing it between triple pipes, like this: |||best_selection|||. 
+                    # No additional comments. The reward of a job well done awaits your accurate selection!"""
+
+                    # context_history = f"""
+                    # Evaluate (0-10, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {list_of_options}. 
+                    # Place your evaluations in order as Pipe-Separated Values. like this four options |#|#|#|#| or just one item like this |#| 
+                    # No additional comments. A tasty reward awaits your accurate selection """
+
+
+                    answer_form = {
+                        "t-1": "score_here", 
+                        "t-2": "score_here",
+                        "t-3": "score_here"
+                    }
+
+                    answer_form = {
+                        "translation-1": "score_here", 
+                        "translation-2": "score_here",
+                        "translation-3": "score_here"
+                    }
+
+                    # context_history = f"""
+                    # Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
+                    # Place your evaluations as a value to the key in Json format. Return your markdown json object 
+                    # listing each translation only as t-number as: 
+                    # ```json 
+                    # {answer_form} 
+                    # ``` 
+                    # No additional comments. A tasty reward awaits your accurate selection."""
+
+                    # context_history = f"""
+                    # Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
+                    # Place your evaluations as a value to the key in Json format. Return your markdown json object 
+                    # listing each translation only as t-number 
+                    # as: 
+                    # ```json 
+                    # {answer_form} 
+                    # ```
+                    # One key-value pair per translation (one key, one value -> "translation-1": "score_here", not nested). No additional comments. A tasty reward awaits your accurate selection.
+                    # """
+
+                    context_history = f"""
+                    Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
+                    Place your evaluations as the value to a key in Json format. Return your markdown json object 
+                    listing each translation only as t-number 
+                    as: 
+                    ```json 
+                    {answer_form} 
+                    ```
+                    Just fill in the score, that's all. One key-value pair per translation (one generic key, one value which is your score -> "translation-1": "score_here", not nested). No additional comments. A tasty reward awaits your accurate selection.
+                    """
+
+                    context_history = f"""
+                    Evaluate each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
+                    If the translation is not even in {target_language}, it should get a zero. 
+                    Place your evaluations  (0-10, 0 is bad, 10 is good) as the value to a key in Json format. Return your markdown json object 
+                    listing each translation only as "translation-number" 
+                    as: 
+                    ```json 
+                    {answer_form} 
+                    ```
+                    Just fill in the score, that's all. One key-value pair per translation (one generic key, one value which is your score -> "translation-1": "score_here", not nested). 
+                    No additional comments. A tasty reward awaits your accurate selection. 
+                    """
+
+                    # context_history = f"""
+                    # Evaluate (0-10, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {dict_of_options}. 
+                    # Place your evaluations as value to the key in Json format. Return your properly formatted dict as:
+                    # '''json
+
+                    # ''' 
+                    # No additional comments. A tasty reward awaits your accurate selection."""
+
+
+                    # # breakpoint
+                    # print(f"\n\n context_history -> {context_history}")
+                    # input("breakpoint")
+
+                    ###################
+                    ###################
+                    # Select Bestest
+                    # By ranked choice
+                    ###################
+                    ###################
+
+
+
+                    # turn list of options int dict
+                    dict_of_options = {option: None for option in list_of_options}
+                    # get highest ranked item:
+                    best_key_option = None
+
+                    while_counter = 0
+
+                    for i in range(number_of_ranked_votes):
+
+                        print(f"while_counter -> {while_counter}")
+
+                        vote_check_ok = False
+
+
+                        while not vote_check_ok:
+                            """
+                            TODO if a different function rank_vote_call_api_within_structure_check()
+                            you should be able to filter everything except numbers out of the answer
+
+                            also...
+                            1. any complete duplicates can be filtered out...
+                            2. any non-numbers filtered out
+                            """
+                            print(f"while_counter -> {while_counter}")
+                            print("number_call_api_within_structure_check")
+
+                            # get a list of votes and make sure it matches the list of candidates
+                            list_of_votes = number_call_api_within_structure_check(
+                                context_history, use_this_model, parameter_dict, mode_locale, skeleton_json
+                            )
+
+                            print(f"\n\nlist_of_votes -> {list_of_votes}")
+                            print(f"type list_of_votes -> {type(list_of_votes)}")
+
+                            # filter out words and make type int
+                            list_of_votes = filter_list_convert_to_int(list_of_votes)
+
+                            print(f"list_of_votes -> {list_of_votes}")
+                            print(f"list_of_options -> {list_of_options}")
+                            print(f"type list_of_votes -> {type(list_of_votes)}\n\n")
+
+                            print(f"list_dict_of_options -> {list_dict_of_options}")
+
+                            if list_of_votes:
+
+                                # if there is one vote per candidate, list each candidates votes
+                                if len(list_of_votes) == len(list_of_options):
+                                    add_ranks_votes_to_candidate(list_of_votes, list_dict_of_options)
+
+                                    print(f"new list_dict_of_options -> {list_dict_of_options}")
+
+                                    # exit loop
+                                    vote_check_ok = True
+
+                                else:  # if len of list is wrong
+                                    while_counter += 1
+                                    print("len of list is wrong")
+
+                            else:  # if no list at all!
+                                while_counter += 1
+                                print("no list at all!")
+
+                    # tally the ranked votes and pick the winner
+                    best_key_option = extract_top_rank(list_dict_of_options)
+
+                    print(f"best_key_option -> {best_key_option}")
+
+
+                    # add value to json
+                    insert_int_value_by_path(
+                        dict_of_selected_best, this_path, best_key_option
+                    )
+
+                    print(f"dict_of_selected_best -> {dict_of_selected_best}")
+
+                    # Exit While
+                    print("\nHats in the air, we can all leave. Buubye!!\n\n\n")
+                    leaf_ok_flag = True
+
+            ##########################
+            # per language: save file
+            ##########################
+            print("trying to save file...")
+
+            # try:
+            #     # if test fails
+            #     if dict_leaf_detection_boolean_true_means_defective(dict_of_selected_best):
+            #         return False
+
+            # except Exception as e:
+            #     print(f"\nTRY AGAIN: dict_leaf_detection_boolean_true_means_defective() empty or stub leaf found: {e}")
+            #     print(f"Failed dict_str -> {dict_of_selected_best}")
+            #     return False
+
+            # add value to json
+            save_json_to_file(
+                dict_of_selected_best, this_original_json_file, target_language, "selected_"
+            )
+
+
+
+def answer_questions_please(
+    list_of_targeted_languages,
+    use_this_model,
+    mode_locale,
+    number_of_preliminary_translations,
+    number_of_ranked_votes,
+    parameter_dict=None,
+):
+
+    """
+    Output format notes:
+    
+    "solution":
+        {
+            "solution_plan_outline":
+            "draft_revisions_and_comments":
+            "final_answer":
+        }
+    
+        
+    """
+    
+    
+    # set parameters to defaults if none are given
+    if not parameter_dict:
+        #######################
+        # Tune Your Paramaters
+        #######################
+        parameter_dict = {
+            "--temp": 0.8,  # (default value is 0.8)
+            "--top-k": 40,  # (selection among N most probable. default: 40)
+            "--top-p": 0.9,  # (probability above threshold P. default: 0.9)
+            "--min-p": 0.05,  # (minimum probability threshold. default: 0.05)
+            "--seed": -1,  # seed, =1 is random seed
+            "--tfs": 1,  # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
+            "--threads": 8,  # (~ set to number of physical CPU cores)
+            "--typical": 1,  # (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
+            "--mirostat": 2,  # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
+            "--mirostat-lr": 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
+            "--mirostat-ent": 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
+            "--ctx-size": 500,  # Sets the size of the prompt context
+        }
+
+
+    ######################
+    # Translation Factory
+    ######################
+    """
+    Maybe modified to only look at each question one at a time.
+    e.g. no overall multi-item dictionary
+    
+    but still a dict or list of possible answers
+    to rank later.
+    
+    
+    """
+
+    # Example usage
+    task_files_list = list_files_in_aitaskfiles_dir()
+
+    if not task_files_list:
+        print("Error: You missed a step, No task files were provided.")
+        raise "No Json files were provided."
+
+    # inspection
+    print(f"Task files in folder -> {task_files_list}")
+
+    for this_original_json_file in task_files_list:
+
+        # Load the original JSON file
+        original_data = load_json_file(this_original_json_file)
+
+        # Create a new JSON file with the deep empty structure
+        name_of_skeleton_saved_file = "empty_lists_" + "_" + this_original_json_file
+
+        skeleton_json = create_empty_json_file(
+            original_data, name_of_skeleton_saved_file
+        )
+
+        name_of_EMPTY_dict_of_selected_best_saved_file = (
+            "empty_string_best_" + "_" + this_original_json_file
+        )
+        dict_of_selected_best = create_empty_selectbest_frame(
+            original_data, name_of_EMPTY_dict_of_selected_best_saved_file
+        )
+
+
+        #########################################
+        # Crawler: Make preliminary Translations
+        #########################################
+
+        paths_list = generate_paths(original_data)
+        check_paths_list = generate_paths(skeleton_json)
+        dict_of_selected_best_paths_list = generate_paths(dict_of_selected_best)
+
+        print(
+            f"""
+        mini_translate_json()
+        Starting this file: 
+        this_original_json_file      -> {this_original_json_file}
+        paths_list                   -> {paths_list}
+        check_paths_list             -> {check_paths_list}
+        dict_of_selected_best_paths_list -> {dict_of_selected_best_paths_list}
+        """
+        )
+
+        # # breakpoint
+        # input("breakpoint")
+
+        # Sanity check
+        if paths_list != dict_of_selected_best_paths_list:
+            error_message = "Error: Path lists between the original JSON and its skeleton do not match."
+            print(error_message)
+            raise ValueError(error_message)
+
+        # for this language
+        for target_language in list_of_targeted_languages:
+
+            # make a blank frame of lists for the translations
+            # make a copy!
+            populated_skeleton = skeleton_json.copy()
+            print(f"\n\n\nInitial populated_skeleton -> {populated_skeleton}\n\n\n")
+
+            # for this leaf
+            for this_path in paths_list:
+
+                leaf_ok_flag = False
+                leaf_fail_counter = 0
+
+                while not leaf_ok_flag:
+
+
+                    if leaf_fail_counter > 10:
+                        raise f"leaf_fail_counter > 10 -> {leaf_fail_counter}"
+
+                    untranslated_leaf = extract_string_value_by_path(original_data, this_path)
+
+                    # # breakpoint
+                    # print(f"\n\n breakpoint 5: untranslated_leaf -> {untranslated_leaf}")
+                    # input("breakpoint")
+
+                    # make empty conversation
+                    # reset context history for new 'conversation' about translation
+                    # context_history = f"translate '{untranslated_leaf}'' into {target_language} with the translation in pipes |||YOUR_TRANSLATION||| no other commentary needed, just a translation please"
+                    # context_history = f"""
+                    # translate only '{untranslated_leaf}'' into {target_language} with the translation formatted
+                    # inside tripple pipes |||YOUR_TRANSLATION||| just that. no other commentary, no underscores _, not all caps.
+                    # translate and earn a treat"""
+
+                    context_history = f"""
+                    translate only '{untranslated_leaf}' into {target_language} formatted 
+                    inside tripple pipes |||your_translation||| just that. no other commentary,
+                    translate and earn a treat: best translation is """
+                    
+                    
+                    solution_body = {"solution":
+                            {
+                                "solution_plan_outline": "",
+                                "draft_revisions_and_comments": "",
+                                "final_answer": int,
+                            }
+                        }
+                    
+                    context_history = f"""
+                    
+                    Determine the best answer for this question:
+                    {this_question}
+                    
+                    from among these answers:
+                    {answers}
+                    
+                    Your answer must be the number of the answer-option in sequence, where "1" is the first answer option.
+                    
+                    Giveyour answer in this format:
+                    {solution_body}
+                    """
 
                     # # breakpoint
                     # print(f"\n\n mini breakpoint 5: context_history -> {context_history}")
