@@ -176,7 +176,7 @@ six parameters
 # from dotenv import load_dotenv
 import os
 import time
-
+import csv
 
 """# make a list of json files"""
 # import openai
@@ -188,18 +188,61 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 mistral_api_key = os.getenv("mistral_api_key") 
 
 
+def make_answers_directory_and_csv_path(this_original_task_file, model_name):
+    """
+    Returns a list of .json files in the current working directory.
+    """
+    solution_dir_path = "solution_files"
+    date_time = datetime.now(UTC)
+    clean_timestamp = date_time.strftime("%Y%m%d%H%M%S%f")
+
+
+    # make path absolute
+    solution_dir_path = os.path.abspath(solution_dir_path)
+
+    # Check if the directory exists
+    if not os.path.exists(solution_dir_path):
+
+        # If it does not exist, create it
+        # Ensure the directory exists
+        try:
+            os.makedirs(
+                solution_dir_path, exist_ok=True
+            )  # Ensure the directory is created if it does not exist
+        except Exception as e:
+            print(f"Error creating directory {solution_dir_path}: {e}")
+            return  # Exit the function if directory creation fails
+
+
+
+    # make path absolute, belts and suspenders
+    solution_dir_path = os.path.abspath(solution_dir_path)
+
+    answer_file_path = f"answer_{this_original_task_file}_{model_name}_{clean_timestamp}_file" 
+
+    # Determine the path to the file that should be saved
+    answer_file_path = os.path.join(solution_dir_path, new_title)
+
+
+    return answer_file_path
+
+
+def merge_answer_csv_files():
+    # TODO
+    pass
+
 
 # Helper Function
 def list_files_in_aitaskfiles_dir(file_type_list=None):
     """
-    Returns a list of .json files in the current working directory.
+    Returns a list of task files in the current working directory.
     """
     file_path = "ai_task_files"
     output_list = None
-    
+
     # make path absolute
     file_path = os.path.abspath(file_path)
-    
+
     # Check if the directory exists
     if not os.path.exists(file_path):
 
@@ -215,7 +258,7 @@ def list_files_in_aitaskfiles_dir(file_type_list=None):
 
     # make path absolute, belts and suspenders
     file_path = os.path.abspath(file_path)
-    
+
     try:
         if file_type_list is None:
             # default to:
@@ -224,38 +267,38 @@ def list_files_in_aitaskfiles_dir(file_type_list=None):
 
 
         output_list = []
-    
+
         # if not a list already, then make it a list
         if  isinstance(file_type_list, str):
             file_type_list = [file_type_list]
-        
+
         for this_file_type in file_type_list:
-    
+
             # List all files in the current working directory
             files_in_cwd = os.listdir("ai_task_files/.")
-        
+
             # Filter the list to include only requested
             task_files = [file for file in files_in_cwd if file.endswith(this_file_type)]
-        
+
             clipped_task_files = [item for item in task_files if not item.startswith('empty_')]
-        
+
             output_list.append(clipped_task_files)
 
         # remove empty lists 
         output_list = [item for item in output_list if item]
-        
+
         # flattened_list
         output_list = [item for sublist in output_list for item in sublist]
-        
+
         print(output_list)
         if not output_list:
             message = f"\n\nExit Dungeon: Your file list in /{file_path}/ is empty, add a file and try!\n\n"
             sys.exit(message)
-        
+
         # remove duplicates
         output_list_set = set(output_list)
         output_list = list(output_list_set)
-        
+
         return output_list
 
     except Exception as e:
@@ -1839,8 +1882,7 @@ def extract_values_from_dict(dict_str):
         print(f"dict_str -> {dict_str}")        
         print(f"type(dict_str) -> {type(dict_str)}")
 
-        
-        
+
         # Parse the string into a Python dictionary
         dict_data = json.loads(dict_str)
         # Extract the values and convert to a list
@@ -3786,18 +3828,18 @@ def answer_questions_please(
 
     """
     Output format notes:
-    
+
     "solution":
         {
             "solution_plan_outline":
             "draft_revisions_and_comments":
             "final_answer":
         }
-    
-        
+
+
     """
-    
-    
+
+
     # set parameters to defaults if none are given
     if not parameter_dict:
         #######################
@@ -3819,29 +3861,26 @@ def answer_questions_please(
         }
 
 
-    ######################
-    # Translation Factory
-    ######################
+    ##################################
+    # answer_questions_please Factory
+    ##################################
     """
     Maybe modified to only look at each question one at a time.
     e.g. no overall multi-item dictionary
-    
+
     but still a dict or list of possible answers
     to rank later.
-    
+
     how to manage...writing answer each time to file....
-    
+
     maybe keep a list of optional answers 
     then for each question write answer to
     the answer_(original_name)_model_name_(timestamp)_file 
-    
-    
+
+
     """
 
-    ###
-    Make answers file pathway.
-    ###
-    
+
     # Example usage
     task_files_list = list_files_in_aitaskfiles_dir()
 
@@ -3853,6 +3892,14 @@ def answer_questions_please(
     print(f"Task files in folder -> {task_files_list}")
 
     for this_original_task_file in task_files_list:
+
+        ###
+        # Make answers file pathway.
+        ###
+        answer_file_path = make_answers_directory_and_csv_path(this_original_task_file, use_this_model)
+
+        print(f"answer_file_path -> {answer_file_path}")
+
 
         # Load the original JSON file
         original_data = load_json_file(this_original_task_file)
@@ -3884,7 +3931,7 @@ def answer_questions_please(
             f"""
         mini_translate_json()
         Starting this file: 
-        this_original_json_file      -> {this_original_json_file}
+        this_original_json_file      -> {this_original_task_file}
         paths_list                   -> {paths_list}
         check_paths_list             -> {check_paths_list}
         dict_of_selected_best_paths_list -> {dict_of_selected_best_paths_list}
@@ -3900,8 +3947,32 @@ def answer_questions_please(
             print(error_message)
             raise ValueError(error_message)
 
+        """
+        To stay lite:
+        - get the number of rows in the csv
+        - for each row, access that row only
+        (note...a csv might be a little mega huge)
+
+
+        FOrmat
+
+        """
+
+        def get_csv_len_in_rows(path):
+            try:
+                with open(path, 'r') as f:
+                    reader = csv.reader(f)
+                    row_count = sum(1 for _ in reader)
+                return row_count
+
+            except Exception as e:
+                raise e
+
+        this_original_task_file_length = get_csv_len_in_rows(this_original_task_file)
+
+
         # for this language
-        for target_language in list_of_targeted_languages:
+        for this_row in range(0, this_original_task_file_length):
 
             # make a blank frame of lists for the translations
             # make a copy!
@@ -3911,11 +3982,15 @@ def answer_questions_please(
             # for this leaf
             for this_path in paths_list:
 
+                """
+                get task from csv
+                """
+                task_from_instructions = ""
+
                 leaf_ok_flag = False
                 leaf_fail_counter = 0
 
                 while not leaf_ok_flag:
-
 
                     if leaf_fail_counter > 10:
                         raise f"leaf_fail_counter > 10 -> {leaf_fail_counter}"
@@ -3938,18 +4013,19 @@ def answer_questions_please(
                     translate only '{untranslated_leaf}' into {target_language} formatted 
                     inside tripple pipes |||your_translation||| just that. no other commentary,
                     translate and earn a treat: best translation is """
-                    
-                    
-                    solution_body = {"solution":
-                            {
-                                "solution_plan_outline": "",
-                                "draft_revisions_and_comments": "",
-                                "final_answer": int,
-                            }
+
+
+                    solution_body = {
+                        "solution":        
+                        {
+                            "solution_plan_outline": "",
+                            "draft_revisions_and_comments": "",
+                            "final_answer": int,
                         }
-                    
+                    }
+
                     context_history = f"""
-                    
+
                     Determine the best answer for this question:
                     {this_question}
                     
@@ -4029,12 +4105,6 @@ def answer_questions_please(
                     #####################################################
                     # Select Top Top Goodest Translation Star-Good-Prime
                     #####################################################
-                    set_save_json_to_file(
-                        populated_skeleton,
-                        this_original_json_file,
-                        target_language,
-                        "set_of_translations_",
-                    )
 
                     # reset context history for new 'conversation' about selection
                     context_history = []
@@ -4075,6 +4145,15 @@ def answer_questions_please(
                     #######################
                     #######################
 
+
+                    """
+                    read task_from_instructions
+
+                    """
+
+
+
+
                     # context_history = set_select_best__system_prompt(
                     #     context_history, target_language
                     # )
@@ -4099,17 +4178,10 @@ def answer_questions_please(
                     # Place your evaluations in order as Pipe-Separated Values. like this four options |#|#|#|#| or just one item like this |#| 
                     # No additional comments. A tasty reward awaits your accurate selection """
 
-
                     answer_form = {
-                        "t-1": "score_here", 
-                        "t-2": "score_here",
-                        "t-3": "score_here"
-                    }
-
-                    answer_form = {
-                        "translation-1": "score_here", 
-                        "translation-2": "score_here",
-                        "translation-3": "score_here"
+                        "option-1": "score_here", 
+                        "option-2": "score_here",
+                        "option-3": "score_here"
                     }
 
                     # context_history = f"""
@@ -4165,6 +4237,9 @@ def answer_questions_please(
                     # No additional comments. A tasty reward awaits your accurate selection."""
 
 
+                    question_task_prompt = context_history
+
+
                     # # breakpoint
                     # print(f"\n\n context_history -> {context_history}")
                     # input("breakpoint")
@@ -4175,7 +4250,6 @@ def answer_questions_please(
                     # By ranked choice
                     ###################
                     ###################
-
 
 
                     # turn list of options int dict
@@ -4257,8 +4331,9 @@ def answer_questions_please(
                     print("\nHats in the air, we can all leave. Buubye!!\n\n\n")
                     leaf_ok_flag = True
 
+
             ##########################
-            # per language: save file
+            # save file
             ##########################
             print("trying to save file...")
 
@@ -4274,9 +4349,19 @@ def answer_questions_please(
 
             # add value to json
             save_json_to_file(
-                dict_of_selected_best, this_original_json_file, target_language, "selected_"
+                dict_of_selected_best, this_original_task_file, target_language, "selected_"
             )
 
+            date_time = datetime.now(UTC)
+            readable_timestamp = date_time.strftime("ymd_%Y-%m-%d")
+
+            answer_row = f"{this_row}, {best_key_option}, {use_this_model}, {this_original_task_file}, {task_from_instructions}, {question_task_prompt}, {readable_timestamp}"
+
+            # append to answer_file_path
+
+            with open(answer_file_path, 'a', newline='') as csvfile:
+                csvwriter = csv.writer(csvfile, delimiter=',')
+                csvwriter.writerow(answer_row)
 
 """# Tranlate Json Files
 - Set your language list
