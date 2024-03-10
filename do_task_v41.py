@@ -218,10 +218,10 @@ def make_answers_directory_and_csv_path(this_original_task_file, model_name):
     # make path absolute, belts and suspenders
     solution_dir_path = os.path.abspath(solution_dir_path)
 
-    answer_file_path = f"answer_{this_original_task_file}_{model_name}_{clean_timestamp}_file" 
+    answer_file_path = f"answer_file_{model_name}_{clean_timestamp}_{this_original_task_file}" 
 
     # Determine the path to the file that should be saved
-    answer_file_path = os.path.join(solution_dir_path, new_title)
+    answer_file_path = os.path.join(solution_dir_path, answer_file_path)
 
 
     return answer_file_path
@@ -269,20 +269,20 @@ def list_files_in_aitaskfiles_dir(file_type_list=None):
         output_list = []
 
         # if not a list already, then make it a list
-        if  isinstance(file_type_list, str):
+        if isinstance(file_type_list, str):
             file_type_list = [file_type_list]
 
         for this_file_type in file_type_list:
+            # Define the directory path
+            directory_path = "ai_task_files"
 
-            # List all files in the current working directory
-            files_in_cwd = os.listdir("ai_task_files/.")
+            # List all files in the specified directory
+            files_in_cwd = os.listdir(directory_path)
 
-            # Filter the list to include only requested
-            task_files = [file for file in files_in_cwd if file.endswith(this_file_type)]
+            # Filter the list to include only files of the requested type
+            task_files = [os.path.abspath(os.path.join(directory_path, file)) for file in files_in_cwd if file.endswith(this_file_type)]
 
-            clipped_task_files = [item for item in task_files if not item.startswith('empty_')]
-
-            output_list.append(clipped_task_files)
+            output_list.append(task_files)
 
         # remove empty lists 
         output_list = [item for item in output_list if item]
@@ -1996,6 +1996,11 @@ def remove_underscores_from_strings_in_list(list_of_strings):
 
     return cleaned_list_of_strings
 
+def str_to_int_or_none(string_input):
+    try:
+        return int(string_input)
+    except:
+        return None
 
 def adjust_capitalization(strings):
     """
@@ -2624,10 +2629,6 @@ def call_api_within_structure_check(context_history,
     print(f"retry_counter -> {retry_counter}")
 
     return jsonchecked_translation
-
-
-""" call_api_within_number_check"""
-
 
 
 # helper function
@@ -4657,207 +4658,212 @@ def do_task_please(
                     # print(f"\n\n breakpoint 5: populated_skeleton -> {populated_skeleton}")
                     # # input("breakpoint") 
 
-                    # Combine into one list of strings using list comprehension
-                    set_list_of_options = set(list_of_options)
-                    list_of_options = list(set_list_of_options)
+                    if list_of_options:
 
-                    # turn list of options int dict
-                    dict_of_options = {option: "score_here" for option in list_of_options}
+                        # Combine into one list of strings using list comprehension
+                        set_list_of_options = set(list_of_options)
+                        list_of_options = list(set_list_of_options)
 
-                    # turn list of options int dict
-                    list_dict_of_options = {option: [] for option in list_of_options}
+                        # turn list of options int dict
+                        dict_of_options = {option: "score_here" for option in list_of_options}
 
-
-                    print(
-                        f"""
-                    mini_translate_json() Select Top Top
-                    list_of_options        -> {list_of_options}
-                    dict_of_options        -> {dict_of_options}
-                    list_dict_of_options   -> {list_dict_of_options}
-                    """
-                    )
-
-                    #######################
-                    #######################
-                    # System Instructions
-                    #######################
-                    #######################
+                        # turn list of options int dict
+                        list_dict_of_options = {option: [] for option in list_of_options}
 
 
-                    """
-                    read task_from_instructions
+                        print(
+                            f"""
+                        mini_translate_json() Select Top Top
+                        list_of_options        -> {list_of_options}
+                        dict_of_options        -> {dict_of_options}
+                        list_dict_of_options   -> {list_dict_of_options}
+                        """
+                        )
 
-                    """
-
-
-
-
-                    # context_history = set_select_best__system_prompt(
-                    #     context_history, target_language
-                    # )
-                    # # User Prompt
-                    # context_history = set_select_best__user_prompt(
-                    #     context_history, target_language, list_of_options, untranslated_task
-                    # )
-
-
-                    # context_history = f"""
-                    # Select the most accurate {target_language} translation for '{untranslated_task}' from these options: {list_of_options}. 
-                    # Place your choice, spelled exactly the same, between triple pipes, like this: |||best_selection|||. 
-                    # No additional comments. A tasty reward awaits your accurate selection."""
-
-                    # """
-                    # Select the most accurate {target_language} translation for '{untranslated_task}' from these options: {list_of_options}. 
-                    # Indicate your choice by placing it between triple pipes, like this: |||best_selection|||. 
-                    # No additional comments. The reward of a job well done awaits your accurate selection!"""
-
-                    # context_history = f"""
-                    # Evaluate (0-10, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {list_of_options}. 
-                    # Place your evaluations in order as Pipe-Separated Values. like this four options |#|#|#|#| or just one item like this |#| 
-                    # No additional comments. A tasty reward awaits your accurate selection """
-
-                    answer_form = {
-                        "option-1": "score_here", 
-                        "option-2": "score_here",
-                        "option-3": "score_here"
-                    }
-
-                    # context_history = f"""
-                    # Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {dict_of_options}. 
-                    # Place your evaluations as a value to the key in Json format. Return your markdown json object 
-                    # listing each translation only as t-number as: 
-                    # ```json 
-                    # {answer_form} 
-                    # ``` 
-                    # No additional comments. A tasty reward awaits your accurate selection."""
-
-                    # context_history = f"""
-                    # Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {dict_of_options}. 
-                    # Place your evaluations as a value to the key in Json format. Return your markdown json object 
-                    # listing each translation only as t-number 
-                    # as: 
-                    # ```json 
-                    # {answer_form} 
-                    # ```
-                    # One key-value pair per translation (one key, one value -> "translation-1": "score_here", not nested). No additional comments. A tasty reward awaits your accurate selection.
-                    # """
-
-                    # context_history = f"""
-                    # Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {dict_of_options}. 
-                    # Place your evaluations as the value to a key in Json format. Return your markdown json object 
-                    # listing each translation only as t-number 
-                    # as: 
-                    # ```json 
-                    # {answer_form} 
-                    # ```
-                    # Just fill in the score, that's all. One key-value pair per translation (one generic key, one value which is your score -> "translation-1": "score_here", not nested). No additional comments. A tasty reward awaits your accurate selection.
-                    # """
-
-                    context_history = f"""
-                    Evaluate each solution for this task'{old_history}' from these options: {dict_of_options}. 
-                    Place your evaluations  (0-10, 0 is bad, 10 is good) as the value to a key in Json format. Return your markdown json object 
-                    listing each option only as "option-number" 
-                    as: 
-                    ```json 
-                    {answer_form} 
-                    ```
-                    Just fill in the score, that's all. One key-value pair per option (one generic key, one value which is your score -> "option-1": "score_here", not nested). 
-                    No additional comments. A tasty reward awaits your accurate selection. 
-                    """
-
-                    # context_history = f"""
-                    # Evaluate (0-10, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {dict_of_options}. 
-                    # Place your evaluations as value to the key in Json format. Return your properly formatted dict as:
-                    # '''json
-
-                    # ''' 
-                    # No additional comments. A tasty reward awaits your accurate selection."""
+                        #######################
+                        #######################
+                        # System Instructions
+                        #######################
+                        #######################
 
 
-                    question_task_prompt = context_history
+                        """
+                        read task_from_instructions
+
+                        """
 
 
-                    # # breakpoint
-                    # print(f"\n\n context_history -> {context_history}")
-                    # input("breakpoint")
-
-                    ###################
-                    ###################
-                    # Select Bestest
-                    # By ranked choice
-                    ###################
-                    ###################
 
 
-                    # turn list of options int dict
-                    dict_of_options = {option: None for option in list_of_options}
-                    # get highest ranked item:
-                    best_key_option = None
-
-                    while_counter = 0
-
-                    for i in range(number_of_ranked_votes):
-
-                        print(f"while_counter -> {while_counter}")
-
-                        vote_check_ok = False
+                        # context_history = set_select_best__system_prompt(
+                        #     context_history, target_language
+                        # )
+                        # # User Prompt
+                        # context_history = set_select_best__user_prompt(
+                        #     context_history, target_language, list_of_options, untranslated_task
+                        # )
 
 
-                        while not vote_check_ok:
-                            """
-                            TODO if a different function rank_vote_call_api_within_structure_check()
-                            you should be able to filter everything except numbers out of the answer
+                        # context_history = f"""
+                        # Select the most accurate {target_language} translation for '{untranslated_task}' from these options: {list_of_options}. 
+                        # Place your choice, spelled exactly the same, between triple pipes, like this: |||best_selection|||. 
+                        # No additional comments. A tasty reward awaits your accurate selection."""
 
-                            also...
-                            1. any complete duplicates can be filtered out...
-                            2. any non-numbers filtered out
-                            """
+                        # """
+                        # Select the most accurate {target_language} translation for '{untranslated_task}' from these options: {list_of_options}. 
+                        # Indicate your choice by placing it between triple pipes, like this: |||best_selection|||. 
+                        # No additional comments. The reward of a job well done awaits your accurate selection!"""
+
+                        # context_history = f"""
+                        # Evaluate (0-10, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {list_of_options}. 
+                        # Place your evaluations in order as Pipe-Separated Values. like this four options |#|#|#|#| or just one item like this |#| 
+                        # No additional comments. A tasty reward awaits your accurate selection """
+
+                        answer_form = {
+                            "option-1": "score_here", 
+                            "option-2": "score_here",
+                            "option-3": "score_here"
+                        }
+
+                        # context_history = f"""
+                        # Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {dict_of_options}. 
+                        # Place your evaluations as a value to the key in Json format. Return your markdown json object 
+                        # listing each translation only as t-number as: 
+                        # ```json 
+                        # {answer_form} 
+                        # ``` 
+                        # No additional comments. A tasty reward awaits your accurate selection."""
+
+                        # context_history = f"""
+                        # Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {dict_of_options}. 
+                        # Place your evaluations as a value to the key in Json format. Return your markdown json object 
+                        # listing each translation only as t-number 
+                        # as: 
+                        # ```json 
+                        # {answer_form} 
+                        # ```
+                        # One key-value pair per translation (one key, one value -> "translation-1": "score_here", not nested). No additional comments. A tasty reward awaits your accurate selection.
+                        # """
+
+                        # context_history = f"""
+                        # Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {dict_of_options}. 
+                        # Place your evaluations as the value to a key in Json format. Return your markdown json object 
+                        # listing each translation only as t-number 
+                        # as: 
+                        # ```json 
+                        # {answer_form} 
+                        # ```
+                        # Just fill in the score, that's all. One key-value pair per translation (one generic key, one value which is your score -> "translation-1": "score_here", not nested). No additional comments. A tasty reward awaits your accurate selection.
+                        # """
+
+                        context_history = f"""
+                        Evaluate each solution for this task'{old_history}' from these options: {dict_of_options}. 
+                        Place your evaluations  (0-10, 0 is bad, 10 is good) as the value to a key in Json format. Return your markdown json object 
+                        listing each option only as "option-number" 
+                        as: 
+                        ```json 
+                        {answer_form} 
+                        ```
+                        Just fill in the score, that's all. One key-value pair per option (one generic key, one value which is your score -> "option-1": "score_here", not nested). 
+                        No additional comments. A tasty reward awaits your accurate selection. 
+                        """
+
+                        # context_history = f"""
+                        # Evaluate (0-10, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {dict_of_options}. 
+                        # Place your evaluations as value to the key in Json format. Return your properly formatted dict as:
+                        # '''json
+
+                        # ''' 
+                        # No additional comments. A tasty reward awaits your accurate selection."""
+
+
+                        question_task_prompt = context_history
+
+
+                        # # breakpoint
+                        # print(f"\n\n context_history -> {context_history}")
+                        # input("breakpoint")
+
+                        ###################
+                        ###################
+                        # Select Bestest
+                        # By ranked choice
+                        ###################
+                        ###################
+
+
+                        # turn list of options int dict
+                        dict_of_options = {option: None for option in list_of_options}
+                        # get highest ranked item:
+                        best_key_option = None
+
+                        while_counter = 0
+
+                        for i in range(number_of_ranked_votes):
+
                             print(f"while_counter -> {while_counter}")
-                            print("number_call_api_within_structure_check")
 
-                            # get a list of votes and make sure it matches the list of candidates
-                            list_of_votes = number_call_api_within_structure_check(
-                                context_history, use_this_model, parameter_dict, ai_local_or_cloud_mode
-                            )
+                            vote_check_ok = False
 
-                            print(f"\n\nlist_of_votes -> {list_of_votes}")
-                            print(f"type list_of_votes -> {type(list_of_votes)}")
 
-                            # filter out words and make type int
-                            list_of_votes = filter_list_convert_to_int(list_of_votes)
+                            while not vote_check_ok:
+                                """
+                                TODO if a different function rank_vote_call_api_within_structure_check()
+                                you should be able to filter everything except numbers out of the answer
 
-                            print(f"list_of_votes -> {list_of_votes}")
-                            print(f"list_of_options -> {list_of_options}")
-                            print(f"type list_of_votes -> {type(list_of_votes)}\n\n")
+                                also...
+                                1. any complete duplicates can be filtered out...
+                                2. any non-numbers filtered out
+                                """
+                                print(f"while_counter -> {while_counter}")
+                                print("number_call_api_within_structure_check")
 
-                            print(f"list_dict_of_options -> {list_dict_of_options}")
+                                # get a list of votes and make sure it matches the list of candidates
+                                list_of_votes = number_call_api_within_structure_check(
+                                    context_history, use_this_model, parameter_dict, ai_local_or_cloud_mode
+                                )
 
-                            if list_of_votes:
+                                print(f"\n\nlist_of_votes -> {list_of_votes}")
+                                print(f"type list_of_votes -> {type(list_of_votes)}")
 
-                                # if there is one vote per candidate, list each candidates votes
-                                if len(list_of_votes) == len(list_of_options):
-                                    add_ranks_votes_to_candidate(list_of_votes, list_dict_of_options)
+                                # filter out words and make type int
+                                list_of_votes = filter_list_convert_to_int(list_of_votes)
 
-                                    print(f"new list_dict_of_options -> {list_dict_of_options}")
+                                print(f"list_of_votes -> {list_of_votes}")
+                                print(f"list_of_options -> {list_of_options}")
+                                print(f"type list_of_votes -> {type(list_of_votes)}\n\n")
 
-                                    # exit loop
-                                    vote_check_ok = True
+                                print(f"list_dict_of_options -> {list_dict_of_options}")
 
-                                else:  # if len of list is wrong
+                                if list_of_votes:
+
+                                    # if there is one vote per candidate, list each candidates votes
+                                    if len(list_of_votes) == len(list_of_options):
+                                        add_ranks_votes_to_candidate(list_of_votes, list_dict_of_options)
+
+                                        print(f"new list_dict_of_options -> {list_dict_of_options}")
+
+                                        # exit loop
+                                        vote_check_ok = True
+
+                                    else:  # if len of list is wrong
+                                        while_counter += 1
+                                        print("len of list is wrong")
+
+                                else:  # if no list at all!
                                     while_counter += 1
-                                    print("len of list is wrong")
+                                    print("no list at all!")
 
-                            else:  # if no list at all!
-                                while_counter += 1
-                                print("no list at all!")
+                        # tally the ranked votes and pick the winner
+                        best_key_option = extract_top_rank(list_dict_of_options)
 
-                    # tally the ranked votes and pick the winner
-                    best_key_option = extract_top_rank(list_dict_of_options)
+                        print(f"best_key_option -> {best_key_option}")
 
-                    print(f"best_key_option -> {best_key_option}")
+                        date_time = datetime.now(UTC)
+                        readable_timestamp = date_time.strftime("ymd_%Y-%m-%d")
 
-                    date_time = datetime.now(UTC)
-                    readable_timestamp = date_time.strftime("ymd_%Y-%m-%d")
+                    else:
+                        best_key_option = None
 
                     answer_row = f"{this_row}, {best_key_option}, {use_this_model}, {this_original_task_file}, {task_from_instructions}, {question_task_prompt}, {readable_timestamp}"
 
@@ -5017,7 +5023,7 @@ number_of_ranked_votes = 1
 
 
 
-task_mode = "csv"
+task_mode = "simple_multiple_choice"
 list_of_models = ["tiny", "mistral-7b-instruct"]
 
 
