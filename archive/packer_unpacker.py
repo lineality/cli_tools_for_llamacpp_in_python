@@ -229,7 +229,7 @@ def dict_package_keys_generator(dict_list, key_quantity=3):
 #                 ###############
 #                 # make readable time
 #                 # from datetime import datetime, UTC
-#                 date_time = datetime.now()
+#                 date_time = datetime.now(UTC)
 #                 clean_timestamp = date_time.strftime('%Y%m%d%H%M%S%f')
 
 #                 filename = f"dict_{i}_{clean_timestamp}.txt"
@@ -294,7 +294,7 @@ def pack_unpack_python_objects(dict_list, key_list=None):
                 # Generate a timestamped filename
                 # make readable time
                 # from datetime import datetime, UTC
-                date_time = datetime.now()
+                date_time = datetime.now(UTC)
                 clean_timestamp = date_time.strftime('%Y%m%d%H%M%S%f')
                 filename = f"dict_{i}_{clean_timestamp}.txt"
                 absolute_path = os.path.join(directory_name, filename)

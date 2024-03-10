@@ -633,7 +633,7 @@ def gguf_api(conversation_history_context_list, parameter_dict, configies_dict):
         os.makedirs(system_instructions_dir)
 
     # from datetime import datetime, UTC
-    date_time = datetime.now()
+    date_time = datetime.now(UTC)
     clean_timestamp = date_time.strftime('%Y%m%d%H%M%S%f')
 
     system_instruction_file_name = f"{clean_timestamp}_instructions.txt"
@@ -779,7 +779,7 @@ def mini_gguf_api(conversation_history_context_list, parameter_dict, configies_d
     #     os.makedirs(system_instructions_dir)
 
     # # from datetime import datetime, UTC
-    # date_time = datetime.now()
+    # date_time = datetime.now(UTC)
     # clean_timestamp = date_time.strftime('%Y%m%d%H%M%S%f')
 
     # system_instruction_file_name = f"{clean_timestamp}_instructions.txt"

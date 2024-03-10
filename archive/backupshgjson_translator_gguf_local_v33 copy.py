@@ -334,7 +334,7 @@ def save_json_to_file(input_text, file_name, target_language, optional_tag=""):
     #     json.dump(data, file, indent=4)
 
     # make readable time
-    date_time = datetime.now()
+    date_time = datetime.now(UTC)
     clean_timestamp = date_time.strftime("%Y%m%d%H%M%S%f")
 
     new_title = f"{target_language}_{clean_timestamp}_{file_name}"
@@ -377,7 +377,7 @@ def set_save_json_to_file(input_text, file_name, target_language, optional_tag="
     #     json.dump(data, file, indent=4)
 
     # make readable time
-    date_time = datetime.now()
+    date_time = datetime.now(UTC)
     clean_timestamp = date_time.strftime("%Y%m%d%H%M%S%f")
 
     new_title = f"{target_language}_{clean_timestamp}_{file_name}"
