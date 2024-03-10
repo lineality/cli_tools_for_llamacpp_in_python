@@ -2519,6 +2519,120 @@ def add_segment_to_absolute_base_path(additional_segment):
 
     return absolute_path
 
+# import json
+
+"""
+For extraction of 'line' of jsonl for task data in json, goes with json_to_values_list(json_obj):
+"""
+def extract_object_by_line_number(jsonl_file_path, line_number):
+    """
+    Retrieves a JSON object from a specified line number in a JSON Lines file.
+
+    Parameters:
+    - jsonl_file_path: str. The path to the JSON Lines file.
+    - line_number: int. The line number of the object to retrieve, starting from 0.
+
+    Returns:
+    - dict: The JSON object at the specified line number. None if the line number is out of bounds.
+    """
+    with open(jsonl_file_path, 'r') as file:
+        for current_line_number, line in enumerate(file):
+            if current_line_number == line_number:
+                return json.loads(line)
+    return None
+
+
+"""
+For extraction of 'line' of jsonl for task data in json, goes with extract_object_by_line_number(jsonl_file_path, line_number):
+"""
+def json_to_values_list(json_obj):
+    """
+    Converts a JSON object into a list of its values.
+
+    Parameters:
+    - json_obj: dict. The JSON object to convert.
+
+    Returns:
+    - list: A list of values from the JSON object.
+    """
+    return list(json_obj.values())
+
+"""
+# Example usage:
+
+# To extract an object from the 2nd line (line_number = 1 since it's zero-indexed):
+selected_object = extract_object_by_line_number('task2.jsonl', 0)
+
+# Then convert the selected object to a list of its values:
+values_list = json_to_values_list(selected_object)
+
+# Note: 'data.jsonl' should be replaced with the actual path to your JSON Lines file.
+values_list
+"""
+
+def extract_specific_fields(json_obj, fields):
+    """
+    Extracts specified fields from a JSON object.
+
+    Parameters:
+    - json_obj: dict. The JSON object to extract data from.
+    - fields: list. A list of strings representing the keys of the fields to extract.
+
+    Returns:
+    - dict: A dictionary containing only the specified fields from the original JSON object.
+    """
+    return {field: json_obj[field] for field in fields if field in json_obj}
+
+  
+def filter_jsonl_by_condition(jsonl_file_path, condition_function):
+    """
+    Filters objects in a JSON Lines file based on a specified condition function.
+
+    Parameters:
+    - jsonl_file_path: str. The path to the JSON Lines file.
+    - condition_function: function. A function that takes a JSON object as input and returns True if the object meets the condition, False otherwise.
+
+    Returns:
+    - list: A list of JSON objects that meet the condition.
+    """
+    matching_objects = []
+    with open(jsonl_file_path, 'r') as file:
+        for line in file:
+            json_obj = json.loads(line)
+            if condition_function(json_obj):
+                matching_objects.append(json_obj)
+    return matching_objects
+
+# Example condition function:
+def example_condition(json_obj):
+    return json_obj['field'] == 'specific_value'
+
+"""
+# Define the path to your JSON Lines file
+jsonl_file_path = 'task2.jsonl'
+
+# Specify the line number from which to extract the JSON object (e.g., line 2)
+line_number = 1  # Remember, it's zero-indexed
+
+# Specify the fields you're interested in extracting from the JSON object
+fields_of_interest = ['ctx_b', 'endings']
+
+# Step 1: Extract the JSON object from the specified line
+json_object = extract_object_by_line_number(jsonl_file_path, line_number)
+
+# Check if the json_object is not None to avoid errors in the next step
+if json_object is not None:
+    # Step 2: Extract only the specified fields from the JSON object
+    specific_fields = extract_specific_fields(json_object, fields_of_interest)
+    print("Extracted Fields:", specific_fields)
+else:
+    print("No JSON object found at the specified line.")
+
+
+"""
+
+
+
 
 # helper function
 def call_api_within_structure_check(context_history, 
@@ -3177,33 +3291,78 @@ def remove_duplicates_from_terminal_list(target_dictionary, this_path):
     print("Duplicates removed from terminal-leaf list.")
 
 
+# import csv
 
-def extract_row_from_csv(this_row, this_path):
+
+def read_jsonl_file(file_path):
+    data = []
+    with open(file_path, 'r') as file:
+        for line in file:
+            obj = json.loads(line)
+            question = obj['question']
+            options = obj['options']
+            data.append((question, options))
+    return data
+
+def extract_row_from_jsonl(this_row, this_path):
     """
-    Extracts a specific row from a CSV file.
+    Extracts a specific row from a CSV file, ensuring that commas within quotes are correctly parsed as part of the same field.
 
     Parameters:
         this_row (int): The index of the row to extract from the CSV.
         this_path (str): The path to the CSV file.
 
     Returns:
-        list: The extracted row as a list of strings. Returns an empty list if the row
-              does not exist or the file cannot be opened.
+        list: The extracted row as a list of strings, respecting quoted fields. Returns an empty list if the row
+              does not exist, the file cannot be opened, or parsing fails.
     """
     try:
-        with open(this_path, newline='') as csvfile:
+        with open(this_path, mode='r', newline='') as csvfile:
             reader = csv.reader(csvfile)
             for i, row in enumerate(reader):
                 if i == this_row:
                     return row
     except FileNotFoundError:
         print(f"File not found: {this_path}")
+    except csv.Error as e:
+        print(f"CSV parsing error in file {this_path}: {e}")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An unexpected error occurred: {e}")
 
-    # Return empty list if the row was not found or an error occurred
-    print("\n\n\nWARNING: NOW ROW FOUND!!! extract_row_from_csv()")
+    # Return empty list if the row was not found, an error occurred, or file cannot be parsed
+    print("WARNING: No row found or error in parsing in extract_row_from_csv()")
     return []
+
+# Ensure your CSV is correctly formatted, particularly for complex fields encapsulated by quotes.
+
+
+
+# def extract_row_from_csv(this_row, this_path):
+#     """
+#     Extracts a specific row from a CSV file.
+
+#     Parameters:
+#         this_row (int): The index of the row to extract from the CSV.
+#         this_path (str): The path to the CSV file.
+
+#     Returns:
+#         list: The extracted row as a list of strings. Returns an empty list if the row
+#               does not exist or the file cannot be opened.
+#     """
+#     try:
+#         with open(this_path, newline='') as csvfile:
+#             reader = csv.reader(csvfile)
+#             for i, row in enumerate(reader):
+#                 if i == this_row:
+#                     return row
+#     except FileNotFoundError:
+#         print(f"File not found: {this_path}")
+#     except Exception as e:
+#         print(f"An error occurred: {e}")
+
+#     # Return empty list if the row was not found or an error occurred
+#     print("\n\n\nWARNING: NOW ROW FOUND!!! extract_row_from_csv()")
+#     return []
 
 # Example usage
 # Assuming the CSV file and the row index you want to extract
@@ -4309,6 +4468,8 @@ def do_task_please(
     index_of_task=0,
     index_of_options=1,
     parameter_dict=None,
+    task_field_name=None,
+    options_field_name=None,
 ):
 
     """
@@ -4425,7 +4586,7 @@ def do_task_please(
 
             # for this language
             # NON-header mode, skip first row
-            for this_row in range(this_original_task_file_length - 1):
+            for this_row in range(1, this_original_task_file_length - 1):
 
                 print(f"this_row -> {this_row}")
 
@@ -4456,10 +4617,44 @@ def do_task_please(
                     "What is 2+2?", [4, 2^2, 2**2, 2*2, all of the above]
                     """
 
-                    row_as_list = extract_row_from_csv(this_row, this_original_task_file)
+                    # row_as_list = extract_row_from_csv(this_row, this_original_task_file)
 
-                    this_task = row_as_list[index_of_task]
-                    these_options = row_as_list[index_of_options]
+
+
+                    """
+                    jsonl mode
+
+                    task_field_name
+                    options_field_name
+
+                    """
+
+                    # Define the path to your JSON Lines file
+                    jsonl_file_path = 'task2.jsonl'
+
+                    # Specify the line number from which to extract the JSON object (e.g., line 2)
+                    line_number = 1  # Remember, it's zero-indexed
+
+                    # Specify the fields you're interested in extracting from the JSON object
+                    fields_of_interest = [task_field_name, options_field_name]
+
+                    # Step 1: Extract the JSON object from the specified line
+                    json_object = extract_object_by_line_number(jsonl_file_path, line_number)
+
+                    # Check if the json_object is not None to avoid errors in the next step
+                    if json_object is not None:
+                        # Step 2: Extract only the specified fields from the JSON object
+                        specific_fields = extract_specific_fields(json_object, fields_of_interest)
+                        print("Extracted Fields:", specific_fields)
+                    else:
+                        print("No JSON object found at the specified line.")
+
+                    this_task = specific_fields[task_field_name]
+                    these_options = specific_fields[options_field_name]
+
+
+                    print(f"row_as_list -> {row_as_list}")
+                    input("breakpoint")
 
                     # # breakpoint
                     # print(f"\n\n breakpoint 5: untranslated_task -> {untranslated_task}")
@@ -4586,6 +4781,9 @@ def do_task_please(
                         {simple_multiple_choice_solution_body}
                         """
 
+
+                    print(f"context_history -> {context_history}")
+                    input("breakpoint")
 
                     old_history = context_history
 
@@ -5030,6 +5228,8 @@ list_of_models = ["tiny", "mistral-7b-instruct"]
 number_of_preliminary_drafts = 2
 number_of_ranked_votes = 1
 file_type_list = ".csv"
+task_field_name = 'task'
+options_field_name = 'options'
 
 do_task_please(
     task_mode,
@@ -5041,4 +5241,6 @@ do_task_please(
     index_of_task=0,
     index_of_options=1,
     parameter_dict=parameter_dict,
+    task_field_name=task_field_name,
+    options_field_name=options_field_name,
 )
