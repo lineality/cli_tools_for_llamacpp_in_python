@@ -2100,6 +2100,7 @@ def task_check_structure_of_response(task_mode, dict_str):
         print(f"\n\n Starting check_structure_of_response, dict_str ")
 
         if "simple" in task_mode:
+            print(f"simple found in task_mode {task_mode}")
 
 
             # if "task_mode == "open_task"":
@@ -2169,7 +2170,7 @@ def task_check_structure_of_response(task_mode, dict_str):
 
 
         else:
-
+            print(f"NO simple found in task_mode {task_mode}")
             response_to_task = task_check_function_description_keys(dict_str)
 
             # cleaned_matches_list = remove_underscores_from_strings_in_list(matches_list)
@@ -2793,7 +2794,7 @@ def call_api_within_structure_check(context_history,
             # # breakpoint
             # input("Breakpoint")
 
-    print(f"retry_counter -> {retry_counter}")
+    print(f"all api with structure check out-while not json_ok_flag: retry_counter -> {retry_counter}")
 
     return jsonchecked_translation
 
@@ -2900,12 +2901,12 @@ def general_task_call_api_within_structure_check(context_history,
 
         else:
             retry_counter += 1
-            print(f"\n\nretry_counter -> {retry_counter}\n")
+            print(f"\n\ngeneral_task_call_api_within_structure_check in while retry_counter -> {retry_counter}\n")
 
             # # breakpoint
             # input("Breakpoint")
 
-    print(f"retry_counter -> {retry_counter}")
+    print(f"general_task_call_api_within_structure_check finalretry_counter -> {retry_counter}")
 
     return jsonchecked_translation
 
@@ -3010,12 +3011,12 @@ def number_call_api_within_structure_check(context_history, use_this_model, para
 
         else:
             retry_counter += 1
-            print(f"\n\nretry_counter -> {retry_counter}\n")
+            print(f"\n\nnumber_call_api_within_structure_check in retry_counter -> {retry_counter}\n")
 
             # # breakpoint
             # input("Breakpoint")
 
-    print(f"retry_counter -> {retry_counter}")
+    print(f"number_call_api_within_structure_check out retry_counter -> {retry_counter}")
 
     return json_checked_value_list
 
@@ -3138,7 +3139,7 @@ def crawler_call_api_within_json_structure_check(
         else:
             retry_counter += 1
 
-    print(f"retry_counter -> {retry_counter}")
+    print(f"crawler_call_api_within_json_structure_check retry_counter -> {retry_counter}")
 
     return jsonchecked_translation
 
