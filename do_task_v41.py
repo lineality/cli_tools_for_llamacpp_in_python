@@ -4674,9 +4674,15 @@ def do_task_please(
                     else:
                         print("No JSON object found at the specified line.")
 
+                    #################
+                    # Task et Option
+                    #################
                     this_task = specific_fields[task_field_name]
                     these_options = specific_fields[options_field_name]
-
+                    if these_options:
+                        task_summary = f"Task: {this_task}, Options: {these_options}"
+                    else:
+                        task_summary = f"Task: {this_task}"
 
                     print(f"this_task -> {this_task}")
                     print(f"these_options -> {these_options}")
@@ -4978,16 +4984,28 @@ def do_task_please(
                             # """
 
                             context_history = f"""
-                            Evaluate each solution for this task'{old_history}' from these options: {dict_of_options}. 
+                            Evaluate each solution for this task'{task_summary}' from these options: {dict_of_options}. 
                             Place your evaluations  (0-10, 0 is bad, 10 is good) as the value to a key in Json format. Return your markdown json object 
                             listing each option only as "option-number" 
                             as: 
                             ```json 
                             {answer_form} 
                             ```
-                            Just fill in the score, that's all. One key-value pair per option (one generic key, one value which is your score -> "option-1": "score_here", not nested). 
-                            No additional comments. A tasty reward awaits your accurate selection. 
+                            Just fill in the score, that's all. One key-value pair per option, not nested. 
+                            No additional comments. A tasty reward awaits your accurate markdown json selection. ``json
                             """
+
+                            context_history = f"""
+                            Evaluate each solution option for the task '{task_summary}'. Evaluate these options: {dict_of_options}. 
+                            Place your evaluations  (0-10, 0 is bad, 10 is good) as the value to a key in markdown ```json format. 
+                            as: 
+                            ```json 
+                            {answer_form} 
+                            ```
+                            Just fill in the score, that's all. One key-value pair per option (one key, one value. not nested; -> "option-1": "your_score_here", ). 
+                            No additional comments. A tasty reward awaits your accurate markdown``` selection. ``json
+                            """
+
 
                             # context_history = f"""
                             # Evaluate (0-10, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {dict_of_options}. 
@@ -5006,6 +5024,7 @@ def do_task_please(
                             # By ranked choice
                             ###################
                             ###################
+                            # TODO limit max while counter
 
 
                             # turn list of options int dict
@@ -5090,6 +5109,27 @@ def do_task_please(
                     print(f"answer_row -> {answer_row}")
 
                     # append to answer_file_path
+
+                    import os
+
+                    # Check if the file exists
+                    if not os.path.exists(answer_file_path):
+                        # If the file doesn't exist, create it
+                        try:
+                            with open(answer_file_path, 'x', newline='') as csvfile:
+                                pass  # Create an empty file
+                        except FileExistsError:
+                            # If the file was created by another process in the meantime, ignore the error
+                            pass
+
+                        # header
+                        header_string = "this_row, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, readable_timestamp"
+                        with open(answer_file_path, 'a', newline='') as csvfile:
+                            csvwriter = csv.writer(csvfile, delimiter=',')
+                            csvwriter.writerow(header_string)
+
+
+
 
                     with open(answer_file_path, 'a', newline='') as csvfile:
                         csvwriter = csv.writer(csvfile, delimiter=',')
