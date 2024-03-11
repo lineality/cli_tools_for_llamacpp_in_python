@@ -2094,6 +2094,8 @@ def task_check_structure_of_response(task_mode, dict_str):
     for tasks, see modes json or |||
 
     """
+    print(f"task_mode-> {task_mode}")
+    print(f"dict_str -> {dict_str}")
 
     try:
         # print(f"\n\n Starting check_structure_of_response, dict_str -> {repr(dict_str)} {type(dict_str)}")
@@ -2170,7 +2172,7 @@ def task_check_structure_of_response(task_mode, dict_str):
 
 
         else:
-            print(f"NO simple found in task_mode {task_mode}")
+            print(f"NO simple found in task_mode -> {task_mode}")
             response_to_task = task_check_function_description_keys(dict_str)
 
             # cleaned_matches_list = remove_underscores_from_strings_in_list(matches_list)
@@ -2894,7 +2896,7 @@ def general_task_call_api_within_structure_check(context_history,
             jsonchecked_translation = None
             print(f"Failed: {str(e)}")
 
-        jsonchecked_translation = task_check_structure_of_response(dict_str, task_mode)
+        jsonchecked_translation = task_check_structure_of_response(task_mode, dict_str)
 
         if jsonchecked_translation:
             json_ok_flag = True
