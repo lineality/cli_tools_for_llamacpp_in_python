@@ -2583,7 +2583,60 @@ def extract_specific_fields(json_obj, fields):
     """
     return {field: json_obj[field] for field in fields if field in json_obj}
 
-  
+
+def count_jsonl_lines(file_path):
+    """
+    Counts the number of lines (objects) in a JSONL file.
+
+    Args:
+        file_path (str): The path to the JSONL file.
+
+    Returns:
+        int: The number of lines (objects) in the file.
+    """
+    count = 0
+    with open(file_path, 'r', encoding='utf-8') as file:
+        for line in file:
+            try:
+                json.loads(line)
+                count += 1
+            except json.JSONDecodeError:
+                print(f"Skipping invalid JSON line: {line}")
+    return count
+
+
+def get_csv_len_in_rows(path):
+    try:
+        with open(path, 'r') as f:
+            reader = csv.reader(f)
+            row_count = sum(1 for _ in reader)
+        return row_count
+
+    except Exception as e:
+        raise e
+
+def get_file_extension(file_path):
+    """
+    Returns the file extension (suffix) from a given file path.
+    
+    Args:
+        file_path (str): The path to the file.
+        
+    Returns:
+        str: The file extension (suffix) without the leading dot.
+    """
+    # Get the base name of the file (the part after the last directory separator)
+    base_name = os.path.basename(file_path)
+    
+    # Split the base name into the file name and extension
+    name, ext = os.path.splitext(base_name)
+    
+    # Return the extension without the leading dot
+
+    output = "." + ext[1:].lower()
+
+    return output
+
 def filter_jsonl_by_condition(jsonl_file_path, condition_function):
     """
     Filters objects in a JSON Lines file based on a specified condition function.
@@ -2735,7 +2788,7 @@ def call_api_within_structure_check(context_history,
 
         else:
             retry_counter += 1
-            print(f"\n\nretry_counter -> {retry_counter}\n")
+            print(f"\n\ncall api with structure check while not json_ok_flag: retry_counter -> {retry_counter}\n")
 
             # # breakpoint
             # input("Breakpoint")
@@ -4567,26 +4620,28 @@ def do_task_please(
             - get the number of rows in the csv
             - for each row, access that row only
             (note...a csv might be a little mega huge)
+            https://colab.research.google.com/drive/1lVtU6RErVic3-LrL085eFNgkRirzfnUk#scrollTo=KXWL8qptpfRJ 
 
             """
 
-            def get_csv_len_in_rows(path):
-                try:
-                    with open(path, 'r') as f:
-                        reader = csv.reader(f)
-                        row_count = sum(1 for _ in reader)
-                    return row_count
 
-                except Exception as e:
-                    raise e
+            # if csv
+            if ".csv" == get_file_extension(this_original_task_file):
+                this_original_task_file_length = get_csv_len_in_rows(this_original_task_file)
 
-            this_original_task_file_length = get_csv_len_in_rows(this_original_task_file)
+            # if jsonl
+            if ".jsonl" == get_file_extension(this_original_task_file):
+                this_original_task_file_length = count_jsonl_lines(this_original_task_file)
+
+            # TODO
+            # if directory of json files
+            print(f"this_original_task_file_length -> {this_original_task_file_length}")
 
 
 
             # for this language
             # NON-header mode, skip first row
-            for this_row in range(1, this_original_task_file_length - 1):
+            for this_row in range(this_original_task_file_length):
 
                 print(f"this_row -> {this_row}")
 
@@ -4629,17 +4684,14 @@ def do_task_please(
 
                     """
 
-                    # Define the path to your JSON Lines file
-                    jsonl_file_path = 'task2.jsonl'
-
                     # Specify the line number from which to extract the JSON object (e.g., line 2)
-                    line_number = 1  # Remember, it's zero-indexed
+                    line_number = this_row  # Remember, it's zero-indexed
 
                     # Specify the fields you're interested in extracting from the JSON object
                     fields_of_interest = [task_field_name, options_field_name]
 
                     # Step 1: Extract the JSON object from the specified line
-                    json_object = extract_object_by_line_number(jsonl_file_path, line_number)
+                    json_object = extract_object_by_line_number(this_original_task_file, line_number)
 
                     # Check if the json_object is not None to avoid errors in the next step
                     if json_object is not None:
@@ -4653,7 +4705,8 @@ def do_task_please(
                     these_options = specific_fields[options_field_name]
 
 
-                    print(f"row_as_list -> {row_as_list}")
+                    print(f"this_task -> {this_task}")
+                    print(f"these_options -> {these_options}")
                     input("breakpoint")
 
                     # # breakpoint
@@ -5222,12 +5275,12 @@ number_of_ranked_votes = 1
 
 
 task_mode = "simple_multiple_choice"
-list_of_models = ["tiny", "mistral-7b-instruct"]
+list_of_models = ["mistral-7b-instruct"]
 
 
 number_of_preliminary_drafts = 2
 number_of_ranked_votes = 1
-file_type_list = ".csv"
+file_type_list = ".jsonl"
 task_field_name = 'task'
 options_field_name = 'options'
 
