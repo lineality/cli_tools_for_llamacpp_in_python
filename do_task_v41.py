@@ -72,6 +72,8 @@ Smalls Model & Crawler Mode
 
 5. 
 
+TODO: 
+try to figure out why not using formatting for json for select vote...
 
 """
 import string
@@ -2750,8 +2752,8 @@ def call_api_within_structure_check(context_history,
                     'pipeline_mode': mini_gguf_api,
                 }
 
-
-                print(f"configies_dict -> {configies_dict}")
+                # inspection
+                # print(f"configies_dict -> {configies_dict}")
 
 
                 ######################
@@ -3015,6 +3017,113 @@ def number_call_api_within_structure_check(context_history, use_this_model, para
             retry_counter += 1
             print(f"\n\nnumber_call_api_within_structure_check in retry_counter -> {retry_counter}\n")
 
+
+    print(f"number_call_api_within_structure_check out retry_counter -> {retry_counter}")
+
+    return json_checked_value_list
+
+
+
+# helper function
+def task_number_call_api_within_structure_check(context_history, use_this_model, parameter_dict, ai_local_or_cloud_mode, retry_x_times):
+    retry_counter = 0
+    json_ok_flag = False
+
+
+    # see
+    mistal_model_list = [
+        "mistral-tiny",
+        "mistral-small",
+        "mistral-large-latest",
+    ]
+    # /home/oops/jan/models/mistral-ins-7b-q4/mistral-7b-instruct-v0.2.Q4_K_M.gguf
+
+    # see https://platform.openai.com/docs/guides/text-generation
+    open_ai_model_list = ["gpt-4", "gpt-4-turbo-preview", "gpt-3.5-turbo"]
+
+    gguf_model_list = ["jais", "tiny_llama", "mistral7b",]
+
+    while not json_ok_flag:
+
+        ####################
+        # get a translation
+        ####################
+
+        try:
+            # check json structure
+
+            ########################
+            # Select Model and Mode
+            ########################
+
+            # for off-line local mode
+            if ai_local_or_cloud_mode == "gguf":
+                print("Started gguf")
+
+                # get model path name-end
+                # use_this_model = get_model_path_by_name("/home/oops/jan/models/", use_this_model)
+
+                # inspection
+                print(f"use_this_model -> {use_this_model}")
+
+                configies_dict = {
+                    'model_path_base': add_segment_to_absolute_base_path("jan/models/"),
+                    'model_nickname': use_this_model,
+                    'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
+                    'pipeline_mode': mini_gguf_api,
+                }
+
+
+                print(f"configies_dict -> {configies_dict}")
+
+
+                ######################
+                # local api with gguf
+                ######################
+                response = configies_dict["pipeline_mode"](context_history, parameter_dict, configies_dict)
+                print(response[0])
+                print(response[1])
+                print(response[2])
+                dict_str = response[2]
+
+            ################
+            # for cloud api
+            ################
+            elif use_this_model in mistal_model_list:
+                print(f"Mistral api selected...{use_this_model}")
+                dict_str = ask_mistral_model(context_history, use_this_model)
+
+            elif use_this_model in open_ai_model_list:
+                print(f"openAI api selected...{use_this_model}")
+                dict_str = openai_call_context_timeout(
+                    client,
+                    context_history,
+                    model=use_this_model,
+                    max_retries=10,
+                    temp=0.9,
+                    timeout_min=8,
+                )
+
+            else:
+                print(f"no known api selected...{use_this_model}")
+                raise f"No known model option chosen...use_this_model -> {use_this_model}"
+
+        except Exception as e:
+            json_checked_value_list = None
+            print(f"Failed: {str(e)}")
+
+        json_checked_value_list = json_number_check_structure_of_response_to_list(dict_str)
+
+        if json_checked_value_list:
+            json_ok_flag = True
+
+        else:
+            retry_counter += 1
+            print(f"\n\nnumber_call_api_within_structure_check in retry_counter -> {retry_counter}\n")
+            
+            # exit after x retries
+            if retry_counter > retry_x_times:
+                return False
 
     print(f"number_call_api_within_structure_check out retry_counter -> {retry_counter}")
 
@@ -4643,7 +4752,8 @@ def do_task_please(
                 while (not task_ok_flag) and (dotask_try_counter <= retry_x_times):
 
                     if task_fail_counter > 10:
-                        raise f"task_fail_counter > 10 -> {task_fail_counter}"
+                        print(f"break while: task_fail_counter > 10 -> {task_fail_counter}")
+                        break
 
                     """
                     TODO
@@ -5073,8 +5183,12 @@ def do_task_please(
                                     print("number_call_api_within_structure_check")
 
                                     # get a list of votes and make sure it matches the list of candidates
-                                    list_of_votes = number_call_api_within_structure_check(
-                                        context_history, use_this_model, parameter_dict, ai_local_or_cloud_mode
+                                    list_of_votes = task_number_call_api_within_structure_check(
+                                        context_history, 
+                                        use_this_model, 
+                                        parameter_dict, 
+                                        ai_local_or_cloud_mode,
+                                        retry_x_times,
                                     )
 
                                     print(f"\n\nlist_of_votes -> {list_of_votes}")
@@ -5164,6 +5278,38 @@ def do_task_please(
                     task_ok_flag = True
 
 
+                if not task_ok_flag:
+
+                    # making csv row
+                    print("making csv row...")
+                    answer_row = f"{this_row_or_line}, 'fail', {use_this_model}, {this_original_task_file}, {task_from_instructions}, {question_task_prompt}, {list_of_options}, {draft_task_attempt_log}, {readable_timestamp}"
+                    print(f"answer_row -> {answer_row}")"
+
+                    # Check if the file exists
+                    if not os.path.exists(answer_file_path):
+                        # If the file doesn't exist, create it
+                        try:
+                            with open(answer_file_path, 'x', newline='') as csvfile:
+                                pass  # Create an empty file
+                        except FileExistsError:
+                            # If the file was created by another process in the meantime, ignore the error
+                            pass
+
+                        # header
+                        header_string = "this_row_or_line, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp"
+                        with open(answer_file_path, 'a', newline='') as csvfile:
+                            csvwriter = csv.writer(csvfile, delimiter=',')
+                            csvwriter.writerow(header_string)
+
+
+                    with open(answer_file_path, 'a', newline='') as csvfile:
+                        csvwriter = csv.writer(csvfile, delimiter=',')
+                        csvwriter.writerow(answer_row)
+
+
+                    # Exit While
+                    print(f"\nFailed to attempt task, moving on... {draft_task_attempt_log}\n\n\n")
+                
                 ##########################
                 # save file
                 ##########################
