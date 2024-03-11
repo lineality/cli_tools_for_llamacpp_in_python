@@ -50,37 +50,16 @@ def add_segment_to_absolute_base_path(additional_segment):
     return absolute_path
 
 
+def print_find_all_models(path="jan/models/"):
 
+    base_path = add_segment_to_absolute_base_path("jan/models/")
 
-base_path = add_segment_to_absolute_base_path("jan/models/")
+    folders_and_files_with_gguf = find_folders_and_files_with_gguf(base_path)
 
-folders_and_files_with_gguf = find_folders_and_files_with_gguf(base_path)
+    print("\nAvailable Models:")
+    for this_model_path in folders_and_files_with_gguf:
+        print("     ", this_model_path)
 
-print("\nAvailable Models:")
-
-for this_model_path in folders_and_files_with_gguf:
-    print("     ", this_model_path)
-
-print("\n\n")
-
-# def get_model_path_by_name(base_path, model_name):
-#     # Call the function to get all folders and files with gguf
-#     folders_and_files = find_folders_and_files_with_gguf(base_path)
+    print("\n\n")
     
-#     # Filter results by model name
-#     matching_models = [path for path in folders_and_files if model_name in path]
-    
-#     # Check the number of matches and return accordingly
-#     if len(matching_models) == 1:
-#         return matching_models[0]
-#     elif len(matching_models) > 1:
-#         return "Error: More than one model found matching the given name. Please be more specific."
-#     else:
-#         return "Error: No models found matching the given name."
-
-# # Example usage
-# base_path = '/home/oops/jan/models'
-# model_name = ".gguf"
-# model_path = get_model_path_by_name(base_path, model_name)
-
-# print(model_path)
+print_find_all_models()

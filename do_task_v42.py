@@ -230,7 +230,7 @@ def make_answers_directory_and_csv_path(this_original_task_file, model_name):
     # Extract just the last part of {model_name} and {this_original_task_file}
     model_name_last_part = os.path.basename(model_name).replace('.', '_')  # Replacing dots to avoid file extension confusion
     original_task_file_last_part = os.path.basename(this_original_task_file).replace('.', '_')
-    
+
     answer_file_path = f"answer_file_{model_name_last_part}_{clean_timestamp}_{original_task_file_last_part}.csv" 
 
     # Determine the path to the file that should be saved
@@ -241,16 +241,16 @@ def make_answers_directory_and_csv_path(this_original_task_file, model_name):
     # 2. extract just the last part of {this_original_task_file}
     # 3. make path, create directories and empty file
 
-    
+
     # Create directories if they don't exist
     os.makedirs(os.path.dirname(answer_file_path), exist_ok=True)
 
-    header_string = "this_row_or_line, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp"
-    
+    header_string = "score, this_row_or_line, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp"
+
     # Create an empty file (or just close it if it already exists)
     with open(answer_file_path, 'a', newline='') as csvfile:
         csvfile.write(header_string)
-        
+
     return answer_file_path
 
 
@@ -337,7 +337,6 @@ def list_files_in_aitaskfiles_dir(file_type_list=None):
 """
 
 import json
-
 
 # Helper Function
 def load_json_file(file_path):
@@ -1956,6 +1955,38 @@ import json
 import re
 
 
+
+def print_find_all_models(path="jan/models/"):
+
+    base_path = add_segment_to_absolute_base_path("jan/models/")
+
+    folders_and_files_with_gguf = find_folders_and_files_with_gguf(base_path)
+
+    print("\nAvailable Models:")
+    for this_model_path in folders_and_files_with_gguf:
+        print("     ", this_model_path)
+
+    print("\n\n")
+
+
+def find_folders_and_files_with_gguf(base_path):
+    folders_and_files_with_gguf = []
+    # Iterate through all items in base path
+    for item in os.listdir(base_path):
+        item_path = os.path.join(base_path, item)
+        # Check if the item is a directory
+        if os.path.isdir(item_path):
+            # Check each file in the directory
+            for file in os.listdir(item_path):
+                # Check if the file ends with '.gguf'
+                if file.endswith('.gguf'):
+                    # Construct the desired string format: basefolder/filename
+                    result = f"{item}/{file}"
+                    folders_and_files_with_gguf.append(result)
+                    break  # Found a matching file, no need to check the rest
+    return folders_and_files_with_gguf
+
+
 def clean_and_convert_to_json(input_str):
     # Step 1: Automatically handle the known structure without using regex
     # This involves replacing the problematic starting and ending quotes if they exist.
@@ -3052,7 +3083,13 @@ def number_call_api_within_structure_check(context_history, use_this_model, para
 
 
 # helper function
-def task_number_call_api_within_structure_check(context_history, use_this_model, parameter_dict, ai_local_or_cloud_mode, retry_x_times):
+def task_number_call_api_within_structure_check(
+        context_history, 
+        use_this_model, 
+        parameter_dict, 
+        ai_local_or_cloud_mode, 
+        retry_x_times, 
+        models_dir_path):
     retry_counter = 0
     json_ok_flag = False
 
@@ -3094,7 +3131,7 @@ def task_number_call_api_within_structure_check(context_history, use_this_model,
                 print(f"use_this_model -> {use_this_model}")
 
                 configies_dict = {
-                    'model_path_base': add_segment_to_absolute_base_path("jan/models/"),
+                    'model_path_base': add_segment_to_absolute_base_path(models_dir_path),
                     'model_nickname': use_this_model,
                     'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
                     'pipeline_mode': mini_gguf_api,
@@ -3162,7 +3199,10 @@ def task_number_call_api_within_structure_check(context_history, use_this_model,
 
 # helper function
 def crawler_call_api_within_json_structure_check(
-    context_history, use_this_model, ai_local_or_cloud_mode, skeleton_json
+    context_history, 
+    use_this_model, 
+    ai_local_or_cloud_mode, 
+    skeleton_json
 ):
     retry_counter = 0
     json_ok_flag = False
@@ -4630,19 +4670,19 @@ def mini_translate_json(
 
 
 
+
+
+
 def do_task_please(
     task_mode,
     list_of_models,
     ai_local_or_cloud_mode,
-    file_type_list,
     number_of_preliminary_drafts,
     retry_x_times,
     number_of_ranked_votes,
-    index_of_task=0,
-    index_of_options=1,
+    task_file_config_dic_list,
     parameter_dict=None,
-    task_field_name=None,
-    options_field_name=None,
+    models_dir_path="jan/models",
 ):
 
     """
@@ -4655,6 +4695,19 @@ def do_task_please(
             "final_answer":
         }
     """
+
+    print_find_all_models(path="jan/models/")
+
+
+    # unpack task_file_config_dic_list
+    file_type = task_file_config_dic_list["file_type"]
+    file_structure = task_file_config_dic_list["file_structure"]
+    task_field_name = task_file_config_dic_list["task_field_name"]
+    index_of_task = task_file_config_dic_list["index_of_task"]
+    index_of_options = task_file_config_dic_list["index_of_options"]
+    options_field_name = task_file_config_dic_list['options_field_name']
+    scoring_field_name = task_file_config_dic_list['scoring_field_name']
+
 
 
     # set parameters to defaults if none are given
@@ -4692,7 +4745,7 @@ def do_task_please(
 
     maybe keep a list of optional answers 
     then for each question write answer to
-    the answer_(original_name)_model_name_(timestamp)_file 
+    the answer_(original_name)_model_name_timestamp)_file 
 
 
     """
@@ -4811,7 +4864,7 @@ def do_task_please(
                     line_number = this_row_or_line  # Remember, it's zero-indexed
 
                     # Specify the fields you're interested in extracting from the JSON object
-                    fields_of_interest = [task_field_name, options_field_name]
+                    fields_of_interest = [task_field_name, options_field_name, scoring_field_name]
 
                     # Step 1: Extract the JSON object from the specified line
                     json_object = extract_object_by_line_number(this_original_task_file, line_number)
@@ -4829,6 +4882,7 @@ def do_task_please(
                     #################
                     this_task = specific_fields[task_field_name]
                     these_options = specific_fields[options_field_name]
+                    correct_answer = specific_fields[scoring_field_name]
                     if these_options:
                         task_summary = f"Task: {this_task}, Options: {these_options}"
                     else:
@@ -5224,6 +5278,7 @@ def do_task_please(
                                         parameter_dict, 
                                         ai_local_or_cloud_mode,
                                         retry_x_times,
+                                        models_dir_path,
                                     )
 
                                     print(f"\n\nlist_of_votes -> {list_of_votes}")
@@ -5275,14 +5330,30 @@ def do_task_please(
                     else:
                         best_key_option = None
 
+
+                    ##########
+                    # Scoring
+                    ##########
+
+                    if best_key_option == correct_answer:
+                        
+                        score = 1
+                    else:
+                        score = 0
+
+
+
+
+
+
                     # making csv row
                     print("making csv row...")
-                    answer_row = f"{this_row_or_line}, {best_key_option}, {use_this_model}, {this_original_task_file}, {task_from_instructions}, {question_task_prompt}, {list_of_options}, {draft_task_attempt_log}, {readable_timestamp}"
+                    answer_row = f"{score}, {this_row_or_line}, {best_key_option}, {use_this_model}, {this_original_task_file}, {task_from_instructions}, {question_task_prompt}, {list_of_options}, {draft_task_attempt_log}, {readable_timestamp}"
                     print(f"answer_row -> {answer_row}")
-                    
+
                     answer_row = strip_newlines_and_spaces(answer_row)
                     print(f"answer_row -> {answer_row}")
-                    
+
                     # append to answer_file_path
 
                     # # Check if the file exists to determine if the header needs to be written
@@ -5294,11 +5365,11 @@ def do_task_please(
                     #     if not file_exists:
                     #         header = ["this_row_or_line", "best_key_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"]
                     #         csvwriter.writerow(header)
-                        
+
                     #     # Write the data row
                     #     csvwriter.writerow(answer_row)
-                        
-                        
+
+
                     # Check if the file exists
                     if not os.path.exists(answer_file_path):
                         # If the file doesn't exist, create it
@@ -5328,7 +5399,7 @@ def do_task_please(
 
                     # making csv row
                     print("making csv row...")
-                    answer_row = f"{this_row_or_line}, 'fail', {use_this_model}, {this_original_task_file}, {task_from_instructions}, {question_task_prompt}, {list_of_options}, {draft_task_attempt_log}, {readable_timestamp}"
+                    answer_row = f""""fail", {this_row_or_line}, "fail", {use_this_model}, {this_original_task_file}, {task_from_instructions}, {question_task_prompt}, {list_of_options}, {draft_task_attempt_log}, {readable_timestamp}"""
                     print(f"answer_row -> {answer_row}")
                     answer_row = strip_newlines_and_spaces(answer_row)
                     print(f"answer_row -> {answer_row}")
@@ -5343,7 +5414,7 @@ def do_task_please(
                             pass
 
                         # header
-                        header_string = "this_row_or_line, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp"
+                        header_string = "score, this_row_or_line, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp"
                         with open(answer_file_path, 'a', newline='') as csvfile:
                             csvfile.write(header_string)
 
@@ -5353,7 +5424,7 @@ def do_task_please(
 
                     # Exit While
                     print(f"\nFailed to attempt task, moving on... {draft_task_attempt_log}\n\n\n")
-                
+
                 ##########################
                 # save file
                 ##########################
@@ -5504,22 +5575,34 @@ list_of_models = ["mistral-7b-instruct"]
 
 number_of_preliminary_drafts = 2
 number_of_ranked_votes = 1
-file_type_list = ".jsonl"
-task_field_name = 'task'
-options_field_name = 'options'
+# file_type_list = ".jsonl"
+# task_field_name = 'task'
+# options_field_name = 'options'
 retry_x_times = 2
+
+
+task_file_config_dic_list = [
+    {
+        "file_type": ".jsonl",
+        "file_structure": "",
+        "task_field_name": 'task',
+        "index_of_task": 0,
+        "index_of_options": 1,
+        "options_field_name": 'options',
+        "scoring_field_name": 'answer_index_from_1',
+    }
+]
+
+
 
 do_task_please(
     task_mode,
     list_of_models,
     ai_local_or_cloud_mode,
-    file_type_list,
     number_of_preliminary_drafts,
     retry_x_times,
     number_of_ranked_votes,
-    index_of_task=0,
-    index_of_options=1,
+    task_file_config_dic_list,
     parameter_dict=parameter_dict,
-    task_field_name=task_field_name,
-    options_field_name=options_field_name,
+    models_dir_path="jan/models",
 )
