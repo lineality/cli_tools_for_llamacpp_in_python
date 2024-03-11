@@ -2,6 +2,11 @@
 """
 TODO:
 
+why is only one option passing through?
+
+do a cleaner numbered list print of the options...
+probably easier for us slow models...
+
 add in fail limit
 
 maybe look for last json in list?
@@ -4882,10 +4887,11 @@ def do_task_please(
 
 
                     if list_of_options:
+                        print(f"list_of_options -> {list_of_options}")
+                        print(f"len(list_of_options) -> {len(list_of_options)}")
 
 
                         if len(list_of_options) > 1:
-
 
                             # Combine into one list of strings using list comprehension
                             set_list_of_options = set(list_of_options)
