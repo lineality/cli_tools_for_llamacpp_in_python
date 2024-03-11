@@ -227,12 +227,28 @@ def make_answers_directory_and_csv_path(this_original_task_file, model_name):
     # make path absolute, belts and suspenders
     solution_dir_path = os.path.abspath(solution_dir_path)
 
-    answer_file_path = f"answer_file_{model_name}_{clean_timestamp}_{this_original_task_file}" 
+    # Extract just the last part of {model_name} and {this_original_task_file}
+    model_name_last_part = os.path.basename(model_name).replace('.', '_')  # Replacing dots to avoid file extension confusion
+    original_task_file_last_part = os.path.basename(this_original_task_file).replace('.', '_')
+    
+    answer_file_path = f"answer_file_{model_name_last_part}_{clean_timestamp}_{original_task_file_last_part}" 
 
     # Determine the path to the file that should be saved
     answer_file_path = os.path.join(solution_dir_path, answer_file_path)
 
+    # TODO: 
+    # 1. extract just the last part of {model_name}
+    # 2. extract just the last part of {this_original_task_file}
+    # 3. make path, create directories and empty file
 
+    
+    # Create directories if they don't exist
+    os.makedirs(os.path.dirname(answer_file_path), exist_ok=True)
+
+    # Create an empty file (or just close it if it already exists)
+    with open(answer_file_path, 'a') as file:
+        pass  # File is created if it does not exist, and not modified if it does
+        
     return answer_file_path
 
 
@@ -5255,30 +5271,37 @@ def do_task_please(
 
                     # append to answer_file_path
 
-                    import os
-
-                    # Check if the file exists
-                    if not os.path.exists(answer_file_path):
-                        # If the file doesn't exist, create it
-                        try:
-                            with open(answer_file_path, 'x', newline='') as csvfile:
-                                pass  # Create an empty file
-                        except FileExistsError:
-                            # If the file was created by another process in the meantime, ignore the error
-                            pass
-
-                        # header
-                        header_string = "this_row_or_line, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp"
-                        with open(answer_file_path, 'a', newline='') as csvfile:
-                            csvwriter = csv.writer(csvfile, delimiter=',')
-                            csvwriter.writerow(header_string)
-
-
-
+                    # Check if the file exists to determine if the header needs to be written
+                    file_exists = os.path.exists(answer_file_path)
 
                     with open(answer_file_path, 'a', newline='') as csvfile:
                         csvwriter = csv.writer(csvfile, delimiter=',')
+                        # If the file doesn't exist, write the header
+                        if not file_exists:
+                            header = ["this_row_or_line", "best_key_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"]
+                            csvwriter.writerow(header)
+                        
+                        # Write the data row
                         csvwriter.writerow(answer_row)
+                    # # Check if the file exists
+                    # if not os.path.exists(answer_file_path):
+                    #     # If the file doesn't exist, create it
+                    #     try:
+                    #         with open(answer_file_path, 'x', newline='') as csvfile:
+                    #             pass  # Create an empty file
+                    #     except FileExistsError:
+                    #         # If the file was created by another process in the meantime, ignore the error
+                    #         pass
+
+                    #     # header
+                    #     header_string = "this_row_or_line, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp"
+                    #     with open(answer_file_path, 'a', newline='') as csvfile:
+                    #         csvwriter = csv.writer(csvfile, delimiter=',')
+                    #         csvwriter.writerow(header_string)
+
+                    # with open(answer_file_path, 'a', newline='') as csvfile:
+                    #     csvwriter = csv.writer(csvfile, delimiter=',')
+                    #     csvwriter.writerow(answer_row)
 
 
                     # Exit While
@@ -5293,25 +5316,17 @@ def do_task_please(
                     answer_row = f"{this_row_or_line}, 'fail', {use_this_model}, {this_original_task_file}, {task_from_instructions}, {question_task_prompt}, {list_of_options}, {draft_task_attempt_log}, {readable_timestamp}"
                     print(f"answer_row -> {answer_row}")
 
-                    # Check if the file exists
-                    if not os.path.exists(answer_file_path):
-                        # If the file doesn't exist, create it
-                        try:
-                            with open(answer_file_path, 'x', newline='') as csvfile:
-                                pass  # Create an empty file
-                        except FileExistsError:
-                            # If the file was created by another process in the meantime, ignore the error
-                            pass
-
-                        # header
-                        header_string = "this_row_or_line, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp"
-                        with open(answer_file_path, 'a', newline='') as csvfile:
-                            csvwriter = csv.writer(csvfile, delimiter=',')
-                            csvwriter.writerow(header_string)
-
+                    # Check if the file exists to determine if the header needs to be written
+                    file_exists = os.path.exists(answer_file_path)
 
                     with open(answer_file_path, 'a', newline='') as csvfile:
                         csvwriter = csv.writer(csvfile, delimiter=',')
+                        # If the file doesn't exist, write the header
+                        if not file_exists:
+                            header = ["this_row_or_line", "best_key_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"]
+                            csvwriter.writerow(header)
+                        
+                        # Write the data row
                         csvwriter.writerow(answer_row)
 
 
