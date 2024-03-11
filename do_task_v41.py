@@ -2810,6 +2810,7 @@ def general_task_call_api_within_structure_check(context_history,
                                                  parameter_dict, 
                                                  ai_local_or_cloud_mode,
                                                  task_mode,
+                                                 draft_task_attempt_log,
                                                  ):
     retry_counter = 0
     json_ok_flag = False
@@ -2870,6 +2871,8 @@ def general_task_call_api_within_structure_check(context_history,
                 print(response[1])
                 print(response[2])
                 dict_str = response[2]
+                
+                draft_task_attempt_log.append(response)
 
             ################
             # for cloud api
@@ -3355,12 +3358,12 @@ def read_jsonl_file(file_path):
             data.append((question, options))
     return data
 
-def extract_row_from_jsonl(this_row, this_path):
+def extract_row_from_jsonl(this_row_or_line, this_path):
     """
     Extracts a specific row from a CSV file, ensuring that commas within quotes are correctly parsed as part of the same field.
 
     Parameters:
-        this_row (int): The index of the row to extract from the CSV.
+        this_row_or_line (int): The index of the row to extract from the CSV.
         this_path (str): The path to the CSV file.
 
     Returns:
@@ -3371,7 +3374,7 @@ def extract_row_from_jsonl(this_row, this_path):
         with open(this_path, mode='r', newline='') as csvfile:
             reader = csv.reader(csvfile)
             for i, row in enumerate(reader):
-                if i == this_row:
+                if i == this_row_or_line:
                     return row
     except FileNotFoundError:
         print(f"File not found: {this_path}")
@@ -3388,12 +3391,12 @@ def extract_row_from_jsonl(this_row, this_path):
 
 
 
-# def extract_row_from_csv(this_row, this_path):
+# def extract_row_from_csv(this_row_or_line, this_path):
 #     """
 #     Extracts a specific row from a CSV file.
 
 #     Parameters:
-#         this_row (int): The index of the row to extract from the CSV.
+#         this_row_or_line (int): The index of the row to extract from the CSV.
 #         this_path (str): The path to the CSV file.
 
 #     Returns:
@@ -3404,7 +3407,7 @@ def extract_row_from_jsonl(this_row, this_path):
 #         with open(this_path, newline='') as csvfile:
 #             reader = csv.reader(csvfile)
 #             for i, row in enumerate(reader):
-#                 if i == this_row:
+#                 if i == this_row_or_line:
 #                     return row
 #     except FileNotFoundError:
 #         print(f"File not found: {this_path}")
@@ -4497,6 +4500,7 @@ def do_task_please(
     ai_local_or_cloud_mode,
     file_type_list,
     number_of_preliminary_drafts,
+    retry_x_times,
     number_of_ranked_votes,
     index_of_task=0,
     index_of_options=1,
@@ -4619,9 +4623,11 @@ def do_task_please(
 
             # for this language
             # NON-header mode, skip first row
-            for this_row in range(this_original_task_file_length):
+            for this_row_or_line in range(this_original_task_file_length):
 
-                print(f"this_row -> {this_row}")
+                draft_task_attempt_log = []
+                
+                print(f"this_row_or_line -> {this_row_or_line}")
 
 
                 """
@@ -4631,8 +4637,10 @@ def do_task_please(
 
                 task_ok_flag = False
                 task_fail_counter = 0
+                
+                dotask_try_counter = 0
 
-                while not task_ok_flag:
+                while (not task_ok_flag) and (dotask_try_counter <= retry_x_times):
 
                     if task_fail_counter > 10:
                         raise f"task_fail_counter > 10 -> {task_fail_counter}"
@@ -4650,7 +4658,7 @@ def do_task_please(
                     "What is 2+2?", [4, 2^2, 2**2, 2*2, all of the above]
                     """
 
-                    # row_as_list = extract_row_from_csv(this_row, this_original_task_file)
+                    # row_as_list = extract_row_from_csv(this_row_or_line, this_original_task_file)
 
 
 
@@ -4663,7 +4671,7 @@ def do_task_please(
                     """
 
                     # Specify the line number from which to extract the JSON object (e.g., line 2)
-                    line_number = this_row  # Remember, it's zero-indexed
+                    line_number = this_row_or_line  # Remember, it's zero-indexed
 
                     # Specify the fields you're interested in extracting from the JSON object
                     fields_of_interest = [task_field_name, options_field_name]
@@ -4856,6 +4864,7 @@ def do_task_please(
                             parameter_dict, 
                             ai_local_or_cloud_mode,
                             task_mode,
+                            draft_task_attempt_log,
                         )
 
                         # # remove overt duplicates
@@ -4874,7 +4883,11 @@ def do_task_please(
                             list_of_options.append(int(task_response_string))
 
                     #####################################################
+                    #####################################################
+                    #####################################################
                     # Select Top Top Goodest Translation Star-Good-Prime
+                    #####################################################
+                    #####################################################
                     #####################################################
 
                     # reset context history for new 'conversation' about selection
@@ -5089,11 +5102,15 @@ def do_task_please(
 
                                         else:  # if len of list is wrong
                                             while_counter += 1
+                                            task_fail_counter += 1
                                             print("len of list is wrong")
+                                            print(f"while_counter:{while_counter}, task_fail_counter:{task_fail_counter}")
 
                                     else:  # if no list at all!
                                         while_counter += 1
+                                        task_fail_counter += 1
                                         print("no list at all!")
+                                        print(f"while_counter:{while_counter}, task_fail_counter:{task_fail_counter}")
 
                             # tally the ranked votes and pick the winner
                             best_key_option = extract_top_rank(list_dict_of_options)
@@ -5111,7 +5128,7 @@ def do_task_please(
 
                     # making csv row
                     print("making csv row...")
-                    answer_row = f"{this_row}, {best_key_option}, {use_this_model}, {this_original_task_file}, {task_from_instructions}, {question_task_prompt}, {list_of_options}, {readable_timestamp}"
+                    answer_row = f"{this_row_or_line}, {best_key_option}, {use_this_model}, {this_original_task_file}, {task_from_instructions}, {question_task_prompt}, {list_of_options}, {draft_task_attempt_log}, {readable_timestamp}"
                     print(f"answer_row -> {answer_row}")
 
                     # append to answer_file_path
@@ -5129,7 +5146,7 @@ def do_task_please(
                             pass
 
                         # header
-                        header_string = "this_row, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, readable_timestamp"
+                        header_string = "this_row_or_line, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp"
                         with open(answer_file_path, 'a', newline='') as csvfile:
                             csvwriter = csv.writer(csvfile, delimiter=',')
                             csvwriter.writerow(header_string)
@@ -5300,6 +5317,7 @@ number_of_ranked_votes = 1
 file_type_list = ".jsonl"
 task_field_name = 'task'
 options_field_name = 'options'
+retry_x_times = 2
 
 do_task_please(
     task_mode,
@@ -5307,6 +5325,7 @@ do_task_please(
     ai_local_or_cloud_mode,
     file_type_list,
     number_of_preliminary_drafts,
+    retry_x_times,
     number_of_ranked_votes,
     index_of_task=0,
     index_of_options=1,
