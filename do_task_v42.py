@@ -1032,6 +1032,29 @@ def add_to_context_history(user_input, context_history, role):
     return context_history
 
 
+def find_matching_file_paths(file_paths, target_file_name):
+    """
+    Finds and returns all paths from a list of file paths that match the target file name.
+
+    Parameters:
+    - file_paths (list of str): The list of file paths to search through.
+    - target_file_name (str): The file name to match.
+
+    Returns:
+    - list of str: A list of full paths matching the target file name.
+    """
+    matching_paths = []
+
+    for path in file_paths:
+        # Extract the name of the file from the path
+        file_name = path.split('/')[-1]
+        if file_name == target_file_name:
+            matching_paths.append(path)
+
+    # return one path
+    return matching_paths[0]
+
+
 # Helper Function
 def prompt_user(user_input, context_history):
 
@@ -4699,15 +4722,6 @@ def do_task_please(
     print_find_all_models(path="jan/models/")
 
 
-    # unpack task_file_config_dic_list
-    file_type = task_file_config_dic_list["file_type"]
-    file_structure = task_file_config_dic_list["file_structure"]
-    task_field_name = task_file_config_dic_list["task_field_name"]
-    index_of_task = task_file_config_dic_list["index_of_task"]
-    index_of_options = task_file_config_dic_list["index_of_options"]
-    options_field_name = task_file_config_dic_list['options_field_name']
-    scoring_field_name = task_file_config_dic_list['scoring_field_name']
-
 
 
     # set parameters to defaults if none are given
@@ -4751,6 +4765,9 @@ def do_task_please(
     """
 
 
+  
+    file_type_list = [".jsonl", ".csv"]
+
     # Example usage
     task_files_list = list_files_in_aitaskfiles_dir(file_type_list)
 
@@ -4761,7 +4778,25 @@ def do_task_please(
     # inspection
     print(f"Task files in folder -> {task_files_list}")
 
-    for this_original_task_file in task_files_list:
+    for this_task_config_dict in task_file_config_dic_list:
+
+        # unpack task_file_config_dic_list
+        file_name = this_task_config_dict["file_name"]
+        file_type = this_task_config_dict["file_type"]
+        file_structure = this_task_config_dict["file_structure"]
+        task_field_name = this_task_config_dict["task_field_name"]
+        index_of_task = this_task_config_dict["index_of_task"]
+        index_of_options = this_task_config_dict["index_of_options"]
+        options_field_name = this_task_config_dict['options_field_name']
+        scoring_field_name = this_task_config_dict['scoring_field_name']
+
+
+        this_original_task_file = find_matching_file_paths(task_files_list, file_name)
+
+
+        print(f"this_original_task_file -> {this_original_task_file}")
+
+
 
         for use_this_model in list_of_models:
             ###
@@ -5091,13 +5126,13 @@ def do_task_please(
 
 
                     if list_of_options:
-                                                
+
                         print(f"list_of_options -> {list_of_options}")
                         print(f"len(list_of_options) -> {len(list_of_options)}")
-                        
+
                         set_ist_of_options = set(list_of_options)
                         list_of_options = list(set_ist_of_options)
-                        
+
                         print("After removing duplicates:")
                         print(f"list_of_options -> {list_of_options}")
                         print(f"len(list_of_options) -> {len(list_of_options)}")
@@ -5335,8 +5370,10 @@ def do_task_please(
                     # Scoring
                     ##########
 
+                    print(f"best_key_option -> {best_key_option}")
+                    print(f"correct_answer -> {correct_answer}")
                     if best_key_option == correct_answer:
-                        
+
                         score = 1
                     else:
                         score = 0
@@ -5583,6 +5620,7 @@ retry_x_times = 2
 
 task_file_config_dic_list = [
     {
+        "file_name": "my_test1.jsonl",
         "file_type": ".jsonl",
         "file_structure": "",
         "task_field_name": 'task',
