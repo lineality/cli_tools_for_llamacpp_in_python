@@ -2861,8 +2861,8 @@ def general_task_call_api_within_structure_check(context_history,
                     'pipeline_mode': mini_gguf_api,
                 }
 
-
-                print(f"configies_dict -> {configies_dict}")
+                # # inspection
+                # print(f"configies_dict -> {configies_dict}")
 
 
                 ######################
@@ -5010,6 +5010,14 @@ def do_task_please(
 
 
                     if list_of_options:
+                                                
+                        print(f"list_of_options -> {list_of_options}")
+                        print(f"len(list_of_options) -> {len(list_of_options)}")
+                        
+                        set_ist_of_options = set(list_of_options)
+                        list_of_options = list(set_ist_of_options)
+                        
+                        print("After removing duplicates:")
                         print(f"list_of_options -> {list_of_options}")
                         print(f"len(list_of_options) -> {len(list_of_options)}")
 
@@ -5283,7 +5291,7 @@ def do_task_please(
                     # making csv row
                     print("making csv row...")
                     answer_row = f"{this_row_or_line}, 'fail', {use_this_model}, {this_original_task_file}, {task_from_instructions}, {question_task_prompt}, {list_of_options}, {draft_task_attempt_log}, {readable_timestamp}"
-                    print(f"answer_row -> {answer_row}")"
+                    print(f"answer_row -> {answer_row}")
 
                     # Check if the file exists
                     if not os.path.exists(answer_file_path):
