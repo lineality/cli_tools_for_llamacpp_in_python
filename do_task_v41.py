@@ -1637,9 +1637,6 @@ def task_check_function_description_keys(dict_str):
     """
     print(f"\n\n Starting check_function_description_keys, dict_str -> {repr(dict_str)} {type(dict_str)}")
 
-    # input("breakpoint")
-
-
 
     ########################
     # Check Json Formatting
@@ -2319,7 +2316,6 @@ def json_number_check_structure_of_response_to_list(dict_str) -> list:
 #         f"\n\n Starting check_structure_of_response, dict_str -> {repr(dict_str)} {type(dict_str)}"
 #     )
 
-#     # input("breakpoint")
 
 #     ########################
 #     # Check Json Formatting
@@ -2752,8 +2748,6 @@ def call_api_within_structure_check(context_history,
 
                 print(f"configies_dict -> {configies_dict}")
 
-                # # breakpoint
-                # input("Breakpoint")
 
                 ######################
                 # local api with gguf
@@ -2799,8 +2793,6 @@ def call_api_within_structure_check(context_history,
             retry_counter += 1
             print(f"\n\ncall api with structure check while not json_ok_flag: retry_counter -> {retry_counter}\n")
 
-            # # breakpoint
-            # input("Breakpoint")
 
     print(f"all api with structure check out-while not json_ok_flag: retry_counter -> {retry_counter}")
 
@@ -2864,8 +2856,6 @@ def general_task_call_api_within_structure_check(context_history,
 
                 print(f"configies_dict -> {configies_dict}")
 
-                # # breakpoint
-                # input("Breakpoint")
 
                 ######################
                 # local api with gguf
@@ -2911,8 +2901,6 @@ def general_task_call_api_within_structure_check(context_history,
             retry_counter += 1
             print(f"\n\ngeneral_task_call_api_within_structure_check in while retry_counter -> {retry_counter}\n")
 
-            # # breakpoint
-            # input("Breakpoint")
 
     print(f"general_task_call_api_within_structure_check finalretry_counter -> {retry_counter}")
 
@@ -2974,8 +2962,6 @@ def number_call_api_within_structure_check(context_history, use_this_model, para
 
                 print(f"configies_dict -> {configies_dict}")
 
-                # # breakpoint
-                # input("Breakpoint")
 
                 ######################
                 # local api with gguf
@@ -3021,8 +3007,6 @@ def number_call_api_within_structure_check(context_history, use_this_model, para
             retry_counter += 1
             print(f"\n\nnumber_call_api_within_structure_check in retry_counter -> {retry_counter}\n")
 
-            # # breakpoint
-            # input("Breakpoint")
 
     print(f"number_call_api_within_structure_check out retry_counter -> {retry_counter}")
 
@@ -3821,8 +3805,6 @@ def replace_leaf_by_path(json_structure, path, new_value):
 #         """
 #         )
 
-#         # # breakpoint
-#         # input("breakpoint")
 
 #         # Sanity check
 #         if paths_list != dict_of_selected_best_paths_list:
@@ -3843,9 +3825,9 @@ def replace_leaf_by_path(json_structure, path, new_value):
 
 #                 untranslated_leaf = extract_value_by_path(original_data, this_path)
 
-#                 # breakpoint
-#                 print(f"\n\n breakpoint 5: untranslated_leaf -> {untranslated_leaf}")
-#                 # input("breakpoint")
+
+#                 print(f"\n\n untranslated_leaf -> {untranslated_leaf}")
+
 
 #                 # make empty conversation
 #                 # reset context history for new 'conversation' about translation
@@ -3861,9 +3843,9 @@ def replace_leaf_by_path(json_structure, path, new_value):
 #                     context_history, target_language, untranslated_leaf
 #                 )
 
-#                 # breakpoint
-#                 print(f"\n\n breakpoint 5: context_history -> {context_history}")
-#                 # input("breakpoint")
+
+#                 print(f"\n\n context_history -> {context_history}")
+
 
 #                 # making N translation-versions
 #                 for i in range(number_of_preliminary_translations):
@@ -3925,9 +3907,8 @@ def replace_leaf_by_path(json_structure, path, new_value):
 #                 context_history = []
 
 #                 print("\n\n\nSelect Top Top Goodest Translation Star-Good-Prime")
-#                 # # inspection breakpoint
-#                 # print(f"\n\n breakpoint 5: populated_skeleton -> {populated_skeleton}")
-#                 # # input("breakpoint")
+
+#                 # print(f"\n\n populated_skeleton -> {populated_skeleton}")
 
 #                 # set prompts to select best translation
 #                 list_of_options = extract_value_by_path(skeleton_json, this_path)
@@ -4155,8 +4136,7 @@ def mini_translate_json(
         """
         )
 
-        # # breakpoint
-        # input("breakpoint")
+
 
         # Sanity check
         if paths_list != dict_of_selected_best_paths_list:
@@ -4186,9 +4166,6 @@ def mini_translate_json(
 
                     untranslated_leaf = extract_string_value_by_path(original_data, this_path)
 
-                    # # breakpoint
-                    # print(f"\n\n breakpoint 5: untranslated_leaf -> {untranslated_leaf}")
-                    # input("breakpoint")
 
                     # make empty conversation
                     # reset context history for new 'conversation' about translation
@@ -4203,9 +4180,7 @@ def mini_translate_json(
                     inside tripple pipes |||your_translation||| just that. no other commentary,
                     translate and earn a treat: best translation is |||"""
 
-                    # # breakpoint
-                    # print(f"\n\n mini breakpoint 5: context_history -> {context_history}")
-                    # input("breakpoint")
+
 
                     # making N translation-versions
                     for i in range(number_of_preliminary_translations):
@@ -4281,9 +4256,6 @@ def mini_translate_json(
                     context_history = []
 
                     print("\n\n\nSelect Top Top Goodest Translation Star-Good-Prime")
-                    # # inspection breakpoint
-                    # print(f"\n\n breakpoint 5: populated_skeleton -> {populated_skeleton}")
-                    # # input("breakpoint") 
 
                     remove_duplicates_from_terminal_list(populated_skeleton, this_path)
 
@@ -4403,12 +4375,6 @@ def mini_translate_json(
                     # '''json
 
                     # ''' 
-                    # No additional comments. A tasty reward awaits your accurate selection."""
-
-
-                    # # breakpoint
-                    # print(f"\n\n context_history -> {context_history}")
-                    # input("breakpoint")
 
                     ###################
                     ###################
@@ -4621,8 +4587,6 @@ def do_task_please(
             """
             )
 
-            # # breakpoint
-            # input("breakpoint")
 
             """
             To stay lite:
@@ -4716,11 +4680,6 @@ def do_task_please(
 
                     print(f"this_task -> {this_task}")
                     print(f"these_options -> {these_options}")
-                    input("breakpoint")
-
-                    # # breakpoint
-                    # print(f"\n\n breakpoint 5: untranslated_task -> {untranslated_task}")
-                    # input("breakpoint")
 
                     # make empty conversation
                     # reset context history for new 'conversation' about translation
@@ -4845,13 +4804,10 @@ def do_task_please(
 
 
                     print(f"context_history -> {context_history}")
-                    input("breakpoint")
+
 
                     old_history = context_history
 
-                    # # breakpoint
-                    # print(f"\n\n mini breakpoint 5: context_history -> {context_history}")
-                    # input("breakpoint")
 
                     list_of_options = []
 
@@ -4912,13 +4868,15 @@ def do_task_please(
 
                     # reset context history for new 'conversation' about selection
                     context_history = []
+                    question_task_prompt = old_history
+                    date_time = datetime.now(UTC)
+                    readable_timestamp = date_time.strftime("ymd_%Y-%m-%d")
 
                     print("\n\n\nSelect Top Top Goodest Translation Star-Good-Prime")
-                    # # inspection breakpoint
-                    # print(f"\n\n breakpoint 5: populated_skeleton -> {populated_skeleton}")
-                    # # input("breakpoint") 
+
 
                     if list_of_options:
+
 
                         if len(list_of_options) > 1:
 
@@ -5040,12 +4998,7 @@ def do_task_please(
                             # No additional comments. A tasty reward awaits your accurate selection."""
 
 
-                            question_task_prompt = context_history
 
-
-                            # # breakpoint
-                            # print(f"\n\n context_history -> {context_history}")
-                            # input("breakpoint")
 
                             ###################
                             ###################
@@ -5122,8 +5075,7 @@ def do_task_please(
 
                             print(f"best_key_option -> {best_key_option}")
 
-                            date_time = datetime.now(UTC)
-                            readable_timestamp = date_time.strftime("ymd_%Y-%m-%d")
+
 
                         else:
                             # make the best choice...the only option
@@ -5132,7 +5084,10 @@ def do_task_please(
                     else:
                         best_key_option = None
 
-                    answer_row = f"{this_row}, {best_key_option}, {use_this_model}, {this_original_task_file}, {task_from_instructions}, {question_task_prompt}, {readable_timestamp}"
+                    # making csv row
+                    print("making csv row...")
+                    answer_row = f"{this_row}, {best_key_option}, {use_this_model}, {this_original_task_file}, {task_from_instructions}, {question_task_prompt}, {list_of_options}, {readable_timestamp}"
+                    print(f"answer_row -> {answer_row}")
 
                     # append to answer_file_path
 
