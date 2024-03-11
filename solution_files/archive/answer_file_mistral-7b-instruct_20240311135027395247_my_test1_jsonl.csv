@@ -1,0 +1,39 @@
+this_row_or_line, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp0, 1, mistral-7b-instruct, /home/oops/code/cli_tools_for_llamacpp_in_python/ai_task_files/my_test1.jsonl, , 
+
+                        Which from this list of possible responses is the best response to being given this task?
+
+                        For this task: 
+                        What is the capital of France? 
+
+                        From this list of possible responses: 
+                        ['Paris', 'London', 'Berlin', 'Madrid'] 
+
+                        Your answer must be the number of the answer-option in sequence, where "1" is the first answer option.
+
+                        Giveyour answer in this format:
+                        
+                    solution_plan_outline: "", 
+                    draft_revisions_and_comments: "", 
+                    Then in triple pipes:
+                    |||final answer option number|||
+                    
+                        , [1], [(0, 'status_message: OK!!', ' Which from this list of possible responses is the best response to being given this task? For this task: What is the capital of France? From this list of possible responses: [\'Paris\', \'London\', \'Berlin\', \'Madrid\'] Your answer must be the number of the answer-option in sequence, where "1" is the first answer option. Giveyour answer in this format: solution_plan_outline: "", draft_revisions_and_comments: "", Then in triple pipes: |||final answer option number|||\n\nsolution_plan_outline: Search for the capital of France in my knowledge base, if not found then ask a reliable source.\n\ndraft_revisions_and_comments: If I am confident that Paris is the capital of France, I can select answer 1 directly. However, if I\'m not sure or if other options seem plausible (like London for historical reasons), I should consider investigating further before committing to an answer.\n\n|||final answer option number: 1|||'), (0, 'status_message: OK!!', ' Which from this list of possible responses is the best response to being given this task? For this task: What is the capital of France? From this list of possible responses: [\'Paris\', \'London\', \'Berlin\', \'Madrid\'] Your answer must be the number of the answer-option in sequence, where "1" is the first answer option. Giveyour answer in this format: solution_plan_outline: "", draft_revisions_and_comments: "", Then in triple pipes: |||final answer option number|||\n\nsolution_plan_outline: Search for the capital city of France within the given options.\ndraft_revisions_and_comments: Check if "Paris" is present in the list, as it is the correct answer.\n|||1|||')], ymd_2024-03-111, None, mistral-7b-instruct, /home/oops/code/cli_tools_for_llamacpp_in_python/ai_task_files/my_test1.jsonl, , 
+
+                        Which from this list of possible responses is the best response to being given this task?
+
+                        For this task: 
+                        What is the largest planet in our solar system? 
+
+                        From this list of possible responses: 
+                        ['Earth', 'Jupiter', 'Mars', 'Venus'] 
+
+                        Your answer must be the number of the answer-option in sequence, where "1" is the first answer option.
+
+                        Giveyour answer in this format:
+                        
+                    solution_plan_outline: "", 
+                    draft_revisions_and_comments: "", 
+                    Then in triple pipes:
+                    |||final answer option number|||
+                    
+                        , [], [(0, 'status_message: OK!!', ' Which from this list of possible responses is the best response to being given this task? For this task: What is the largest planet in our solar system? From this list of possible responses: [\'Earth\', \'Jupiter\', \'Mars\', \'Venus\'] Your answer must be the number of the answer-option in sequence, where "1" is the first answer option. Giveyour answer in this format: solution_plan_outline: "", draft_revisions_and_comments: "", Then in triple pipes: |||final answer option number||| The largest planet in our solar system is Jupiter. solution_plan_outline: "Identify the planets listed and determine which one has the greatest diameter."\n\ndraft_revisions_and_comments: ""\n\n|||final answer option number: 2|||'), (0, 'status_message: OK!!', ' Which from this list of possible responses is the best response to being given this task? For this task: What is the largest planet in our solar system? From this list of possible responses: [\'Earth\', \'Jupiter\', \'Mars\', \'Venus\'] Your answer must be the number of the answer-option in sequence, where "1" is the first answer option. Giveyour answer in this format: solution_plan_outline: "", draft_revisions_and_comments: "", Then in triple pipes: |||final answer option number||| The largest planet in our solar system is Jupiter. solution_plan_outline: Identify the largest planet from the given options by comparing their sizes or diameters. Draft revisions and comments: None. |||final answer option number: 2|||')], ymd_2024-03-11
