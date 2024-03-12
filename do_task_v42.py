@@ -4852,7 +4852,7 @@ def do_task_please(
             for this_row_or_line in range(this_original_task_file_length):
 
                 draft_task_attempt_log = []
-                
+    
                 print(f"this_row_or_line -> {this_row_or_line}")
 
 
@@ -4863,7 +4863,7 @@ def do_task_please(
 
                 task_ok_flag = False
                 task_fail_counter = 0
-                
+
                 dotask_try_counter = 0
 
                 while (not task_ok_flag) and (dotask_try_counter <= retry_x_times):
@@ -5383,15 +5383,14 @@ def do_task_please(
 
 
 
-
-
-
                     # making csv row
                     print("making csv row...")
                     answer_row = f""""{score}, "{this_row_or_line}", "{best_key_option}", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_options}", "{draft_task_attempt_log}", "{readable_timestamp}"\n"""
                     print(f"answer_row -> {answer_row}")
 
                     answer_row = strip_newlines_and_spaces(answer_row)
+                    print(f"\n\nanswer_row -> {answer_row}")
+                    answer_row = answer_row + "\n"
                     print(f"\n\nanswer_row -> {answer_row}")
 
                     # append to answer_file_path
@@ -5463,9 +5462,11 @@ def do_task_please(
 
                     # making csv row
                     print("making csv row...")
-                    answer_row = f""""fail", "{this_row_or_line}", "fail", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_options}", "{draft_task_attempt_log}", "{readable_timestamp}"\n"""
+                    answer_row = f'"fail", "{this_row_or_line}", "fail", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_options}", "{draft_task_attempt_log}", "{readable_timestamp}"\n'
                     print(f"answer_row -> {answer_row}")
                     answer_row = strip_newlines_and_spaces(answer_row)
+                    answer_row = answer_row + "\n"
+
                     print(f"\n\nanswer_row -> {answer_row}")
 
 

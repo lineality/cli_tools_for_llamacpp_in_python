@@ -1,53 +1,62 @@
+
 import os
+from datetime import datetime, UTC
 
-def get_absolute_base_path():
-    # Get the absolute path to the current user's home directory (Starts from root, ends at home directory)
-    home_directory = os.path.expanduser("~")  # e.g., "/home/john"
-
-    # # Define your relative path (Starts from home directory, ends at your target file/directory)
-    # relative_path = "Documents/my_project/config.txt"  # e.g., "Documents/my_project/config.txt"
-
-    # # Create an absolute path (Starts from root, ends at your target file/directory)
-    # absolute_path = os.path.join(home_directory, relative_path)  # e.g., "/home/john/Documents/my_project/config.txt"
-
-    absolute_path = os.path.abspath(home_directory)
-
-    return absolute_path
-
-print(get_absolute_base_path())
+def make_answers_directory_and_csv_path(this_original_task_file, model_name):
+    """
+    Returns a list of .json files in the current working directory.
+    """
+    solution_dir_path = "solution_files"
+    date_time = datetime.now(UTC)
+    clean_timestamp = date_time.strftime("%Y%m%d%H%M%S%f")
 
 
-def add_segment_to_absolute_base_path(additional_segment):
+    # make path absolute
+    solution_dir_path = os.path.abspath(solution_dir_path)
 
-    # Get the absolute path to the current user's home directory (Starts from root, ends at home directory)
-    home_directory = os.path.expanduser("~")  # e.g., "/home/john"
+    # Check if the directory exists
+    if not os.path.exists(solution_dir_path):
 
-    # Create an absolute path including the new segment
-    absolute_path = os.path.join(home_directory, additional_segment)
+        # If it does not exist, create it
+        # Ensure the directory exists
+        try:
+            os.makedirs(
+                solution_dir_path, exist_ok=True
+            )  # Ensure the directory is created if it does not exist
+        except Exception as e:
+            print(f"Error creating directory {solution_dir_path}: {e}")
+            return  # Exit the function if directory creation fails
 
-    absolute_path = os.path.abspath(absolute_path)
-
-    return absolute_path
 
 
-print(add_segment_to_absolute_base_path("/jan/models"))
+    # make path absolute, belts and suspenders
+    solution_dir_path = os.path.abspath(solution_dir_path)
+
+    # Extract just the last part of {model_name} and {this_original_task_file}
+    model_name_last_part = os.path.basename(model_name).replace('.', '_')  # Replacing dots to avoid file extension confusion
+    original_task_file_last_part = os.path.basename(this_original_task_file).replace('.', '_')
+
+    answer_file_path = f"answer_file_{model_name_last_part}_{clean_timestamp}_{original_task_file_last_part}.csv" 
+
+    # Determine the path to the file that should be saved
+    answer_file_path = os.path.join(solution_dir_path, answer_file_path)
+
+    # TODO: 
+    # 1. extract just the last part of {model_name}
+    # 2. extract just the last part of {this_original_task_file}
+    # 3. make path, create directories and empty file
 
 
-def add_segment_to_absolute_base_path(additional_segment):
-    # Get the absolute path to the current user's home directory
-    home_directory = os.path.expanduser("~")
-    print(f"Home Directory: {home_directory}")  # Debugging print
+    # Create directories if they don't exist
+    os.makedirs(os.path.dirname(answer_file_path), exist_ok=True)
 
-    # Create an absolute path by joining the home directory with the additional segment
-    absolute_path = os.path.join(home_directory, additional_segment)
-    print(f"Joined Path Before abspath: {absolute_path}")  # Debugging print
+    header_string = '"score", "this_row_or_line", "best_key_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"\n'
 
-    # Ensure the path is absolute (this should not change the path if already absolute)
-    absolute_path = os.path.abspath(absolute_path)
-    print(f"Final Absolute Path: {absolute_path}")  # Debugging print
+    # Create an empty file (or just close it if it already exists)
+    with open(answer_file_path, 'a', newline='') as csvfile:
+        csvfile.write(header_string)
 
-    return absolute_path
+    return answer_file_path
 
-# Example usage
-absolute_path_result = add_segment_to_absolute_base_path("jan/models/")
-print(f"Result: {absolute_path_result}")
+
+make_answers_directory_and_csv_path("abc", "xyz")
