@@ -5113,9 +5113,9 @@ def do_task_please(
 
                         """
 
-                        ############
-                        # Translate
-                        ############
+                        ##########
+                        # Do Task
+                        ##########
                         task_response_string = general_task_call_api_within_structure_check(
                             context_history, 
                             use_this_model, 
@@ -5415,7 +5415,7 @@ def do_task_please(
 
                     # making csv row
                     print("with score: making csv row...")
-                    answer_row = f""""{score}, "{this_row_or_line}", "{best_key_option}", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_options}", "{draft_task_attempt_log}", "{readable_timestamp}"\n"""
+                    answer_row = f'"{score}, "{this_row_or_line}", "{best_key_option}", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_options}", "{replace_special_characters_with_text(draft_task_attempt_log)}", "{readable_timestamp}"\n'
                     # print(f"answer_row -> {answer_row}")
 
                     answer_row = strip_newlines_and_spaces(answer_row)
@@ -5429,17 +5429,16 @@ def do_task_please(
                     file_exists = os.path.exists(answer_file_path)
 
                     with open(answer_file_path, 'a', newline='') as csvfile:
-                        csvwriter = csv.writer(csvfile, delimiter=',')
                         # If the file doesn't exist, write the header
                         if not file_exists:
-                            header_string = "this_row_or_line, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp"
-                            csvwriter.writerow(header_string)
+                            header_string = '"score", "this_row_or_line", "best_key_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"\n'
+                            csvfile.write(header_string)
 
                         # Write the data row
-                        csvwriter.writerow(answer_row)
+                        csvfile.write(answer_row)
 
 
-                    # Check if the file exists
+                    # Check if the file exists, if not, make file with header
                     if not os.path.exists(answer_file_path):
                         # If the file doesn't exist, create it
                         try:
@@ -5451,12 +5450,11 @@ def do_task_please(
 
                         # header
                         header_string = '"score", "this_row_or_line", "best_key_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"\n'
-                        with open(answer_file_path, 'a', newline='') as csvfile:
-                            csvwriter = csv.writer(csvfile, delimiter=',')
-                            csvwriter.writerow(header_string)
+                            csvfile.write(header_string)
 
-                    with open(answer_file_path, 'a', newline='') as csvfile:
-                        csvfile.write(answer_row)
+                        # works
+                        with open(answer_file_path, 'a', newline='') as csvfile:
+                            csvfile.write(answer_row)
 
 
                     # Exit While
