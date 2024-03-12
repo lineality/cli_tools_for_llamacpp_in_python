@@ -245,7 +245,7 @@ def make_answers_directory_and_csv_path(this_original_task_file, model_name):
     # Create directories if they don't exist
     os.makedirs(os.path.dirname(answer_file_path), exist_ok=True)
 
-    header_string = "score, this_row_or_line, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp"
+    header_string = "score, this_row_or_line, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp\n"
 
     # Create an empty file (or just close it if it already exists)
     with open(answer_file_path, 'a', newline='') as csvfile:
@@ -1945,6 +1945,8 @@ def set_translate__user_prompt(context_history, target_language, original_data):
     return context_history
 
 """# json inspection"""
+
+
 
 
 # Helper Function
@@ -5370,12 +5372,13 @@ def do_task_please(
                     # Scoring
                     ##########
 
-                    print(f"best_key_option -> {best_key_option}")
-                    print(f"correct_answer -> {correct_answer}")
+                    print(f"best_key_option -> {best_key_option} type -> {type(best_key_option)}")
+                    print(f"correct_answer -> {best_key_option} type -> {type(best_key_option)}")
                     if best_key_option == correct_answer:
-
+                        print("Score!")
                         score = 1
                     else:
+                        print("Oops")
                         score = 0
 
 
@@ -5385,26 +5388,26 @@ def do_task_please(
 
                     # making csv row
                     print("making csv row...")
-                    answer_row = f"{score}, {this_row_or_line}, {best_key_option}, {use_this_model}, {this_original_task_file}, {task_from_instructions}, {question_task_prompt}, {list_of_options}, {draft_task_attempt_log}, {readable_timestamp}"
+                    answer_row = f""""{score}, "{this_row_or_line}", "{best_key_option}", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_options}", "{draft_task_attempt_log}", "{readable_timestamp}"\n"""
                     print(f"answer_row -> {answer_row}")
 
                     answer_row = strip_newlines_and_spaces(answer_row)
-                    print(f"answer_row -> {answer_row}")
+                    print(f"\n\nanswer_row -> {answer_row}")
 
                     # append to answer_file_path
 
-                    # # Check if the file exists to determine if the header needs to be written
-                    # file_exists = os.path.exists(answer_file_path)
+                    # Check if the file exists to determine if the header needs to be written
+                    file_exists = os.path.exists(answer_file_path)
 
-                    # with open(answer_file_path, 'a', newline='') as csvfile:
-                    #     csvwriter = csv.writer(csvfile, delimiter=',')
-                    #     # If the file doesn't exist, write the header
-                    #     if not file_exists:
-                    #         header = ["this_row_or_line", "best_key_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"]
-                    #         csvwriter.writerow(header)
+                    with open(answer_file_path, 'a', newline='') as csvfile:
+                        csvwriter = csv.writer(csvfile, delimiter=',')
+                        # If the file doesn't exist, write the header
+                        if not file_exists:
+                            header_string = "this_row_or_line, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp"
+                            csvwriter.writerow(header_string)
 
-                    #     # Write the data row
-                    #     csvwriter.writerow(answer_row)
+                        # Write the data row
+                        csvwriter.writerow(answer_row)
 
 
                     # Check if the file exists
@@ -5432,14 +5435,50 @@ def do_task_please(
                     task_ok_flag = True
 
 
+
+
+                    # # Check if the file exists
+                    # if not os.path.exists(answer_file_path):
+                    #     # If the file doesn't exist, create it with the header
+                    #     with open(answer_file_path, 'w', newline='') as csvfile:  # Use 'w' mode to write the header
+                    #         csvwriter = csv.writer(csvfile, delimiter=',')
+                    #         header = ["this_row_or_line", "best_key_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"]
+                    #         csvwriter.writerow(header)
+
+                    # Assume `answer_row` is a list of values you want to write to the CSV
+                    # For example, constructing `answer_row` might look like this:
+                    # answer_row = ["fail", this_row_or_line, "fail", use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp]
+                    # Make sure `answer_row` is a list here, not a string.
+
+                    # # Strip newlines and spaces from each element if needed
+                    # answer_row = [strip_newlines_and_spaces(str(item)) for item in answer_row]
+
+                    # # Now, append this row to the CSV file
+                    # with open(answer_file_path, 'a', newline='') as csvfile:
+                    #     csvwriter = csv.writer(csvfile, delimiter=',')
+                    #     csvwriter.writerow(answer_row)
+
+
                 if not task_ok_flag:
 
                     # making csv row
                     print("making csv row...")
-                    answer_row = f""""fail", {this_row_or_line}, "fail", {use_this_model}, {this_original_task_file}, {task_from_instructions}, {question_task_prompt}, {list_of_options}, {draft_task_attempt_log}, {readable_timestamp}"""
+                    answer_row = f""""fail", "{this_row_or_line}", "fail", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_options}", "{draft_task_attempt_log}", "{readable_timestamp}"\n"""
                     print(f"answer_row -> {answer_row}")
                     answer_row = strip_newlines_and_spaces(answer_row)
-                    print(f"answer_row -> {answer_row}")
+                    print(f"\n\nanswer_row -> {answer_row}")
+
+
+
+                    # Strip newlines and spaces from each element if needed
+                    answer_row = [strip_newlines_and_spaces(str(item)) for item in answer_row]
+
+                    # # Now, append this row to the CSV file
+                    # with open(answer_file_path, 'a', newline='') as csvfile:
+                    #     csvwriter = csv.writer(csvfile, delimiter=',')
+                    #     csvwriter.writerow(answer_row)
+
+
                     # Check if the file exists
                     if not os.path.exists(answer_file_path):
                         # If the file doesn't exist, create it
@@ -5451,7 +5490,7 @@ def do_task_please(
                             pass
 
                         # header
-                        header_string = "score, this_row_or_line, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp"
+                        header_string = "score, this_row_or_line, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp\n"
                         with open(answer_file_path, 'a', newline='') as csvfile:
                             csvfile.write(header_string)
 
@@ -5466,16 +5505,6 @@ def do_task_please(
                 # save file
                 ##########################
                 print("All done? Anyone here...hello? What was that? Is someone")
-
-                # try:
-                #     # if test fails
-                #     if dict_task_detection_boolean_true_means_defective(dict_of_selected_best):
-                #         return False
-
-                # except Exception as e:
-                #     print(f"\nTRY AGAIN: dict_task_detection_boolean_true_means_defective() empty or stub task found: {e}")
-                #     print(f"Failed dict_str -> {dict_of_selected_best}")
-                #     return False
 
 
 
