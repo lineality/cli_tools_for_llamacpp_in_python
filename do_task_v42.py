@@ -990,6 +990,19 @@ headers = {
 """
 
 
+def pretty_print_list(lst):
+    if not lst:
+        return False
+
+    max_index_width = len(str(len(lst)))
+    pretty_string = ""
+
+    for index, item in enumerate(lst, start=1):
+        pretty_string += f"{index:>{max_index_width}}. {item}; "
+
+    return pretty_string.rstrip()
+
+
 # Helper Function
 def segment_for_adding_to_context_history(role, comment):
 
@@ -1090,6 +1103,23 @@ def counter(timeout=10):
         time.sleep(1)
     return count
 
+def replace_special_characters_with_text(string):
+    replacements = {
+        ',': '(comma)',
+        '"': '(double quote or inverted commas)',
+        "'": '(single quote or apostrophe)',
+        '[': '(left square bracket)',
+        ']': '(right square bracket)',
+        '{': '(left curly bracket)',
+        '}': '(right curly bracket)',
+        ':': '(colon)',
+        '\\n': '(newline)',
+    }
+    
+    for char, replacement in replacements.items():
+        string = string.replace(char, replacement)
+    
+    return string
 
 # Helper Function
 def ask_mistral_model(context_history, use_this_model):
@@ -4921,7 +4951,7 @@ def do_task_please(
                     these_options = specific_fields[options_field_name]
                     correct_answer = specific_fields[scoring_field_name]
                     if these_options:
-                        task_summary = f"Task: {this_task}, Options: {these_options}"
+                        task_summary = f"Task: {this_task}, Options: {pretty_print_list(these_options)}"
                     else:
                         task_summary = f"Task: {this_task}"
 
@@ -5020,7 +5050,7 @@ def do_task_please(
                         {this_task} 
 
                         From this list of possible responses: 
-                        {these_options} 
+                        {pretty_print_list(these_options)} 
 
                         Your answer must be the number of the answer-option in sequence, where "1" is the first answer option.
 
@@ -5041,7 +5071,7 @@ def do_task_please(
                         {this_task} 
 
                         From this list of possible responses: 
-                        {these_options} 
+                        {pretty_print_list(these_options)} 
 
                         Your answer must be the number of the answer-option in sequence, where "1" is the first answer option.
 
@@ -5239,7 +5269,7 @@ def do_task_please(
                             # """
 
                             context_history = f"""
-                            Evaluate each solution for this task'{task_summary}' from these options: {dict_of_options}. 
+                            Evaluate each solution for this task'{task_summary}' from these options: {pretty_print_list(dict_of_options)}. 
                             Place your evaluations  (0-10, 0 is bad, 10 is good) as the value to a key in Json format. Return your markdown json object 
                             listing each option only as "option-number" 
                             as: 
@@ -5251,7 +5281,7 @@ def do_task_please(
                             """
 
                             context_history = f"""
-                            Evaluate each solution option for the task '{task_summary}'. Evaluate these options: {dict_of_options}. 
+                            Evaluate each solution option for the task '{task_summary}'. Evaluate these options: {pretty_print_list(dict_of_options)}. 
                             Place your evaluations  (0-10, 0 is bad, 10 is good) as the value to a key in markdown ```json format. 
                             as: 
                             ```json 
@@ -5384,12 +5414,12 @@ def do_task_please(
 
 
                     # making csv row
-                    print("making csv row...")
+                    print("with score: making csv row...")
                     answer_row = f""""{score}, "{this_row_or_line}", "{best_key_option}", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_options}", "{draft_task_attempt_log}", "{readable_timestamp}"\n"""
-                    print(f"answer_row -> {answer_row}")
+                    # print(f"answer_row -> {answer_row}")
 
                     answer_row = strip_newlines_and_spaces(answer_row)
-                    print(f"\n\nanswer_row -> {answer_row}")
+                    # print(f"\n\nanswer_row -> {answer_row}")
                     answer_row = answer_row + "\n"
                     print(f"\n\nanswer_row -> {answer_row}")
 
@@ -5461,9 +5491,9 @@ def do_task_please(
                 if not task_ok_flag:
 
                     # making csv row
-                    print("making csv row...")
-                    answer_row = f'"fail", "{this_row_or_line}", "fail", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_options}", "{draft_task_attempt_log}", "{readable_timestamp}"\n'
-                    print(f"answer_row -> {answer_row}")
+                    print("if not task_ok_flag: making csv row...")
+                    answer_row = f'"fail", "{this_row_or_line}", "fail", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_options}", "{replace_special_characters_with_text(draft_task_attempt_log)}", "{readable_timestamp}"\n'
+                    # print(f"answer_row -> {answer_row}")
                     answer_row = strip_newlines_and_spaces(answer_row)
                     answer_row = answer_row + "\n"
 
