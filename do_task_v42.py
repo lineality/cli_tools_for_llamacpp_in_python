@@ -245,7 +245,7 @@ def make_answers_directory_and_csv_path(this_original_task_file, model_name):
     # Create directories if they don't exist
     os.makedirs(os.path.dirname(answer_file_path), exist_ok=True)
 
-    header_string = "score, this_row_or_line, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp\n"
+    header_string = '"score", "this_row_or_line", "best_key_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"\n'
 
     # Create an empty file (or just close it if it already exists)
     with open(answer_file_path, 'a', newline='') as csvfile:
@@ -5421,7 +5421,7 @@ def do_task_please(
                             pass
 
                         # header
-                        header_string = "this_row_or_line, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp"
+                        header_string = '"score", "this_row_or_line", "best_key_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"\n'
                         with open(answer_file_path, 'a', newline='') as csvfile:
                             csvwriter = csv.writer(csvfile, delimiter=',')
                             csvwriter.writerow(header_string)
@@ -5490,7 +5490,7 @@ def do_task_please(
                             pass
 
                         # header
-                        header_string = "score, this_row_or_line, best_key_option, use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp\n"
+                        header_string = '"score", "this_row_or_line", "best_key_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"\n'
                         with open(answer_file_path, 'a', newline='') as csvfile:
                             csvfile.write(header_string)
 
