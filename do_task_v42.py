@@ -245,7 +245,7 @@ def make_answers_directory_and_csv_path(this_original_task_file, model_name):
     # Create directories if they don't exist
     os.makedirs(os.path.dirname(answer_file_path), exist_ok=True)
 
-    header_string = '"score", "this_row_or_line", "best_key_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"\n'
+    header_string = '"score", "this_row_or_line", "selected_option", "correct_option", "ouse_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"\n'
 
     # Create an empty file (or just close it if it already exists)
     with open(answer_file_path, 'a', newline='') as csvfile:
@@ -1103,7 +1103,13 @@ def counter(timeout=10):
         time.sleep(1)
     return count
 
-def replace_special_characters_with_text(string):
+
+def replace_special_characters_with_text(input_item):
+    
+    if not isinstance(input_item, str):
+    
+        input_item = str(input_item)
+    
     replacements = {
         ',': '(comma)',
         '"': '(double quote or inverted commas)',
@@ -1117,9 +1123,10 @@ def replace_special_characters_with_text(string):
     }
     
     for char, replacement in replacements.items():
-        string = string.replace(char, replacement)
+        input_item = input_item.replace(char, replacement)
     
-    return string
+    return input_item
+
 
 # Helper Function
 def ask_mistral_model(context_history, use_this_model):
@@ -4627,7 +4634,7 @@ def mini_translate_json(
                     # turn list of options int dict
                     dict_of_options = {option: None for option in list_of_options}
                     # get highest ranked item:
-                    best_key_option = None
+                    selected_option = None
 
                     while_counter = 0
 
@@ -4687,14 +4694,14 @@ def mini_translate_json(
                                 print("no list at all!")
 
                     # tally the ranked votes and pick the winner
-                    best_key_option = extract_top_rank(list_dict_of_options)
+                    selected_option = extract_top_rank(list_dict_of_options)
 
-                    print(f"best_key_option -> {best_key_option}")
+                    print(f"selected_option -> {selected_option}")
 
 
                     # add value to json
                     insert_int_value_by_path(
-                        dict_of_selected_best, this_path, best_key_option
+                        dict_of_selected_best, this_path, selected_option
                     )
 
                     print(f"dict_of_selected_best -> {dict_of_selected_best}")
@@ -4949,7 +4956,7 @@ def do_task_please(
                     #################
                     this_task = specific_fields[task_field_name]
                     these_options = specific_fields[options_field_name]
-                    correct_answer = specific_fields[scoring_field_name]
+                    correct_option = specific_fields[scoring_field_name]
                     if these_options:
                         task_summary = f"Task: {this_task}, Options: {pretty_print_list(these_options)}"
                     else:
@@ -5315,7 +5322,7 @@ def do_task_please(
                             # turn list of options int dict
                             dict_of_options = {option: None for option in list_of_options}
                             # get highest ranked item:
-                            best_key_option = None
+                            selected_option = None
 
                             while_counter = 0
 
@@ -5384,27 +5391,27 @@ def do_task_please(
                                         print(f"while_counter:{while_counter}, task_fail_counter:{task_fail_counter}")
 
                             # tally the ranked votes and pick the winner
-                            best_key_option = extract_top_rank(list_dict_of_options)
+                            selected_option = extract_top_rank(list_dict_of_options)
 
-                            print(f"best_key_option -> {best_key_option}")
+                            print(f"selected_option -> {selected_option}")
 
 
 
                         else:
                             # make the best choice...the only option
-                            best_key_option = list_of_options[0]
+                            selected_option = list_of_options[0]
 
                     else:
-                        best_key_option = None
+                        selected_option = None
 
 
                     ##########
                     # Scoring
                     ##########
 
-                    print(f"best_key_option -> {best_key_option} type -> {type(best_key_option)}")
-                    print(f"correct_answer -> {best_key_option} type -> {type(best_key_option)}")
-                    if best_key_option == correct_answer:
+                    print(f"selected_option -> {selected_option} type -> {type(selected_option)}")
+                    print(f"correct_option -> {selected_option} type -> {type(selected_option)}")
+                    if selected_option == correct_option:
                         print("Score!")
                         score = 1
                     else:
@@ -5415,7 +5422,7 @@ def do_task_please(
 
                     # making csv row
                     print("with score: making csv row...")
-                    answer_row = f'"{score}, "{this_row_or_line}", "{best_key_option}", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_options}", "{replace_special_characters_with_text(draft_task_attempt_log)}", "{readable_timestamp}"\n'
+                    answer_row = f'"{score}", "{this_row_or_line}", "{selected_option}", "{correct_option}", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_options}", "{replace_special_characters_with_text(draft_task_attempt_log)}", "{readable_timestamp}"\n'
                     # print(f"answer_row -> {answer_row}")
 
                     answer_row = strip_newlines_and_spaces(answer_row)
@@ -5429,33 +5436,8 @@ def do_task_please(
                     file_exists = os.path.exists(answer_file_path)
 
                     with open(answer_file_path, 'a', newline='') as csvfile:
-                        # If the file doesn't exist, write the header
-                        if not file_exists:
-                            header_string = '"score", "this_row_or_line", "best_key_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"\n'
-                            csvfile.write(header_string)
-
                         # Write the data row
                         csvfile.write(answer_row)
-
-
-                    # Check if the file exists, if not, make file with header
-                    if not os.path.exists(answer_file_path):
-                        # If the file doesn't exist, create it
-                        try:
-                            with open(answer_file_path, 'x', newline='') as csvfile:
-                                pass  # Create an empty file
-                        except FileExistsError:
-                            # If the file was created by another process in the meantime, ignore the error
-                            pass
-
-                        # header
-                        header_string = '"score", "this_row_or_line", "best_key_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"\n'
-                            csvfile.write(header_string)
-
-                        # works
-                        with open(answer_file_path, 'a', newline='') as csvfile:
-                            csvfile.write(answer_row)
-
 
                     # Exit While
                     print("\nHats in the air, we can all leave. Buubye!!\n\n\n")
@@ -5469,7 +5451,7 @@ def do_task_please(
                     #     # If the file doesn't exist, create it with the header
                     #     with open(answer_file_path, 'w', newline='') as csvfile:  # Use 'w' mode to write the header
                     #         csvwriter = csv.writer(csvfile, delimiter=',')
-                    #         header = ["this_row_or_line", "best_key_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"]
+                    #         header = ["this_row_or_line", "selected_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"]
                     #         csvwriter.writerow(header)
 
                     # Assume `answer_row` is a list of values you want to write to the CSV
@@ -5498,7 +5480,6 @@ def do_task_please(
                     print(f"\n\nanswer_row -> {answer_row}")
 
 
-
                     # Strip newlines and spaces from each element if needed
                     answer_row = [strip_newlines_and_spaces(str(item)) for item in answer_row]
 
@@ -5506,22 +5487,6 @@ def do_task_please(
                     # with open(answer_file_path, 'a', newline='') as csvfile:
                     #     csvwriter = csv.writer(csvfile, delimiter=',')
                     #     csvwriter.writerow(answer_row)
-
-
-                    # Check if the file exists
-                    if not os.path.exists(answer_file_path):
-                        # If the file doesn't exist, create it
-                        try:
-                            with open(answer_file_path, 'x', newline='') as csvfile:
-                                pass  # Create an empty file
-                        except FileExistsError:
-                            # If the file was created by another process in the meantime, ignore the error
-                            pass
-
-                        # header
-                        header_string = '"score", "this_row_or_line", "best_key_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"\n'
-                        with open(answer_file_path, 'a', newline='') as csvfile:
-                            csvfile.write(header_string)
 
                     with open(answer_file_path, 'a', newline='') as csvfile:
                         csvfile.write(answer_row)
