@@ -3003,6 +3003,7 @@ def general_task_call_api_within_structure_check(context_history,
                                                  ai_local_or_cloud_mode,
                                                  task_mode,
                                                  draft_task_attempt_log,
+                                                 retry_x_times
                                                  ):
     retry_counter = 0
     json_ok_flag = False
@@ -3021,7 +3022,7 @@ def general_task_call_api_within_structure_check(context_history,
 
     gguf_model_list = ["jais", "tiny_llama", "mistral7b",]
 
-    while not json_ok_flag:
+    while (not json_ok_flag) and (retry_counter < retry_x_times):
 
         ####################
         # get a translation
@@ -3039,7 +3040,7 @@ def general_task_call_api_within_structure_check(context_history,
                 print("Started gguf")
 
                 # get model path name-end
-                
+
 
                 # inspection
                 print(f"use_this_model -> {use_this_model}")
@@ -3063,7 +3064,7 @@ def general_task_call_api_within_structure_check(context_history,
                 print(response[1])
                 print(response[2])
                 dict_str = response[2]
-                
+
                 draft_task_attempt_log.append(response)
 
             ################
@@ -3101,6 +3102,8 @@ def general_task_call_api_within_structure_check(context_history,
             retry_counter += 1
             print(f"\n\ngeneral_task_call_api_within_structure_check in while retry_counter -> {retry_counter}\n")
 
+            if retry_counter > retry_x_times:
+                return False
 
     print(f"general_task_call_api_within_structure_check finalretry_counter -> {retry_counter}")
 
@@ -5200,6 +5203,7 @@ def do_task_please(
                             ai_local_or_cloud_mode,
                             task_mode,
                             draft_task_attempt_log,
+                            retry_x_times,
                         )
 
                         # # remove overt duplicates
@@ -5700,6 +5704,7 @@ number_of_ranked_votes = 1
 
 
 task_mode = "simple_multiple_choice"
+list_of_models = ["tinyllama", "mistral-7b-instruct"]
 list_of_models = ["mistral-7b-instruct"]
 
 
