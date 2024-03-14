@@ -4804,9 +4804,48 @@ def mini_translate_json(
             )
 
 
+# # Function to write data to a CSV file
+# def append_list_of_values_to_csv(file_path, data, header=None):
+#     """
+#     Writes given data to a CSV file.
 
+#     :param file_path: str, the path to the CSV file to be written.
+#     :param data: list of lists, where each inner list represents a row in the CSV.
+#     :param header: list, optional header row. If provided, it will be written as the first row in the file.
+#     """
+#     # Open the file in write mode ('w') with newline='' to prevent adding extra newline characters on Windows
+#     with open(file_path, 'a', newline='') as file:
+#         writer = csv.writer(file)
 
+#         # Write the header first if it's provided
+#         if header:
+#             writer.writerow(header)
 
+#         # Write the data rows
+#         writer.writerows(data)
+
+def append_list_of_values_to_csv(file_path, data, header=None):
+    """
+    Appends given data to a CSV file. If the file doesn't exist, it's created with an optional header.
+    If the file exists, data is appended without repeating the header.
+
+    :param file_path: str, the path to the CSV file to be appended.
+    :param data: list of lists, where each inner list represents a row in the CSV.
+    :param header: list, optional header row. If the file is new, the header is written as the first row.
+    """
+    # Determine if the file exists and has content to decide on writing the header
+    file_exists_and_not_empty = os.path.isfile(file_path) and os.path.getsize(file_path) > 0
+
+    # Open the file in append mode. 'newline=''' ensures consistent newline behavior across platforms
+    with open(file_path, 'a', newline='') as file:
+        writer = csv.writer(file)
+
+        # If the file is new (doesn't exist or is empty), and a header is provided, write the header
+        if not file_exists_and_not_empty and header:
+            writer.writerow(header)
+
+        # Write the data rows
+        writer.writerows(data)
 
 def do_task_please(
     task_mode,
@@ -5480,7 +5519,9 @@ def do_task_please(
 
 
                     ##########
+                    ##########
                     # Scoring
+                    ##########
                     ##########
 
                     print(f"selected_option -> {selected_option} type -> {type(selected_option)}")
@@ -5494,24 +5535,46 @@ def do_task_please(
 
 
 
+
                     # making csv row
                     print("with score: making csv row...")
-                    answer_row = f'"{score}", "{this_row_or_line}", "{selected_option}", "{correct_option}", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_options}", "{replace_special_characters_with_text(draft_task_attempt_log)}", "{readable_timestamp}"\n'
+
+
+                    safe_task_attempt_log = replace_special_characters_with_text(draft_task_attempt_log)
+
+                    list_of_items_to_write_to_csv = [
+                        score,
+                        this_row_or_line, 
+                        selected_option, 
+                        correct_option, 
+                        use_this_model, 
+                        this_original_task_file, 
+                        task_from_instructions, 
+                        question_task_prompt, 
+                        list_of_options, 
+                        safe_task_attempt_log,
+                        readable_timestamp,
+
+                    ]
+
+                    # answer_row = f'"{score}", "{this_row_or_line}", "{selected_option}", "{correct_option}", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_options}", "{replace_special_characters_with_text(draft_task_attempt_log)}", "{readable_timestamp}"\n'
                     # print(f"answer_row -> {answer_row}")
 
-                    answer_row = strip_newlines_and_spaces(answer_row)
+                    # answer_row = strip_newlines_and_spaces(answer_row)
+                    # # print(f"\n\nanswer_row -> {answer_row}")
+                    # answer_row = answer_row + "\n"
                     # print(f"\n\nanswer_row -> {answer_row}")
-                    answer_row = answer_row + "\n"
-                    print(f"\n\nanswer_row -> {answer_row}")
 
                     # append to answer_file_path
 
-                    # Check if the file exists to determine if the header needs to be written
-                    file_exists = os.path.exists(answer_file_path)
+                    # # Check if the file exists to determine if the header needs to be written
+                    # file_exists = os.path.exists(answer_file_path)
 
-                    with open(answer_file_path, 'a', newline='') as csvfile:
-                        # Write the data row
-                        csvfile.write(answer_row)
+                    # with open(answer_file_path, 'a', newline='') as csvfile:
+                    #     # Write the data row
+                    #     csvfile.write(answer_row)
+
+                    append_list_of_values_to_csv(answer_file_path, list_of_items_to_write_to_csv, header=None)
 
                     # Exit While
                     print("\nHats in the air, we can all leave. Buubye!!\n\n\n")

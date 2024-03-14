@@ -181,7 +181,7 @@ def score_tally(directory_path):
         print(f"Report saved to {report_filename}")
 
     except Exception as e:
-        print(f"Error processing score tally: {e}")
+        print(f"score_tally() Error processing score tally: {e}")
 
 
 import os
@@ -244,6 +244,77 @@ def score_tally(directory_path):
 import os
 import csv
 
+
+# def append_list_of_values_to_csv(file_path, list_of_items, header=None):
+#     """
+#     Appends given data to a CSV file. If the file doesn't exist, it's created with an optional header.
+#     If the file exists, data is appended without repeating the header.
+
+#     :param file_path: str, the path to the CSV file to be appended.
+#     :param data: list of lists, where each inner list represents a row in the CSV.
+#     :param header: list, optional header row. If the file is new, the header is written as the first row.
+#     """
+#     # Determine if the file exists and has content to decide on writing the header
+#     file_exists_and_not_empty = os.path.isfile(file_path) and os.path.getsize(file_path) > 0
+
+#     # Open the file in append mode. 'newline=''' ensures consistent newline behavior across platforms
+#     with open(file_path, 'a', newline='') as file:
+#         writer = csv.writer(file)
+
+#         # If the file is new (doesn't exist or is empty), and a header is provided, write the header
+#         if not file_exists_and_not_empty and header:
+#             writer.writerow(header)
+
+#         # Write the data rows
+#         writer.writerows(list_of_items)
+
+
+import csv
+
+# def append_list_of_values_to_csv(file_path, fields):
+#     """
+#     Appends a row of fields to a CSV file.
+
+#     Args:
+#         file_path (str): The path to the CSV file.
+#         fields (list): A list of fields to be appended as a row to the CSV file.
+
+#     Returns:
+#         None
+#     """
+#     try:
+#         with open(file_path, 'a', newline='') as file:
+#             writer = csv.writer(file)
+#             writer.writerow(fields)
+#         print("Row appended successfully.")
+#     except FileNotFoundError:
+#         print(f"File '{file_path}' not found.")
+#     except Exception as e:
+#         print(f"An error occurred: {str(e)}")
+
+import csv
+
+def append_list_of_values_to_csv(file_path, fields):
+    """
+    Appends a row of fields to a CSV file with the specified format.
+
+    Args:
+        file_path (str): The path to the CSV file.
+        fields (list): A list of fields to be appended as a row to the CSV file.
+
+    Returns:
+        None
+    """
+    try:
+        with open(file_path, 'a', newline='') as file:
+            writer = csv.writer(file, quoting=csv.QUOTE_ALL)
+            writer.writerow(fields)
+        print("Row appended successfully.")
+    except FileNotFoundError:
+        print(f"File '{file_path}' not found.")
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+
 def score_tally(directory_path):
     solution_dir_path = os.path.abspath(directory_path)
 
@@ -290,10 +361,13 @@ def score_tally(directory_path):
             report_line = f'"{percentage:.2f}%", "{model_name}", "score {score_data["total"]} / {score_data["count"]}"\n'
             report_list.append(report_line)
 
-        # Append the new report lines to the file
-        with open(report_filename, 'a', newline='') as report_file:
-            for report_line in report_list:
-                report_file.write(report_line)
+
+        report_file_path = "solution_files/score_report.csv"
+
+        for report_line in report_list:
+            print(report_line)
+            append_list_of_values_to_csv(report_file_path, report_line)
+
         print(f"Report appended to {report_filename}")
 
     except Exception as e:
@@ -336,5 +410,5 @@ def extract_model_name_from_csv(file_path):
     return None  # Return None if the model name is not found
 
 # Extract and print the model name
-model_name = extract_model_name_from_csv("solution_files/answer_file_mistral-7b-instruct_20240313234327585104_my_test1_jsonl.csv")
+model_name = extract_model_name_from_csv("solution_files/answer_file_tinyllama_20240314013555702548_my_test1_jsonl.csv")
 print(f"Model name: {model_name}")
