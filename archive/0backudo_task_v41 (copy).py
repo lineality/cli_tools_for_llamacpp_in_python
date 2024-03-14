@@ -2767,7 +2767,7 @@ def call_api_within_structure_check(context_history,
                 print("Started gguf")
 
                 # get model path name-end
-                # use_this_model = get_model_path_by_name("/home/oops/jan/models/", use_this_model)
+                
 
                 # inspection
                 print(f"use_this_model -> {use_this_model}")
@@ -2876,7 +2876,7 @@ def general_task_call_api_within_structure_check(context_history,
                 print("Started gguf")
 
                 # get model path name-end
-                # use_this_model = get_model_path_by_name("/home/oops/jan/models/", use_this_model)
+                
 
                 # inspection
                 print(f"use_this_model -> {use_this_model}")
@@ -2984,7 +2984,7 @@ def number_call_api_within_structure_check(context_history, use_this_model, para
                 print("Started gguf")
 
                 # get model path name-end
-                # use_this_model = get_model_path_by_name("/home/oops/jan/models/", use_this_model)
+                
 
                 # inspection
                 print(f"use_this_model -> {use_this_model}")
@@ -3088,7 +3088,7 @@ def task_number_call_api_within_structure_check(context_history, use_this_model,
                 print("Started gguf")
 
                 # get model path name-end
-                # use_this_model = get_model_path_by_name("/home/oops/jan/models/", use_this_model)
+                
 
                 # inspection
                 print(f"use_this_model -> {use_this_model}")

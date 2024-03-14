@@ -245,7 +245,7 @@ def make_answers_directory_and_csv_path(this_original_task_file, model_name):
     # Create directories if they don't exist
     os.makedirs(os.path.dirname(answer_file_path), exist_ok=True)
 
-    header_string = '"score", "this_row_or_line", "selected_option", "correct_option", "ouse_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"\n'
+    header_string = '"score", "this_row_or_line", "selected_option", "correct_option", "name_of_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"\n'
 
     # Create an empty file (or just close it if it already exists)
     with open(answer_file_path, 'a', newline='') as csvfile:
@@ -2629,7 +2629,7 @@ def json_number_check_structure_of_response_to_list(dict_str) -> list:
 
 
 def score_tally(directory_path):
-    
+
     # make path absolute
     solution_dir_path = os.path.abspath("solution_files")
 
@@ -2646,51 +2646,55 @@ def score_tally(directory_path):
             print(f"Error creating directory {solution_dir_path}: {e}")
             return  # Exit the function if directory creation fails
 
-    header_string = '"percent", "model", "score"\n' 
+        header_string = '"percent", "model", "score"\n' 
 
-    # Create an empty file (or just close it if it already exists)
-    with open("solution_files/score_report.csv", 'a', newline='') as csvfile:
-        csvfile.write(header_string)
-
-
-    
-    
-    
-    model_scores = {}
-    total_scores = 0
-    # Iterating through files in the directory
-    for filename in os.listdir(directory_path):
-        if filename.endswith(".csv"):
-            file_path = os.path.join(directory_path, filename)
-            print(f"Processing file: {file_path}")  # Keep this print statement
-            with open(file_path, 'r') as file:
-                reader = csv.DictReader(file)
-                print("reading...")  # Keep this print statement
-                for row in reader:
-                    model_name = row.get('use_this_model', 'Unknown')
-                    print(model_name)  # Keep this print statement for model_name
-                    score = int(row.get('score', 0))
-                    # Update the scores and counts for each model
-                    if model_name not in model_scores:
-                        model_scores[model_name] = {'total': 0, 'count': 0}
-                    
-                    model_scores[model_name]['total'] += score
-                    model_scores[model_name]['count'] += 1
-                    total_scores += score
-    # Preparing and printing the report
-    report_list = []
-    for model_name, score_data in model_scores.items():
-        percentage = (score_data['total'] / total_scores) * 100 if total_scores > 0 else 0
-        report_line = f'"{percentage:.0f}%", "{model_name}", "score {score_data['total']} / {score_data['count']}"\n'
-        report_list.append(report_line)
-        print(report_line)  # Print each line of the report
-    # Joining the report lines and writing to a file
-    for this_report_str in report_list:
-        with open(os.path.join(directory_path, "score_report.csv"), 'a') as report_file:
-            report_file.write(this_report_str)
-            print(f"Report saved to {os.path.join(directory_path, 'score_report.txt')}")  # Confirmation message
+        # Create an empty file (or just close it if it already exists)
+        with open("solution_files/score_report.csv", 'a', newline='') as csvfile:
+            csvfile.write(header_string)
 
 
+    # do the tally
+    try:
+        model_scores = {}
+        total_scores = 0
+        # Iterating through files in the directory
+        for filename in os.listdir(directory_path):
+            if filename.endswith(".csv"):
+                file_path = os.path.join(directory_path, filename)
+                print(f"Processing file: {file_path}")  # Keep this print statement
+                with open(file_path, 'r') as file:
+                    reader = csv.DictReader(file)
+                    print("reading...")  # Keep this print statement
+                    for row in reader:
+                        model_name = row.get('name_of_model', 'Unknown')
+                        print(f"name_of_model -> {model_name}")  # Keep this print statement for model_name
+                        score = int(row.get('score', 0))
+                        # Update the scores and counts for each model
+                        if model_name not in model_scores:
+                            model_scores[model_name] = {'total': 0, 'count': 0}
+
+                        model_scores[model_name]['total'] += score
+                        model_scores[model_name]['count'] += 1
+                        total_scores += score
+        # Preparing and printing the report
+        report_list = []
+        for model_name, score_data in model_scores.items():
+
+            percentage = (score_data['total'] / total_scores) * 100 if total_scores > 0 else 0
+            score_total = score_data['total']
+            score_count = score_data['count']
+
+            report_line = f'"{percentage:.2f}%", "{model_name}", "score {score_total} / {score_count}"\n'
+            report_list.append(report_line)
+            print(report_line)  # Print each line of the report
+        # Joining the report lines and writing to a file
+        for this_report_str in report_list:
+            with open(os.path.join(directory_path, "score_report.csv"), 'a') as report_file:
+                report_file.write(this_report_str)
+                print(f"Report saved to {os.path.join(directory_path, 'score_report.txt')}")  # Confirmation message
+
+    except Exception as e:
+        raise e
 
 
 def get_absolute_base_path():
@@ -2926,7 +2930,7 @@ def call_api_within_structure_check(context_history,
                 print("Started gguf")
 
                 # get model path name-end
-                # use_this_model = get_model_path_by_name("/home/oops/jan/models/", use_this_model)
+                
 
                 # inspection
                 print(f"use_this_model -> {use_this_model}")
@@ -3035,7 +3039,7 @@ def general_task_call_api_within_structure_check(context_history,
                 print("Started gguf")
 
                 # get model path name-end
-                # use_this_model = get_model_path_by_name("/home/oops/jan/models/", use_this_model)
+                
 
                 # inspection
                 print(f"use_this_model -> {use_this_model}")
@@ -3143,7 +3147,7 @@ def number_call_api_within_structure_check(context_history, use_this_model, para
                 print("Started gguf")
 
                 # get model path name-end
-                # use_this_model = get_model_path_by_name("/home/oops/jan/models/", use_this_model)
+                
 
                 # inspection
                 print(f"use_this_model -> {use_this_model}")
@@ -3253,7 +3257,7 @@ def task_number_call_api_within_structure_check(
                 print("Started gguf")
 
                 # get model path name-end
-                # use_this_model = get_model_path_by_name("/home/oops/jan/models/", use_this_model)
+                
 
                 # inspection
                 print(f"use_this_model -> {use_this_model}")
@@ -3367,7 +3371,7 @@ def crawler_call_api_within_json_structure_check(
                 print("Started gguf")
 
                 # get model path name-end
-                use_this_model = get_model_path_by_name("/home/oops/jan/models/", use_this_model)
+                
 
                 #######################
                 # Tune Your Paramaters
