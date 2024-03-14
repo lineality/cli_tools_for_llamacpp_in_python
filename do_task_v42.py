@@ -80,7 +80,7 @@ import string
 from module_llamacpp import gguf_api, mini_gguf_api, get_model_path_by_name
 
 # importing this runs the script (cludge)
-import find_all_models 
+# import find_all_models 
 
 """dict_translator_local_cloud_delimiter_v29.ipynb
 

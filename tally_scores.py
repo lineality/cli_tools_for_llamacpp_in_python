@@ -1,67 +1,340 @@
 import os
 import csv
 
+
+# def score_tally(directory_path):
+
+#     # make path absolute
+#     solution_dir_path = os.path.abspath("solution_files")
+
+#     # Check if the directory exists
+#     if not os.path.exists(solution_dir_path):
+
+#         # If it does not exist, create it
+#         # Ensure the directory exists
+#         try:
+#             os.makedirs(
+#                 solution_dir_path, exist_ok=True
+#             )  # Ensure the directory is created if it does not exist
+#         except Exception as e:
+#             print(f"Error creating directory {solution_dir_path}: {e}")
+#             return  # Exit the function if directory creation fails
+
+#         header_string = '"percent", "model", "score"\n' 
+
+#         # Create an empty file (or just close it if it already exists)
+#         with open("solution_files/score_report.csv", 'w', newline='') as csvfile:
+#             csvfile.write(header_string)
+
+
 def score_tally(directory_path):
-    
+
     # make path absolute
-    solution_dir_path = os.path.abspath("solution_files")
+    solution_dir_path = os.path.abspath(directory_path)
 
-    # Check if the directory exists
-    if not os.path.exists(solution_dir_path):
+    # Ensure the directory exists
+    os.makedirs(solution_dir_path, exist_ok=True)
 
-        # If it does not exist, create it
-        # Ensure the directory exists
-        try:
-            os.makedirs(
-                solution_dir_path, exist_ok=True
-            )  # Ensure the directory is created if it does not exist
-        except Exception as e:
-            print(f"Error creating directory {solution_dir_path}: {e}")
-            return  # Exit the function if directory creation fails
+    report_filename = os.path.join(solution_dir_path, "score_report.csv")
 
-    header_string = '"percent", "model", "score"\n' 
+    header_string = '"percent", "model", "score"\n'
 
-    # Create an empty file (or just close it if it already exists)
-    with open("solution_files/score_report.csv", 'a', newline='') as csvfile:
-        csvfile.write(header_string)
+    # Write the header if creating a new report
+    if not os.path.exists(report_filename):
+        with open(report_filename, 'w', newline='') as csvfile:
+            csvfile.write(header_string)
 
 
-    
-    
-    
-    model_scores = {}
-    total_scores = 0
-    # Iterating through files in the directory
-    for filename in os.listdir(directory_path):
-        if filename.endswith(".csv"):
-            file_path = os.path.join(directory_path, filename)
-            print(f"Processing file: {file_path}")  # Keep this print statement
-            with open(file_path, 'r') as file:
-                reader = csv.DictReader(file)
-                print("reading...")  # Keep this print statement
-                for row in reader:
-                    model_name = row.get('use_this_model', 'Unknown')
-                    print(model_name)  # Keep this print statement for model_name
-                    score = int(row.get('score', 0))
-                    # Update the scores and counts for each model
-                    if model_name not in model_scores:
-                        model_scores[model_name] = {'total': 0, 'count': 0}
-                    
-                    model_scores[model_name]['total'] += score
-                    model_scores[model_name]['count'] += 1
-                    total_scores += score
-    # Preparing and printing the report
-    report_list = []
-    for model_name, score_data in model_scores.items():
-        percentage = (score_data['total'] / total_scores) * 100 if total_scores > 0 else 0
-        report_line = f'"{percentage:.0f}%", "{model_name}", "score {score_data['total']} / {score_data['count']}"\n'
-        report_list.append(report_line)
-        print(report_line)  # Print each line of the report
-    # Joining the report lines and writing to a file
-    for this_report_str in report_list:
-        with open(os.path.join(directory_path, "score_report.csv"), 'a') as report_file:
-            report_file.write(this_report_str)
-            print(f"Report saved to {os.path.join(directory_path, 'score_report.txt')}")  # Confirmation message
+    # # do the tally
+    # try:
+    #     model_scores = {}
+    #     total_scores = 0
+    #     # Iterating through files in the directory
+    #     for filename in os.listdir(directory_path):
+    #         if filename.endswith(".csv"):
+    #             file_path = os.path.join(directory_path, filename)
+    #             print(f"Processing file: {file_path}")  # Keep this print statement
+    #             with open(file_path, 'r') as file:
+    #                 reader = csv.DictReader(file)
+    #                 print("reading...")  # Keep this print statement
+    #                 for row in reader:
+    #                     model_name = row.get('name_of_model')
+    #                     print(f"name_of_model -> {model_name}")  # Keep this print statement for model_name
+    #                     score = int(row.get('score', 0))
+    #                     # Update the scores and counts for each model
+    #                     if model_name not in model_scores:
+    #                         model_scores[model_name] = {'total': 0, 'count': 0}
 
+    #                     # incremiment if scored
+    #                     model_scores[model_name]['total'] += score
+
+    #                     # incriment either way
+    #                     model_scores[model_name]['count'] += 1
+
+    #                     total_scores += score
+    #     # Preparing and printing the report
+    #     report_list = []
+    #     for model_name, score_data in model_scores.items():
+    #         number_of_correct = score_data['total']
+    #         percentage = ( number_of_correct / total_scores ) * 100 if total_scores > 0 else 0
+    #         score_total = score_data['total']
+    #         score_count = score_data['count']
+
+    #         report_line = f'"{percentage:.2f}%", "{model_name}", "score {score_total} / {score_count}"\n'
+    #         report_list.append(report_line)
+    #         print(report_line)  # Print each line of the report
+    #     # Joining the report lines and writing to a file
+    #     for this_report_str in report_list:
+    #         with open(os.path.join(directory_path, "score_report.csv"), 'a') as report_file:
+    #             report_file.write(this_report_str)
+    #             print(f"Report saved to {os.path.join(directory_path, 'score_report.txt')}")  # Confirmation message
+
+    # except Exception as e:
+    #     raise e
+            
+    try:
+        model_scores = {}
+        total_scores = 0
+        # Iterating through files in the directory
+        for filename in os.listdir(directory_path):
+            if filename.endswith(".csv"):
+                file_path = os.path.join(directory_path, filename)
+                print(f"Processing file: {file_path}")  # Keep this print statement
+                with open(file_path, 'r') as file:
+                    reader = csv.DictReader(file)
+                    print("reading...")  # Keep this print statement
+                    for row in reader:
+                        model_name = row.get('name_of_model')
+                        if not model_name:  # Check if model_name is empty or None
+                            model_name = "Unknown"  # Assign a default name if missing
+                        print(f"name_of_model -> {model_name}")  # Keep this print statement for model_name
+                        score = int(row.get('score', 0))
+                        # Update the scores and counts for each model
+                        model_scores.setdefault(model_name, {'total': 0, 'count': 0})
+                        model_scores[model_name]['total'] += score
+                        model_scores[model_name]['count'] += 1
+                        total_scores += 1  # Increment the total count of scores, not their sum
+
+        # Preparing and printing the report
+        report_list = []
+        for model_name, score_data in model_scores.items():
+            percentage = (score_data['total'] / total_scores) * 100 if total_scores > 0 else 0  # Correct percentage calculation
+            report_line = f'"{percentage:.2f}%", "{model_name}", "score {score_data['total']} / {score_data['count']}"\n'
+            report_list.append(report_line)
+            print(report_line)  # Print each line of the report
+
+        # Writing the report to a file
+        report_filename = os.path.join(directory_path, "score_report.csv")
+        with open(report_filename, 'w') as report_file:
+            for this_report_str in report_list:
+                report_file.write(this_report_str)
+        print(f"Report saved to {report_filename}")
+
+    except Exception as e:
+        raise e
+
+
+
+import os
+import csv
+
+def score_tally(directory_path):
+    solution_dir_path = os.path.abspath(directory_path)
+
+    # Ensure the directory exists
+    os.makedirs(solution_dir_path, exist_ok=True)
+
+    report_filename = os.path.join(solution_dir_path, "score_report.csv")
+    header_string = '"percent", "model", "score"\n'
+    # Write the header if creating a new report
+    if not os.path.exists(report_filename):
+        with open(report_filename, 'w', newline='') as csvfile:
+            csvfile.write(header_string)
+
+    try:
+        model_scores = {}
+        total_scores = 0
+        for filename in os.listdir(directory_path):
+            if filename.endswith(".csv"):
+                file_path = os.path.join(directory_path, filename)
+                print(f"Processing file: {file_path}")
+                with open(file_path, 'r') as file:
+                    reader = csv.DictReader(file)
+                    for row in reader:
+                        model_name = row.get('name_of_model', "Unknown").strip()  # Ensure model_name is not None
+                        print(f"name_of_model -> {model_name}")
+                        score = int(row.get('score', 0))
+                        model_scores.setdefault(model_name, {'total': 0, 'count': 0})
+                        model_scores[model_name]['total'] += score
+                        model_scores[model_name]['count'] += 1
+                        total_scores += 1
+
+        report_list = [header_string]  # Add the header to the report list
+        for model_name, score_data in model_scores.items():
+            percentage = (score_data['total'] / total_scores) * 100 if total_scores > 0 else 0
+            report_line = f'"{percentage:.2f}%", "{model_name}", "score {score_data['total']} / {score_data['count']}"\n'
+            report_list.append(report_line)
+
+        # Write the full report, including the header
+        with open(report_filename, 'a') as report_file:  # 'w' mode to overwrite and include header
+            report_file.writelines(report_list)
+        print(f"Report saved to {report_filename}")
+
+    except Exception as e:
+        print(f"Error processing score tally: {e}")
+
+
+import os
+import csv
+
+def score_tally(directory_path):
+    solution_dir_path = os.path.abspath(directory_path)
+
+    # Ensure the directory exists
+    os.makedirs(solution_dir_path, exist_ok=True)
+
+    report_filename = os.path.join(solution_dir_path, "score_report.csv")
+    header_string = '"percent", "model", "score"\n'
+
+    # Check if the file exists and is empty to decide on writing the header
+    if not os.path.exists(report_filename) or os.path.getsize(report_filename) == 0:
+        with open(report_filename, 'w', newline='') as csvfile:
+            csvfile.write(header_string)
+
+    try:
+        model_scores = {}
+        total_scores = 0
+        # Iterate over CSV files and tally scores
+        for filename in os.listdir(directory_path):
+            if filename.endswith(".csv"):
+                file_path = os.path.join(directory_path, filename)
+                print(f"Processing file: {file_path}")
+                with open(file_path, 'r') as file:
+                    reader = csv.DictReader(file)
+                    for row in reader:
+                        model_name = row.get('name_of_model', "Unknown").strip()
+                        if not model_name:  # Fallback if model_name is empty after stripping
+                            model_name = "Unknown"
+                        print(f"name_of_model -> {model_name}")  # Confirming model name retrieval
+                        score = int(row.get('score', 0))
+                        model_scores.setdefault(model_name, {'total': 0, 'count': 0})
+                        model_scores[model_name]['total'] += score
+                        model_scores[model_name]['count'] += 1
+                        total_scores += 1  # Adjust as per your scoring logic
+
+        # Prepare report lines excluding the header (since file will be appended)
+        report_list = []
+        for model_name, score_data in model_scores.items():
+            percentage = (score_data['total'] / total_scores) * 100 if total_scores > 0 else 0
+            report_line = f'"{percentage:.2f}%", "{model_name}", "score {score_data['total']} / {score_data['count']}"\n'
+            report_list.append(report_line)
+
+        # Append the new report lines to the file
+        with open(report_filename, 'a') as report_file:
+            for report_line in report_list:
+                report_file.write(report_line)
+        print(f"Report appended to {report_filename}")
+
+    except Exception as e:
+        print(f"Error processing score tally: {e}")
+
+# score_tally("solution_files/score_report.csv")
+
+
+import os
+import csv
+
+def score_tally(directory_path):
+    solution_dir_path = os.path.abspath(directory_path)
+
+    # Ensure the directory exists
+    os.makedirs(solution_dir_path, exist_ok=True)
+
+    report_filename = os.path.join(solution_dir_path, "score_report.csv")
+    header_string = '"percent", "model", "score"\n'
+
+    # Check if the file exists and is empty to decide on writing the header
+    if not os.path.exists(report_filename) or os.path.getsize(report_filename) == 0:
+        with open(report_filename, 'w', newline='') as csvfile:
+            csvfile.write(header_string)
+
+    try:
+        model_scores = {}
+        total_scores = 0
+        # Iterate over CSV files and tally scores
+        for filename in os.listdir(directory_path):
+            if filename.endswith(".csv"):
+                file_path = os.path.join(directory_path, filename)
+                print(f"Processing file: {file_path}")
+                with open(file_path, mode='r', newline='') as file:
+                    # Read the file into a dictionary, trimming spaces from headers
+                    reader = csv.DictReader((line.replace('\0', '') for line in file), skipinitialspace=True)
+                    # Adjust the fieldnames to strip leading and trailing spaces
+                    reader.fieldnames = [name.strip() for name in reader.fieldnames]
+                    for row in reader:
+                        # Attempt to get the model name with a case-insensitive key search
+                        for key in row.keys():
+                            if key.lower() == "name_of_model".lower():
+                                model_name = row[key]
+                                print(f"name_of_model -> {model_name}")  # Confirming model name retrieval
+                                score = int(row.get('score', 0))
+                                model_scores.setdefault(model_name, {'total': 0, 'count': 0})
+                                model_scores[model_name]['total'] += score
+                                model_scores[model_name]['count'] += 1
+                                total_scores += 1
+
+        # Prepare report lines excluding the header
+        report_list = []
+        for model_name, score_data in model_scores.items():
+            percentage = (score_data['total'] / total_scores) * 100 if total_scores > 0 else 0
+            report_line = f'"{percentage:.2f}%", "{model_name}", "score {score_data["total"]} / {score_data["count"]}"\n'
+            report_list.append(report_line)
+
+        # Append the new report lines to the file
+        with open(report_filename, 'a', newline='') as report_file:
+            for report_line in report_list:
+                report_file.write(report_line)
+        print(f"Report appended to {report_filename}")
+
+    except Exception as e:
+        print(f"Error processing score tally: {e}")
+
+
+
+
+
+# Example usage
 score_tally("solution_files")
 
+
+import csv
+
+# Path to your CSV file
+csv_file_path = 'data.csv'
+
+# Function to extract the model name from the CSV
+def extract_model_name_from_csv(file_path):
+    with open(file_path, mode='r', newline='') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            # Return the model name from the first row
+            return row["name_of_model"]
+    return None  # Return None if the model name is not found
+
+
+def extract_model_name_from_csv(file_path):
+    with open(file_path, mode='r', newline='') as file:
+        # Read the file into a dictionary, trimming spaces from headers
+        reader = csv.DictReader((line.replace('\0', '') for line in file), skipinitialspace=True)
+        # Adjust the fieldnames to strip leading and trailing spaces
+        reader.fieldnames = [name.strip() for name in reader.fieldnames]
+        for row in reader:
+            # Attempt to get the model name with a case-insensitive key search
+            for key in row.keys():
+                if key.lower() == "name_of_model".lower():
+                    return row[key]
+    return None  # Return None if the model name is not found
+
+# Extract and print the model name
+model_name = extract_model_name_from_csv("solution_files/answer_file_mistral-7b-instruct_20240313234327585104_my_test1_jsonl.csv")
+print(f"Model name: {model_name}")
