@@ -1,8 +1,2 @@
-"percent", "model", "score"
-percent,model,score
-50.0,frog,0.5
-percent,model,score
-50.0,frog,0.5
-"50.0","frog","0.5"
-percent,model,score
-50.0,frog,0.5
+"percent","model","score","time_stamp"
+"50.0","frog","0.5","2024-03-15-13:51:35203485"

@@ -4804,48 +4804,29 @@ def mini_translate_json(
             )
 
 
-# # Function to write data to a CSV file
-# def append_list_of_values_to_csv(file_path, data, header=None):
-#     """
-#     Writes given data to a CSV file.
 
-#     :param file_path: str, the path to the CSV file to be written.
-#     :param data: list of lists, where each inner list represents a row in the CSV.
-#     :param header: list, optional header row. If provided, it will be written as the first row in the file.
-#     """
-#     # Open the file in write mode ('w') with newline='' to prevent adding extra newline characters on Windows
-#     with open(file_path, 'a', newline='') as file:
-#         writer = csv.writer(file)
-
-#         # Write the header first if it's provided
-#         if header:
-#             writer.writerow(header)
-
-#         # Write the data rows
-#         writer.writerows(data)
-
-def append_list_of_values_to_csv(file_path, data, header=None):
+def append_list_of_values_to_csv(file_path, fields):
     """
-    Appends given data to a CSV file. If the file doesn't exist, it's created with an optional header.
-    If the file exists, data is appended without repeating the header.
+    Appends a row of fields to a CSV file with the specified format.
 
-    :param file_path: str, the path to the CSV file to be appended.
-    :param data: list of lists, where each inner list represents a row in the CSV.
-    :param header: list, optional header row. If the file is new, the header is written as the first row.
+    Args:
+        file_path (str): The path to the CSV file.
+        fields (list): A list of fields to be appended as a row to the CSV file.
+
+    Returns:
+        None
     """
-    # Determine if the file exists and has content to decide on writing the header
-    file_exists_and_not_empty = os.path.isfile(file_path) and os.path.getsize(file_path) > 0
+    try:
+        with open(file_path, 'a', newline='') as file:
+            writer = csv.writer(file, quoting=csv.QUOTE_ALL)
+            # writer = csv.writer(file)
+            writer.writerow(fields)
+        print("Row appended successfully.")
+    except FileNotFoundError:
+        print(f"File '{file_path}' not found.")
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
 
-    # Open the file in append mode. 'newline=''' ensures consistent newline behavior across platforms
-    with open(file_path, 'a', newline='') as file:
-        writer = csv.writer(file)
-
-        # If the file is new (doesn't exist or is empty), and a header is provided, write the header
-        if not file_exists_and_not_empty and header:
-            writer.writerow(header)
-
-        # Write the data rows
-        writer.writerows(data)
 
 def do_task_please(
     task_mode,
