@@ -271,28 +271,26 @@ import csv
 
 import csv
 
-# def append_list_of_values_to_csv(file_path, fields):
-#     """
-#     Appends a row of fields to a CSV file.
+def append_dict_of_values_row_with_fields_list_to_csv(values_dict, fields_list, path):
+    """
+    Appends a row of fields to a CSV file.
 
-#     Args:
-#         file_path (str): The path to the CSV file.
-#         fields (list): A list of fields to be appended as a row to the CSV file.
+    Args:
+        file_path (str): The path to the CSV file.
+        fields (list): A list of fields to be appended as a row to the CSV file.
 
-#     Returns:
-#         None
-#     """
-#     try:
-#         with open(file_path, 'a', newline='') as file:
-#             writer = csv.writer(file)
-#             writer.writerow(fields)
-#         print("Row appended successfully.")
-#     except FileNotFoundError:
-#         print(f"File '{file_path}' not found.")
-#     except Exception as e:
-#         print(f"An error occurred: {str(e)}")
+    Returns:
+        None
+    """
+    with open(path, 'a', newline='') as csvfile:
+        fieldnames = fields_list
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-import csv
+        writer.writeheader()
+        writer.writerow(values_dict)
+
+
+
 
 def append_list_of_values_to_csv(file_path, fields):
     """
@@ -343,7 +341,7 @@ def score_tally(directory_path):
                     # Adjust the fieldnames to strip leading and trailing spaces
                     reader.fieldnames = [name.strip() for name in reader.fieldnames]
                     for row in reader:
-                        # Attempt to get the model name with a case-insensitive key search
+                        # Attempt to get the model name with a case-insensitive key searchhttps://docs.python.org/3/library/csv.html
                         for key in row.keys():
                             if key.lower() == "name_of_model".lower():
                                 model_name = row[key]
@@ -354,11 +352,12 @@ def score_tally(directory_path):
                                 model_scores[model_name]['count'] += 1
                                 total_scores += 1
 
-        # Prepare report lines excluding the header
+        # Prepare report lines excluding the header https://stackoverflow.com/questions/2363731/how-to-append-a-new-row-to-an-old-csv-file-in-python
         report_list = []
         for model_name, score_data in model_scores.items():
             percentage = (score_data['total'] / total_scores) * 100 if total_scores > 0 else 0
-            report_line = f'"{percentage:.2f}%", "{model_name}", "score {score_data["total"]} / {score_data["count"]}"\n'
+            score = score_data["total"] / score_data["count"]
+            report_line = [percentage, model_name, score]
             report_list.append(report_line)
 
 
@@ -367,6 +366,14 @@ def score_tally(directory_path):
         for report_line in report_list:
             print(report_line)
             append_list_of_values_to_csv(report_file_path, report_line)
+            values_dict = ["percent", "model", "score"]
+            values_dict = {
+                "percent":report_line[0],
+                "model":report_line[1],
+                "score":report_line[2],
+            }
+            append_dict_of_values_row_with_fields_list_to_csv(values_dict, fields_list, report_file_path)
+            
 
         print(f"Report appended to {report_filename}")
 
