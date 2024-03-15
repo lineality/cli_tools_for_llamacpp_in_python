@@ -391,13 +391,19 @@ def score_tally(directory_path):
 
         for report_line in report_list:
             print(report_line)
+            
+            date_time = datetime.now(UTC)
+            readable_timestamp = date_time.strftime("%Y-%m-%d-%H:%M:%S%f")
+            report_line.append(readable_timestamp)
+            
             append_list_of_values_to_csv(report_file_path, report_line)
             
-            fields_list = ["percent", "model", "score"]
+
             values_dict = {
                 "percent":report_line[0],
                 "model":str(report_line[1]),
                 "score":report_line[2],
+                "time_stamp": readable_timestamp,
             }
             # append_dict_of_values_row_with_fields_list_to_csv(values_dict, fields_list, report_file_path)
             
@@ -506,11 +512,7 @@ def append_list_of_values_to_csv(file_path, fields_list):
         None
     """
     try:
-        date_time = datetime.now(UTC)
-
-        readable_timestamp = date_time.strftime("%Y-%m-%d-%H:%M:%S%f")
-        
-        fields_list.append(readable_timestamp)
+        print(f"fields_list {fields_list}")
         
         with open(file_path, 'a', newline='') as file:
             writer = csv.writer(file, quoting=csv.QUOTE_ALL)
