@@ -313,6 +313,9 @@ def append_list_of_values_to_csv(file_path, fields):
     except Exception as e:
         print(f"An error occurred: {str(e)}")
 
+
+
+
 def score_tally(directory_path):
     solution_dir_path = os.path.abspath(directory_path)
 
@@ -366,10 +369,11 @@ def score_tally(directory_path):
         for report_line in report_list:
             print(report_line)
             append_list_of_values_to_csv(report_file_path, report_line)
-            values_dict = ["percent", "model", "score"]
+            
+            fields_list = ["percent", "model", "score"]
             values_dict = {
                 "percent":report_line[0],
-                "model":report_line[1],
+                "model":str(report_line[1]),
                 "score":report_line[2],
             }
             append_dict_of_values_row_with_fields_list_to_csv(values_dict, fields_list, report_file_path)
