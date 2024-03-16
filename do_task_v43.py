@@ -5079,9 +5079,9 @@ def do_task_please(
             print(f"answer_file_path -> {answer_file_path}")
 
 
-            #########################################
-            # Crawler: Make preliminary Translations
-            #########################################
+            ########################
+            # Iterate through tasks
+            ########################
 
 
             print(
@@ -5117,7 +5117,6 @@ def do_task_please(
 
 
 
-            # for this language
             # NON-header mode, skip first row
             for this_row_or_line in range(this_original_task_file_length):
 
@@ -5187,6 +5186,8 @@ def do_task_please(
                     #################
                     # Task et Option
                     #################
+                    """
+                    """
                     this_task = specific_fields[task_field_name]
                     these_options = specific_fields[options_field_name]
                     correct_option = specific_fields[scoring_field_name]
@@ -5197,6 +5198,9 @@ def do_task_please(
 
                     print(f"this_task -> {this_task}")
                     print(f"these_options -> {these_options}")
+                    print(f"task_summary -> {task_summary}")
+
+
 
                     # make empty conversation
                     # reset context history for new 'conversation' about translation
@@ -5408,6 +5412,11 @@ def do_task_please(
 
                             dict_multiple_choice_solution_body_nocontext 
                             pipes_multiple_choice_solution_body_nocontext 
+                        """
+
+                        """
+                        Your answer must be the number of the option in the order given. "1" is the first option. 
+
                         """
 
                         #############
@@ -5858,26 +5867,30 @@ def do_task_please(
                         print("Oops")
                         score = 0
 
-
-
-
                     # making csv row
                     print("with score: making csv row...")
 
 
+
                     safe_task_attempt_log = replace_special_characters_with_text(draft_task_attempt_log)
 
+                    safe_question_task_prompt = replace_special_characters_with_text(question_task_prompt)
+
+                    safe_task_from_instructions = replace_special_characters_with_text(this_task)
+
                     just_model_file_name = os.path.basename(use_this_model)
-                    
+                    just_this_original_task_file_name = os.path.basename(this_original_task_file)
+
+
                     list_of_items_to_write_to_csv = [
                         score,
                         this_row_or_line, 
                         selected_option, 
                         correct_option, 
                         just_model_file_name, 
-                        this_original_task_file, 
-                        task_from_instructions, 
-                        question_task_prompt, 
+                        just_this_original_task_file_name, 
+                        safe_task_from_instructions, 
+                        safe_question_task_prompt, 
                         list_of_options, 
                         safe_task_attempt_log,
                         readable_timestamp,
@@ -5956,10 +5969,16 @@ def do_task_please(
 
                     # nicely format some fields
                     safe_task_attempt_log = replace_special_characters_with_text(draft_task_attempt_log)
+
+                    safe_question_task_prompt = replace_special_characters_with_text(question_task_prompt)
+
+                    safe_task_from_instructions = replace_special_characters_with_text(this_task)
+
                     just_model_file_name = os.path.basename(use_this_model)
+                    just_this_original_task_file_name = os.path.basename(this_original_task_file)
 
                     print(f"just_model_file_name -> {just_model_file_name}")
-                    
+
                     # replace some fields with 'fail'
                     list_of_items_to_write_to_csv = [
                         "fail",
@@ -5967,9 +5986,9 @@ def do_task_please(
                         "fail",
                         correct_option, 
                         just_model_file_name, 
-                        this_original_task_file, 
-                        task_from_instructions, 
-                        question_task_prompt, 
+                        just_this_original_task_file_name, 
+                        safe_task_from_instructions, 
+                        safe_question_task_prompt, 
                         list_of_options, 
                         safe_task_attempt_log,
                         readable_timestamp,
