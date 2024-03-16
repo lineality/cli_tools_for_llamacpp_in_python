@@ -5887,11 +5887,9 @@ def do_task_please(
                             context_history = f"""
                             For this original task: '{task_summary}'. Evaluate only these {len(list_of_ranked_choice_options)} 
                             options: {pretty_print_option_list(dict_of_options)}. 
-                            (0-10; 0 is bad, 10 is good) Place your evaluation of each as the value to a key in markdown ```json format. 
+                            (0-10; 0 is bad, 10 is good) Place your evaluation of each as the value to a key in dict or json format. 
                             as: 
-                            ```json 
                             {answer_form} 
-                            ```
                             Just fill in the score, that's all. One key-value pair for each of the {len(list_of_ranked_choice_options)} 
                             evaluated options (one key, one value. not nested; not everything in the original question. -> "option-1": "your_score_here", ). 
                             No additional comments. A tasty reward awaits your accurate markdown selection. 
