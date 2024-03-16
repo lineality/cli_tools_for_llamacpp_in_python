@@ -989,6 +989,17 @@ headers = {
     response = requests.post(endpoint_url, headers=headers, json=request_body)
 """
 
+def pretty_print_option_list(lst):
+    if not lst:
+        return False
+
+    max_index_width = len(str(len(lst)))
+    pretty_string = ""
+
+    for index, item in enumerate(lst, start=1):
+        pretty_string += f" Option {index:>{max_index_width}}. {item}; "
+
+    return pretty_string.rstrip()
 
 def pretty_print_list(lst):
     if not lst:
@@ -1105,11 +1116,15 @@ def counter(timeout=10):
 
 
 def replace_special_characters_with_text(input_item):
-    
+
     if not isinstance(input_item, str):
-    
+
         input_item = str(input_item)
-    
+
+    # Remove duplicate spaces
+    input_item = re.sub(r'\s+', ' ', input_item.strip())
+
+
     replacements = {
         ',': '(comma)',
         '"': '(double quote or inverted commas)',
@@ -1120,11 +1135,13 @@ def replace_special_characters_with_text(input_item):
         '}': '(right curly bracket)',
         ':': '(colon)',
         '\\n': '(newline)',
+        '\n': '(newline)',
     }
-    
+
     for char, replacement in replacements.items():
         input_item = input_item.replace(char, replacement)
-    
+
+
     return input_item
 
 
@@ -5276,9 +5293,6 @@ def do_task_please(
 
 
 
-
-
-
                     # inspection
                     print(f"""
                     task mode items:
@@ -5722,28 +5736,28 @@ def do_task_please(
                             # Just fill in the score, that's all. One key-value pair per translation (one generic key, one value which is your score -> "translation-1": "score_here", not nested). No additional comments. A tasty reward awaits your accurate selection.
                             # """
 
-                            context_history = f"""
-                            Evaluate each solution for this task'{task_summary}' from these options: {pretty_print_list(dict_of_options)}. 
-                            Place your evaluations  (0-10, 0 is bad, 10 is good) as the value to a key in Json format. Return your markdown json object 
-                            listing each option only as "option-number" 
-                            as: 
-                            ```json 
-                            {answer_form} 
-                            ```
-                            Just fill in the score, that's all. One key-value pair per option, not nested. 
-                            No additional comments. A tasty reward awaits your accurate markdown json selection. ``json
-                            """
+                            # context_history = f"""
+                            # Evaluate each solution for this task'{task_summary}' from these options: {pretty_print_list(dict_of_options)}. 
+                            # Place your evaluations  (0-10, 0 is bad, 10 is good) as the value to a key in Json format. Return your markdown json object 
+                            # listing each option only as "option-number" 
+                            # as: 
+                            # ```json 
+                            # {answer_form} 
+                            # ```
+                            # Just fill in the score, that's all. One key-value pair per option, not nested. 
+                            # No additional comments. A tasty reward awaits your accurate markdown json selection. ``json
+                            # """
 
-                            context_history = f"""
-                            Evaluate each solution option for the task '{task_summary}'. Evaluate these options: {pretty_print_list(dict_of_options)}. 
-                            Place your evaluations  (0-10, 0 is bad, 10 is good) as the value to a key in markdown ```json format. 
-                            as: 
-                            ```json 
-                            {answer_form} 
-                            ```
-                            Just fill in the score, that's all. One key-value pair per option (one key, one value. not nested; -> "option-1": "your_score_here", ). 
-                            No additional comments. A tasty reward awaits your accurate markdown``` selection. ``json
-                            """
+                            # context_history = f"""
+                            # Evaluate each solution option for the task '{task_summary}'. Evaluate these options: {pretty_print_list(dict_of_options)}. 
+                            # Place your evaluations  (0-10, 0 is bad, 10 is good) as the value to a key in markdown ```json format. 
+                            # as: 
+                            # ```json 
+                            # {answer_form} 
+                            # ```
+                            # Just fill in the score, that's all. One key-value pair per option (one key, one value. not nested; -> "option-1": "your_score_here", ). 
+                            # No additional comments. A tasty reward awaits your accurate markdown``` selection. ``json
+                            # """
 
 
                             # context_history = f"""
@@ -5754,6 +5768,17 @@ def do_task_please(
                             # ''' 
                             # No additional comments. A tasty reward awaits your accurate selection."""
 
+
+                            context_history = f"""
+                            For this origional task: '{task_summary}'. Evaluate only these {len(list_of_options)} options: {pretty_print_option_list(dict_of_options)}. 
+                            Place your evaluations  (0-10, 0 is bad, 10 is good) as the value to a key in markdown ```json format. 
+                            as: 
+                            ```json 
+                            {answer_form} 
+                            ```
+                            Just fill in the score, that's all. One key-value pair per each of the {len(list_of_options)} options (one key, one value. not nested; not everything in the original question. -> "option-1": "your_score_here", ). 
+                            No additional comments. A tasty reward awaits your accurate markdown``` selection. ``json
+                            """
 
 
 
