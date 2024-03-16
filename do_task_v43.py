@@ -2230,8 +2230,6 @@ def task_check_structure_of_response(structured_output_format, dict_str):
 
         # if the model is structuring the output in ||| ||| pipes, then look for pipes
         if structured_output_format == "pipes":
-            print(f"use_history_context_dict_list -> {use_history_context_dict_list}")
-
 
             # if "task_mode == "open_task"":
 
@@ -2265,16 +2263,24 @@ def task_check_structure_of_response(structured_output_format, dict_str):
             # Use re.findall to find all occurrences that match the pattern
             matches_list = re.findall(pattern, dict_str)
 
+            # inspection
+            print(f"matches_list -> {matches_list}")
+
             # matches_list is a list of all captured groups in the text
             # If you expect only one match and want to return just that, you can adjust the code accordingly
 
             strings_to_remove = [
                 "final answer option number",
+                "number"
             ]
 
             matches_list = remove_specific_strings(matches_list, strings_to_remove)
 
-            response_to_task = matches_list[0]
+            matches_list = remove_non_integers_from_list(matches_list)
+
+
+
+            response_to_task = matches_list[-1]
 
             # cleaned_matches_list = remove_underscores_from_strings_in_list(matches_list)
 
@@ -2299,7 +2305,7 @@ def task_check_structure_of_response(structured_output_format, dict_str):
 
 
         elif structured_output_format == "markdown_json":
-            
+
             print(f"use context, structured_output_format -> {structured_output_format}")
             response_to_task = task_extract_markdown_json_to_dict(dict_str)
 
@@ -2317,14 +2323,18 @@ def task_check_structure_of_response(structured_output_format, dict_str):
             raise "No output structure mode selected: task_check_structure_of_response()"
 
     except Exception as e:
-        print(f"Exception task_check_structure_of_response error parsing ai response_to_task -> {str(e)}")
+        print(f"Exception task_check_structure_of_response() error parsing ai response_to_task -> {str(e)}")
         return False
 
 
 
 """# Call api within: Check json structure against original"""
 
-
+def remove_non_integers_from_list(input_list):
+    try:  
+        return [item for item in input_list if isinstance(item, int) or (isinstance(item, str) and item.isdigit())]
+    except Exception as e:
+        raise e
 
 def extract_values_from_dict(dict_str):
 
@@ -5250,8 +5260,7 @@ def do_task_please(
                     pipes_multiple_choice_solution_body_nocontext = """
                     solution_plan_outline: ...(YOUR PLAN), 
                     draft_revisions_and_comments: ...(YOUR COMMENTS), 
-                    Then in triple pipes: 
-                    |||final answer option number here||| e.g. |||#|||
+                    Then in triple pipes, the final answer option number: |||number|||
                     """
 
 
