@@ -1696,7 +1696,7 @@ def ask_mistral_model(context_history, use_this_model):
 
 
 # Helper Function
-def task_check_function_description_keys(dict_str):
+def task_extract_markdown_json_to_dict(dict_str):
     """
     TODO or final_answer
 
@@ -2210,25 +2210,27 @@ def check_structure_of_response(dict_str):
             return False
 
     except Exception as e:
-        print(f"check_structure_of_response error parsing ai translation_list {str(e)}")
+        print(f"check_structure_of_response error parsing ai translation_list -> {str(e)}")
         return False
 
 
 # Helper Function
-def task_check_structure_of_response(task_mode, dict_str):
+def task_check_structure_of_response(structured_output_format, dict_str):
     """
-    for tasks, see modes json or |||
+
+    checking the structure of the response...depends on what the desired structure is.
 
     """
-    print(f"task_mode-> {task_mode}")
+    print(f"structured_output_format -> {structured_output_format}")
     print(f"dict_str -> {dict_str}")
 
     try:
         # print(f"\n\n Starting check_structure_of_response, dict_str -> {repr(dict_str)} {type(dict_str)}")
-        print(f"\n\n Starting check_structure_of_response, dict_str ")
+        print(f"\n\n Starting task_check_structure_of_response, dict_str ")
 
-        if "simple" in task_mode:
-            print(f"simple found in task_mode {task_mode}")
+        # if the model is structuring the output in ||| ||| pipes, then look for pipes
+        if structured_output_format == "pipes":
+            print(f"use_history_context_dict_list -> {use_history_context_dict_list}")
 
 
             # if "task_mode == "open_task"":
@@ -2270,7 +2272,6 @@ def task_check_structure_of_response(task_mode, dict_str):
                 "final answer option number",
             ]
 
-
             matches_list = remove_specific_strings(matches_list, strings_to_remove)
 
             response_to_task = matches_list[0]
@@ -2293,24 +2294,14 @@ def task_check_structure_of_response(task_mode, dict_str):
                 return response_to_task
 
             else:
-                print(f"check_structure_of_response error parsing ai response_to_task")
+                print(f"task_check_structure_of_response error parsing ai response_to_task")
                 return False
 
 
-        else:
-            print(f"NO simple found in task_mode -> {task_mode}")
-            response_to_task = task_check_function_description_keys(dict_str)
-
-            # cleaned_matches_list = remove_underscores_from_strings_in_list(matches_list)
-
-            # translation = cleaned_matches_list
-
-            # # Remove duplicates
-            # translation_set = set(translation)
-            # response_to_task = list(translation_set)
-
-            # # adjust all-capitalized words to only starting with a capital letter
-            # adjust_capitalization(response_to_task)
+        elif structured_output_format == "markdown_json":
+            
+            print(f"use context, structured_output_format -> {structured_output_format}")
+            response_to_task = task_extract_markdown_json_to_dict(dict_str)
 
             # inspection
             print(f"task_check_structure_of_response()  response_to_task -> {response_to_task}")
@@ -2322,6 +2313,8 @@ def task_check_structure_of_response(task_mode, dict_str):
                 print(f"check_structure_of_response error parsing ai response_to_task")
                 return False
 
+        else:
+            raise "No output structure mode selected: task_check_structure_of_response()"
 
     except Exception as e:
         print(f"check_structure_of_response error parsing ai response_to_task {str(e)}")
@@ -3083,10 +3076,14 @@ def general_task_call_api_within_structure_check(context_history,
                                                  use_this_model, 
                                                  parameter_dict, 
                                                  ai_local_or_cloud_mode,
-                                                 task_mode,
+                                                 structured_output_format,
                                                  draft_task_attempt_log,
                                                  retry_x_times
                                                  ):
+    """
+    structured_output_format is passed to the output structure checker
+    """
+    
     retry_counter = 0
     json_ok_flag = False
 
@@ -3175,7 +3172,8 @@ def general_task_call_api_within_structure_check(context_history,
             jsonchecked_translation = None
             print(f"Failed: {str(e)}")
 
-        jsonchecked_translation = task_check_structure_of_response(task_mode, dict_str)
+
+        jsonchecked_translation = task_check_structure_of_response(structured_output_format, dict_str)
 
         if jsonchecked_translation:
             json_ok_flag = True
@@ -4977,9 +4975,6 @@ def do_task_please(
 
     print_find_all_models(models_dir_path)
 
-
-
-    
     # task mode items:
     task_mode_answer_option_choices_provided = task_mode_configies["answer_option_choices_provided"]
     task_mode_validate_the_answer = task_mode_configies["validate_the_answer"]
@@ -5289,18 +5284,17 @@ def do_task_please(
                             # Multiple Choice: use context
                             ##################
                             context_history = f"""
-
-                            Which from this list of possible responses is the best response to being given this task?
+                            Which is the best option?
 
                             For this task: 
                             {this_task} 
 
-                            From this list of possible responses: 
+                            From this list of options: 
                             {pretty_print_list(these_options)} 
 
-                            Your answer must be the number of the answer-option in sequence, where "1" is the first answer option.
+                            Your answer must be the number of the option in the order given. "1" is the first option. 
 
-                            Giveyour answer in this format:
+                            Give your answer in this format: 
                             {multiple_choice_solution_body}
                             """
 
@@ -5311,15 +5305,15 @@ def do_task_please(
                             ##################
                             context_history = f"""
 
-                            Which from this list of possible responses is the best response to being given this task?
+                            Which is the best option?
 
                             For this task: 
                             {this_task} 
 
-                            From this list of possible responses: 
+                            From this list of options: 
                             {pretty_print_list(these_options)} 
 
-                            Your answer must be the number of the answer-option in sequence, where "1" is the first answer option.
+                            Your answer must be the number of the option in the order given. "1" is the first option.
 
                             Giveyour answer in this format:
                             {simple_multiple_choice_solution_body}
@@ -5362,12 +5356,17 @@ def do_task_please(
                         ##########
                         # Do Task
                         ##########
+                        """
+                        Set the structured_output_format:
+                        """
+                        structured_output_format = "markdown_json"  # markdown_json/delimiter/pipes/etc.
+                        
                         task_response_string = general_task_call_api_within_structure_check(
                             context_history, 
                             use_this_model, 
                             parameter_dict, 
                             ai_local_or_cloud_mode,
-                            task_mode,
+                            structured_output_format,
                             draft_task_attempt_log,
                             retry_x_times,
                         )
@@ -5917,7 +5916,6 @@ number_of_ranked_votes = 1
 
 
 
-task_mode = "simple_multiple_choice"
 list_of_models = ["tinyllama", "mistral-7b-instruct"]
 list_of_models = ["mistral-7b-instruct"]
 
