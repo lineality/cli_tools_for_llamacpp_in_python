@@ -3199,6 +3199,9 @@ def general_task_call_api_within_structure_check(
     task_mode_output_structure_mode is passed to the output structure checker
     """
 
+    # default
+    dict_str = ""
+
     retry_counter = 0
     json_ok_flag = False
 
@@ -3287,6 +3290,9 @@ def general_task_call_api_within_structure_check(
             jsonchecked_translation = None
             print(f"Failed: {str(e)}")
 
+        if not dict_str:
+            print(f"general_task_call_api_within_structure_check, not returned string,  dict_str -> {dict_str}, type -> {type(dict_str)}")
+            return False
 
         jsonchecked_translation = task_check_structure_of_response(
             task_mode_output_structure_mode, 
@@ -5329,6 +5335,9 @@ def do_task_please(
                         these_original_task_options = None
 
                     correct_option = specific_fields[scoring_field_name]
+                    print(f"correct_option -> {correct_option}")
+
+
                     if these_original_task_options: 
                         task_summary = f"Task: {this_task}, Options: {pretty_print_list(these_original_task_options)}"
                     else:
@@ -6042,6 +6051,15 @@ def do_task_please(
                     # Scoring
                     ##########
                     ##########
+                    print(f"""
+                        Scoring:
+                          selected_option       -> {selected_option}
+                          type(selected_option) -> {type(selected_option)}
+
+                          correct_option        -> {correct_option}
+                          type(correct_option)  -> {type(correct_option)}
+
+                          """)
 
                     # default
                     score = 0
@@ -6049,7 +6067,7 @@ def do_task_please(
                     # if multiple choice and should check answer:
                     if task_mode_validate_the_answer and task_mode_answer_option_choices_provided:
                         print(f"selected_option -> {selected_option} type -> {type(selected_option)}")
-                        print(f"correct_option -> {selected_option} type -> {type(selected_option)}")
+                        print(f"correct_option -> {correct_option} type -> {type(correct_option)}")
                         if selected_option == correct_option:
                             print("Score!")
                             score = 1
@@ -6069,8 +6087,9 @@ def do_task_please(
                     - without spaces 
                     """
                     if task_mode_validate_the_answer and (not task_mode_answer_option_choices_provided):
+                        print("checking substring")
                         print(f"selected_option -> {selected_option} type -> {type(selected_option)}")
-                        print(f"correct_option -> {selected_option} type -> {type(selected_option)}")
+                        print(f"correct_option -> {correct_option} type -> {type(correct_option)}")
 
 
                         if is_substring_boolean(selected_option, correct_option):
