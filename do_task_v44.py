@@ -1112,7 +1112,7 @@ def extract_dictionaries_from_string_no_pips(input_string):
     pattern = r'{.*?}'
     matches = re.findall(pattern, input_string)
     dictionaries = []
-    
+
     for match in matches:
         try:
             dictionary = eval(match)
@@ -1120,7 +1120,7 @@ def extract_dictionaries_from_string_no_pips(input_string):
                 dictionaries.append(dictionary)
         except (SyntaxError, NameError, TypeError):
             pass
-    
+
     return dictionaries
 
 # Helper Function
@@ -2370,8 +2370,8 @@ def task_check_structure_of_response(
         return False
 
 
-
 """# Call api within: Check json structure against original"""
+
 
 def remove_non_integers_from_list(input_list):
     try:  
@@ -2379,7 +2379,13 @@ def remove_non_integers_from_list(input_list):
     except Exception as e:
         raise e
 
+
+
 def extract_values_from_dict(dict_str):
+    """
+    take dict, list, or string-dict-json
+    returns the values from a dictionary as a list
+    """
 
     try:
         # inspection
@@ -2387,15 +2393,31 @@ def extract_values_from_dict(dict_str):
         print(f"dict_str -> {dict_str}")        
         print(f"type(dict_str) -> {type(dict_str)}")
 
+        # if a list, take last item from list
+        if isinstance(dict_str, list):
+            dict_str = dict_str[-1]
 
-        # Parse the string into a Python dictionary
-        dict_data = json.loads(dict_str)
+        print(f"dict_str -> {dict_str}")        
+        print(f"type(dict_str) -> {type(dict_str)}")
+
+        # if a list, take last item from list
+        if isinstance(dict_str, str):
+            print("string input")
+            dict_str = dict_str.replace("'",'"')
+            # Parse the string into a Python dictionary
+            dict_str = json.loads(dict_str)
+
         # Extract the values and convert to a list
-        values_list = list(dict_data.values())
+        values_list = list(dict_str.values())
+        print(f"values_list -> {values_list}")        
+        print(f"type(values_list) -> {type(values_list)}")
+
         return values_list
+
     except Exception as e:
-       print("extract_values_from_dict failed to get values, maybe bad input")
-       return False
+        print("extract_values_from_dict failed to get values, maybe bad input")
+        return False
+
 
 
 def return_list_of_jsons_from_string(dict_str):
@@ -2423,6 +2445,7 @@ def return_list_of_jsons_from_string(dict_str):
 
         else:
             # try without pips
+            print("try extract_dictionaries_from_string_no_pips(dict_str) ")
             return extract_dictionaries_from_string_no_pips(dict_str)
 
     except:
@@ -2458,7 +2481,10 @@ def json_number_check_structure_of_response_to_list(dict_str) -> list:
 
     if "'" in str(dict_str):
         extracted_dict = return_list_of_jsons_from_string(dict_str)
-        print(f"extracted_dict {extracted_dict}")
+        if isinstance(extracted_dict, list):
+            extracted_dict = extracted_dict[-1]
+            
+        print(f"extracted_dict -> {extracted_dict}")
         print(f"type(extracted_dict) {type(extracted_dict)}")
 
     else:
@@ -2913,6 +2939,26 @@ values_list = json_to_values_list(selected_object)
 # Note: 'data.jsonl' should be replaced with the actual path to your JSON Lines file.
 values_list
 """
+
+
+def is_substring_boolean(if_this_string, in_this_string):
+    if not if_this_string:
+        return False
+
+    # Define math symbols to keep
+    math_symbols = "+-*/^="
+
+    # Remove punctuation from both strings, excluding math symbols
+    if_this_string = if_this_string.translate(str.maketrans("", "", "".join(set(string.punctuation) - set(math_symbols))))
+    in_this_string = in_this_string.translate(str.maketrans("", "", "".join(set(string.punctuation) - set(math_symbols))))
+
+    # Strip whitespace and convert to lowercase
+    if_this_string = if_this_string.strip().lower()
+    in_this_string = in_this_string.strip().lower()
+
+    # Check if if_this_string is a substring of in_this_string
+    return if_this_string in in_this_string
+
 
 def extract_specific_fields(json_obj, fields):
     """
@@ -5997,18 +6043,45 @@ def do_task_please(
                     ##########
                     ##########
 
-                    print(f"selected_option -> {selected_option} type -> {type(selected_option)}")
-                    print(f"correct_option -> {selected_option} type -> {type(selected_option)}")
-                    if selected_option == correct_option:
-                        print("Score!")
-                        score = 1
-                    else:
-                        print("Oops")
-                        score = 0
+                    # default
+                    score = 0
 
-                    # making csv row
-                    print("with score: making csv row...")
+                    # if multiple choice and should check answer:
+                    if task_mode_validate_the_answer and task_mode_answer_option_choices_provided:
+                        print(f"selected_option -> {selected_option} type -> {type(selected_option)}")
+                        print(f"correct_option -> {selected_option} type -> {type(selected_option)}")
+                        if selected_option == correct_option:
+                            print("Score!")
+                            score = 1
+                        else:
+                            print("Oops")
+                            score = 0
 
+                        # making csv row
+                        print("with score: making csv row...")
+
+
+                    # if open-answer and should check answer:
+                    """
+                    If open answer contains
+                    - without capitcaliaation
+                    - without puncutation
+                    - without spaces 
+                    """
+                    if task_mode_validate_the_answer and (not task_mode_answer_option_choices_provided):
+                        print(f"selected_option -> {selected_option} type -> {type(selected_option)}")
+                        print(f"correct_option -> {selected_option} type -> {type(selected_option)}")
+
+
+                        if is_substring_boolean(selected_option, correct_option):
+                            print("Score!")
+                            score = 1
+                        else:
+                            print("Oops")
+                            score = 0
+
+                        # making csv row
+                        print("with score: making csv row...")
 
 
                     safe_task_attempt_log = replace_special_characters_with_text(draft_task_attempt_log)
