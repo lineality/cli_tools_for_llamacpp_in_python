@@ -5663,7 +5663,7 @@ def do_task_please(
                     #     # Write the data row
                     #     csvfile.write(answer_row)
 
-                    append_list_of_values_to_csv(answer_file_path, list_of_items_to_write_to_csv, header=None)
+                    append_list_of_values_to_csv(answer_file_path, list_of_items_to_write_to_csv)
 
                     # Exit While
                     print("\nHats in the air, we can all leave. Buubye!!\n\n\n")
@@ -5732,7 +5732,7 @@ def do_task_please(
                         readable_timestamp,
                     ]
 
-                    append_list_of_values_to_csv(answer_file_path, list_of_items_to_write_to_csv, header=None)
+                    append_list_of_values_to_csv(answer_file_path, list_of_items_to_write_to_csv)
 
 
                     # Exit While
