@@ -5251,7 +5251,7 @@ def do_task_please(
                     solution_plan_outline: ...(YOUR PLAN), 
                     draft_revisions_and_comments: ...(YOUR COMMENTS), 
                     Then in triple pipes: 
-                    |||final answer option number|||
+                    |||final answer option number here||| e.g. |||#|||
                     """
 
 
@@ -5341,7 +5341,8 @@ def do_task_please(
 
                                 """
                             else:
-                                raise f"No output_structure_mode selected"
+                                print( f""" exit: prompt selection 1: option problem task_mode_output_structure_mode {task_mode_output_structure_mode}""")
+                                sys.exit()
 
                         ################
                         # if NO context
@@ -5382,8 +5383,8 @@ def do_task_please(
 
                                 """
                             else:
-                                raise f"No output_structure_mode selected"
-
+                                print( f""" exit: prompt selection 1: option problem task_mode_output_structure_mode {task_mode_output_structure_mode}""")
+                                sys.exit()
 
                     ##################
                     ################## 
@@ -5450,8 +5451,9 @@ def do_task_please(
                                 {dict_multiple_choice_solution_body_nocontext}
                                 """
 
-                        else:
-                            raise f""" prompt selection 1: option problem """
+                            else:
+                                print( f""" exit: prompt selection 1: option problem task_mode_output_structure_mode {task_mode_output_structure_mode}""")
+                                sys.exit()
 
 
                         ################
@@ -5505,8 +5507,9 @@ def do_task_please(
                                 {dict_multiple_choice_solution_body_nocontext}
                                 """
 
-                        else:
-                            raise f""" prompt selection 1: option problem """
+                            else:
+                                print( f""" exit: prompt selection 1: option problem task_mode_output_structure_mode {task_mode_output_structure_mode}""")
+                                sys.exit()
 
                     print(f"context_history -> {context_history}")
 
