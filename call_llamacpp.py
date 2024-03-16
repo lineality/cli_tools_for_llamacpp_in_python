@@ -1139,6 +1139,53 @@ context_history = "translate only \'First Name\' into French formatted inside tr
 
 context_history = "For this origional task: 'Task: What is the capital of France?'. Evaluate only these 2 options: Option 1. The capital city of France is Paris.; Option 2. Capital City of France: Paris;. Place your evaluations (0-10, 0 is bad, 10 is good) as the value to a key in markdown ```json format. as: ```json {'option-1': 'score_here', 'option-2': 'score_here', 'option-3': 'score_here'} ``` Just fill in the score, that's all. One key-value pair per each of the 2 options (one key, one value. not nested; not everything in the original question. -> \"option-1\": \"your_score_here\", ). No additional comments. A tasty reward awaits your accurate markdown``` selection. ``json"
 
+
+answer_form = {
+"option-1": "score_here", 
+"option-2": "score_here",
+"option-3": "score_here"
+}
+
+sample_2 = '```json {"option-1": '
+
+task_summary = "Task: What is the capital of France?"
+list_of_ranked_choice_options = [
+    "The capital city of France is Paris.",
+      "Capital City of France: Paris"
+]
+
+context_history = f"""
+For this original task: '{task_summary}'. Evaluate only these {len(list_of_ranked_choice_options)} 
+options: {list_of_ranked_choice_options}. 
+(0-10; 0 is bad, 10 is good) Place your evaluation of each as the value to a key in markdown ```json format. 
+as: 
+```json 
+{answer_form} 
+```
+Just fill in the score, that's all. One key-value pair for each of the {len(list_of_ranked_choice_options)} 
+evaluated options (one key, one value. not nested; not everything in the original question. -> "option-1": "your_score_here", ). 
+No additional comments. A tasty reward awaits your accurate markdown selection. 
+Let's stare: {sample_2}
+"""
+
+context_history = f"""
+Let's answer in dictionary ```json ``` format between triple pips.
+For this original task: '{task_summary}'. Evaluate these {len(list_of_ranked_choice_options)} 
+options: {list_of_ranked_choice_options}. 
+(0-10; 0 is bad, 10 is good) Place each evaluation as the value to a key in markdown ```json format. 
+as: 
+```json 
+{answer_form} 
+```
+A tasty reward awaits your accurate markdown selection. 
+Use ``` or no treat.
+"""
+
+
+
+# Remove duplicate spaces
+# context_history = re.sub(r'\s+', ' ', context_history.strip())
+
 ai_model = "deepcode"
 ai_model = "estopian"
 ai_model = "zephyr"
@@ -1150,6 +1197,7 @@ configies_dict = {
     'model_nickname': ai_model,
     'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
 }
+
 
 response = mini_gguf_api(context_history, parameter_dict, configies_dict)
 print(response[0])
