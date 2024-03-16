@@ -245,7 +245,7 @@ def make_answers_directory_and_csv_path(this_original_task_file, model_name):
     # Create directories if they don't exist
     os.makedirs(os.path.dirname(answer_file_path), exist_ok=True)
 
-    header_string = '"score", "this_row_or_line", "selected_option", "correct_option", "name_of_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"\n'
+    header_string = '"score", "this_row_or_line", "selected_option", "correct_option", "name_of_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_ranked_choice_options", "draft_task_attempt_log", "readable_timestamp"\n'
 
     # Create an empty file (or just close it if it already exists)
     with open(answer_file_path, 'a', newline='') as csvfile:
@@ -4337,7 +4337,7 @@ def replace_leaf_by_path(json_structure, path, new_value):
 #                 # print(f"\n\n populated_skeleton -> {populated_skeleton}")
 
 #                 # set prompts to select best translation
-#                 list_of_options = extract_value_by_path(skeleton_json, this_path)
+#                 list_of_ranked_choice_options = extract_value_by_path(skeleton_json, this_path)
 
 #                 # System Instructions
 #                 context_history = set_select_best__system_prompt(
@@ -4345,7 +4345,7 @@ def replace_leaf_by_path(json_structure, path, new_value):
 #                 )
 #                 # User Prompt
 #                 context_history = set_select_best__user_prompt(
-#                     context_history, target_language, list_of_options, untranslated_leaf
+#                     context_history, target_language, list_of_ranked_choice_options, untranslated_leaf
 #                 )
 
 #                 #################
@@ -4373,10 +4373,10 @@ def replace_leaf_by_path(json_structure, path, new_value):
 
 #                     selected_bestest_value = selected_bestest_value[0]
 
-#                     print(f"selected_bestest_value -> {selected_bestest_value} vs. list_of_options -> {list_of_options}")
+#                     print(f"selected_bestest_value -> {selected_bestest_value} vs. list_of_ranked_choice_options -> {list_of_ranked_choice_options}")
 
 #                     # Make sure selected item is in the list (and not a new halucination or mutation)
-#                     if selected_bestest_value in list_of_options:
+#                     if selected_bestest_value in list_of_ranked_choice_options:
 #                         selected_is_in_list_ok = True
 
 #                     else:
@@ -4686,23 +4686,23 @@ def mini_translate_json(
                     remove_duplicates_from_terminal_list(populated_skeleton, this_path)
 
                     # set prompts to select best translation
-                    list_of_options = extract_value_by_path(populated_skeleton, this_path)
+                    list_of_ranked_choice_options = extract_value_by_path(populated_skeleton, this_path)
 
                     # # Combine into one list of strings using list comprehension
-                    # list_of_options = [item for sublist in list_of_options_nested for item in sublist]
-                    # list_of_options = list_of_options_nested
+                    # list_of_ranked_choice_options = [item for sublist in list_of_ranked_choice_options_nested for item in sublist]
+                    # list_of_ranked_choice_options = list_of_ranked_choice_options_nested
 
                     # turn list of options int dict
-                    dict_of_options = {option: "score_here" for option in list_of_options}
+                    dict_of_options = {option: "score_here" for option in list_of_ranked_choice_options}
 
                     # turn list of options int dict
-                    list_dict_of_options = {option: [] for option in list_of_options}
+                    list_dict_of_options = {option: [] for option in list_of_ranked_choice_options}
 
 
                     print(
                         f"""
                     mini_translate_json() Select Top Top
-                    list_of_options        -> {list_of_options}
+                    list_of_ranked_choice_options        -> {list_of_ranked_choice_options}
                     dict_of_options        -> {dict_of_options}
                     list_dict_of_options   -> {list_dict_of_options}
                     """
@@ -4719,22 +4719,22 @@ def mini_translate_json(
                     # )
                     # # User Prompt
                     # context_history = set_select_best__user_prompt(
-                    #     context_history, target_language, list_of_options, untranslated_leaf
+                    #     context_history, target_language, list_of_ranked_choice_options, untranslated_leaf
                     # )
 
 
                     # context_history = f"""
-                    # Select the most accurate {target_language} translation for '{untranslated_leaf}' from these options: {list_of_options}. 
+                    # Select the most accurate {target_language} translation for '{untranslated_leaf}' from these options: {list_of_ranked_choice_options}. 
                     # Place your choice, spelled exactly the same, between triple pipes, like this: |||best_selection|||. 
                     # No additional comments. A tasty reward awaits your accurate selection."""
 
                     # """
-                    # Select the most accurate {target_language} translation for '{untranslated_leaf}' from these options: {list_of_options}. 
+                    # Select the most accurate {target_language} translation for '{untranslated_leaf}' from these options: {list_of_ranked_choice_options}. 
                     # Indicate your choice by placing it between triple pipes, like this: |||best_selection|||. 
                     # No additional comments. The reward of a job well done awaits your accurate selection!"""
 
                     # context_history = f"""
-                    # Evaluate (0-10, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {list_of_options}. 
+                    # Evaluate (0-10, 10 is great) each {target_language} translation for '{untranslated_leaf}' from these options: {list_of_ranked_choice_options}. 
                     # Place your evaluations in order as Pipe-Separated Values. like this four options |#|#|#|#| or just one item like this |#| 
                     # No additional comments. A tasty reward awaits your accurate selection """
 
@@ -4812,7 +4812,7 @@ def mini_translate_json(
 
 
                     # turn list of options int dict
-                    dict_of_options = {option: None for option in list_of_options}
+                    dict_of_options = {option: None for option in list_of_ranked_choice_options}
                     # get highest ranked item:
                     selected_option = None
 
@@ -4849,7 +4849,7 @@ def mini_translate_json(
                             list_of_votes = filter_list_convert_to_int(list_of_votes)
 
                             print(f"list_of_votes -> {list_of_votes}")
-                            print(f"list_of_options -> {list_of_options}")
+                            print(f"list_of_ranked_choice_options -> {list_of_ranked_choice_options}")
                             print(f"type list_of_votes -> {type(list_of_votes)}\n\n")
 
                             print(f"list_dict_of_options -> {list_dict_of_options}")
@@ -4857,7 +4857,7 @@ def mini_translate_json(
                             if list_of_votes:
 
                                 # if there is one vote per candidate, list each candidates votes
-                                if len(list_of_votes) == len(list_of_options):
+                                if len(list_of_votes) == len(list_of_ranked_choice_options):
                                     add_ranks_votes_to_candidate(list_of_votes, list_dict_of_options)
 
                                     print(f"new list_dict_of_options -> {list_dict_of_options}")
@@ -5069,6 +5069,8 @@ def do_task_please(
 
     for this_task_config_dict in task_file_config_dic_list:
 
+
+
         # unpack task_file_config_dic_list
         file_name = this_task_config_dict["file_name"]
         file_type = this_task_config_dict["file_type"]
@@ -5092,12 +5094,23 @@ def do_task_please(
         if "ranked_choice_output_structure_mode" in this_task_config_dict:
             task_mode_ranked_choice_output_structure_mode = this_task_config_dict["ranked_choice_output_structure_mode"]
 
+        if "answer_option_choices_provided" in this_task_config_dict:
+            task_mode_answer_option_choices_provided = this_task_config_dict["answer_option_choices_provided"]
+
+        if "validate_the_answer" in this_task_config_dict:
+            task_mode_validate_the_answer = this_task_config_dict["validate_the_answer"]
+
+        if "use_history_context_dict_list" in this_task_config_dict:
+            task_mode_use_history_context_dict_list = this_task_config_dict["use_history_context_dict_list"]
+
+        if "system_instructions" in this_task_config_dict:
+            task_mode_system_instructions = this_task_config_dict["system_instructions"]
+
 
 
         this_original_task_file = find_matching_file_paths(task_files_list, file_name)
 
-
-        print(f"this_original_task_file -> {this_original_task_file}")
+        print(f"\n\n\n Now starting this_original_task_file -> {this_original_task_file}")
 
 
 
@@ -5157,10 +5170,8 @@ def do_task_please(
 
 
                 """
-                get task from csv
+                get task from file
                 """
-                task_from_instructions = ""
-
                 task_ok_flag = False
                 task_fail_counter = 0
 
@@ -5220,15 +5231,20 @@ def do_task_please(
                     """
                     """
                     this_task = specific_fields[task_field_name]
-                    these_options = specific_fields[options_field_name]
+
+                    if 'options' in specific_fields:
+                        these_original_task_options = specific_fields[options_field_name]
+                    else:
+                        these_original_task_options = None
+
                     correct_option = specific_fields[scoring_field_name]
-                    if these_options:
-                        task_summary = f"Task: {this_task}, Options: {pretty_print_list(these_options)}"
+                    if these_original_task_options: 
+                        task_summary = f"Task: {this_task}, Options: {pretty_print_list(these_original_task_options)}"
                     else:
                         task_summary = f"Task: {this_task}"
 
                     print(f"this_task -> {this_task}")
-                    print(f"these_options -> {these_options}")
+                    print(f"these_original_task_options -> {these_original_task_options}")
                     print(f"task_summary -> {task_summary}")
 
 
@@ -5465,7 +5481,7 @@ def do_task_please(
                                 {this_task} 
 
                                 From this list of options: 
-                                {pretty_print_list(these_options)} 
+                                {pretty_print_list(these_original_task_options)} 
 
                                 Your answer must be the number of the option in the order given. "1" is the first option. 
 
@@ -5489,7 +5505,7 @@ def do_task_please(
                                 {this_task} 
 
                                 From this list of options: 
-                                {pretty_print_list(these_options)} 
+                                {pretty_print_list(these_original_task_options)} 
 
                                 Your answer must be the number of the option in the order given. "1" is the first option. 
 
@@ -5521,7 +5537,7 @@ def do_task_please(
                                 {this_task} 
 
                                 From this list of options: 
-                                {pretty_print_list(these_options)} 
+                                {pretty_print_list(these_original_task_options)} 
 
                                 Your answer must be the number of the option in the order given. "1" is the first option. 
 
@@ -5545,7 +5561,7 @@ def do_task_please(
                                 {this_task} 
 
                                 From this list of options: 
-                                {pretty_print_list(these_options)} 
+                                {pretty_print_list(these_original_task_options)} 
 
                                 Your answer must be the number of the option in the order given. "1" is the first option. 
 
@@ -5563,7 +5579,7 @@ def do_task_please(
                     old_history = context_history
 
 
-                    list_of_options = []
+                    list_of_ranked_choice_options = []
 
                     # making N translation-versions
                     for i in range(number_of_preliminary_drafts):
@@ -5620,7 +5636,7 @@ def do_task_please(
                         task_response_string = str_to_int_or_none(task_response_string)
 
                         if task_response_string:
-                            list_of_options.append(int(task_response_string))
+                            list_of_ranked_choice_options.append(int(task_response_string))
 
                     #####################################################
                     #####################################################
@@ -5639,36 +5655,36 @@ def do_task_please(
                     print("\n\n\nSelect Top Top Goodest Translation Star-Good-Prime")
 
 
-                    if list_of_options:
+                    if list_of_ranked_choice_options:
 
-                        print(f"list_of_options -> {list_of_options}")
-                        print(f"len(list_of_options) -> {len(list_of_options)}")
+                        print(f"list_of_ranked_choice_options -> {list_of_ranked_choice_options}")
+                        print(f"len(list_of_ranked_choice_options) -> {len(list_of_ranked_choice_options)}")
 
-                        set_ist_of_options = set(list_of_options)
-                        list_of_options = list(set_ist_of_options)
+                        set_ist_of_options = set(list_of_ranked_choice_options)
+                        list_of_ranked_choice_options = list(set_ist_of_options)
 
                         print("After removing duplicates:")
-                        print(f"list_of_options -> {list_of_options}")
-                        print(f"len(list_of_options) -> {len(list_of_options)}")
+                        print(f"list_of_ranked_choice_options -> {list_of_ranked_choice_options}")
+                        print(f"len(list_of_ranked_choice_options) -> {len(list_of_ranked_choice_options)}")
 
 
-                        if len(list_of_options) > 1:
+                        if len(list_of_ranked_choice_options) > 1:
 
                             # Combine into one list of strings using list comprehension
-                            set_list_of_options = set(list_of_options)
-                            list_of_options = list(set_list_of_options)
+                            set_list_of_ranked_choice_options = set(list_of_ranked_choice_options)
+                            list_of_ranked_choice_options = list(set_list_of_ranked_choice_options)
 
                             # turn list of options int dict
-                            dict_of_options = {option: "score_here" for option in list_of_options}
+                            dict_of_options = {option: "score_here" for option in list_of_ranked_choice_options}
 
                             # turn list of options int dict
-                            list_dict_of_options = {option: [] for option in list_of_options}
+                            list_dict_of_options = {option: [] for option in list_of_ranked_choice_options}
 
 
                             print(
                                 f"""
                             do_task_please() Select Top Top
-                            list_of_options        -> {list_of_options}
+                            list_of_ranked_choice_options        -> {list_of_ranked_choice_options}
                             dict_of_options        -> {dict_of_options}
                             list_dict_of_options   -> {list_dict_of_options}
                             """
@@ -5694,22 +5710,22 @@ def do_task_please(
                             # )
                             # # User Prompt
                             # context_history = set_select_best__user_prompt(
-                            #     context_history, target_language, list_of_options, untranslated_task
+                            #     context_history, target_language, list_of_ranked_choice_options, untranslated_task
                             # )
 
 
                             # context_history = f"""
-                            # Select the most accurate {target_language} translation for '{untranslated_task}' from these options: {list_of_options}. 
+                            # Select the most accurate {target_language} translation for '{untranslated_task}' from these options: {list_of_ranked_choice_options}. 
                             # Place your choice, spelled exactly the same, between triple pipes, like this: |||best_selection|||. 
                             # No additional comments. A tasty reward awaits your accurate selection."""
 
                             # """
-                            # Select the most accurate {target_language} translation for '{untranslated_task}' from these options: {list_of_options}. 
+                            # Select the most accurate {target_language} translation for '{untranslated_task}' from these options: {list_of_ranked_choice_options}. 
                             # Indicate your choice by placing it between triple pipes, like this: |||best_selection|||. 
                             # No additional comments. The reward of a job well done awaits your accurate selection!"""
 
                             # context_history = f"""
-                            # Evaluate (0-10, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {list_of_options}. 
+                            # Evaluate (0-10, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {list_of_ranked_choice_options}. 
                             # Place your evaluations in order as Pipe-Separated Values. like this four options |#|#|#|#| or just one item like this |#| 
                             # No additional comments. A tasty reward awaits your accurate selection """
 
@@ -5784,13 +5800,13 @@ def do_task_please(
 
 
                             context_history = f"""
-                            For this origional task: '{task_summary}'. Evaluate only these {len(list_of_options)} options: {pretty_print_option_list(dict_of_options)}. 
+                            For this origional task: '{task_summary}'. Evaluate only these {len(list_of_ranked_choice_options)} options: {pretty_print_option_list(dict_of_options)}. 
                             Place your evaluations  (0-10, 0 is bad, 10 is good) as the value to a key in markdown ```json format. 
                             as: 
                             ```json 
                             {answer_form} 
                             ```
-                            Just fill in the score, that's all. One key-value pair per each of the {len(list_of_options)} options (one key, one value. not nested; not everything in the original question. -> "option-1": "your_score_here", ). 
+                            Just fill in the score, that's all. One key-value pair per each of the {len(list_of_ranked_choice_options)} options (one key, one value. not nested; not everything in the original question. -> "option-1": "your_score_here", ). 
                             No additional comments. A tasty reward awaits your accurate markdown``` selection. ``json
                             """
 
@@ -5806,7 +5822,7 @@ def do_task_please(
 
 
                             # turn list of options int dict
-                            dict_of_options = {option: None for option in list_of_options}
+                            dict_of_options = {option: None for option in list_of_ranked_choice_options}
                             # get highest ranked item:
                             selected_option = None
 
@@ -5848,7 +5864,7 @@ def do_task_please(
                                     list_of_votes = filter_list_convert_to_int(list_of_votes)
 
                                     print(f"list_of_votes -> {list_of_votes}")
-                                    print(f"list_of_options -> {list_of_options}")
+                                    print(f"list_of_ranked_choice_options -> {list_of_ranked_choice_options}")
                                     print(f"type list_of_votes -> {type(list_of_votes)}\n\n")
 
                                     print(f"list_dict_of_options -> {list_dict_of_options}")
@@ -5856,7 +5872,7 @@ def do_task_please(
                                     if list_of_votes:
 
                                         # if there is one vote per candidate, list each candidates votes
-                                        if len(list_of_votes) == len(list_of_options):
+                                        if len(list_of_votes) == len(list_of_ranked_choice_options):
                                             add_ranks_votes_to_candidate(list_of_votes, list_dict_of_options)
 
                                             print(f"new list_dict_of_options -> {list_dict_of_options}")
@@ -5885,7 +5901,7 @@ def do_task_please(
 
                         else:
                             # make the best choice...the only option
-                            selected_option = list_of_options[0]
+                            selected_option = list_of_ranked_choice_options[0]
 
                     else:
                         selected_option = None
@@ -5930,12 +5946,12 @@ def do_task_please(
                         just_this_original_task_file_name, 
                         safe_task_from_instructions, 
                         safe_question_task_prompt, 
-                        list_of_options, 
+                        list_of_ranked_choice_options, 
                         safe_task_attempt_log,
                         readable_timestamp,
                     ]
 
-                    # answer_row = f'"{score}", "{this_row_or_line}", "{selected_option}", "{correct_option}", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_options}", "{replace_special_characters_with_text(draft_task_attempt_log)}", "{readable_timestamp}"\n'
+                    # answer_row = f'"{score}", "{this_row_or_line}", "{selected_option}", "{correct_option}", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_ranked_choice_options}", "{replace_special_characters_with_text(draft_task_attempt_log)}", "{readable_timestamp}"\n'
                     # print(f"answer_row -> {answer_row}")
 
                     # answer_row = strip_newlines_and_spaces(answer_row)
@@ -5966,12 +5982,12 @@ def do_task_please(
                     #     # If the file doesn't exist, create it with the header
                     #     with open(answer_file_path, 'w', newline='') as csvfile:  # Use 'w' mode to write the header
                     #         csvwriter = csv.writer(csvfile, delimiter=',')
-                    #         header = ["this_row_or_line", "selected_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"]
+                    #         header = ["this_row_or_line", "selected_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_ranked_choice_options", "draft_task_attempt_log", "readable_timestamp"]
                     #         csvwriter.writerow(header)
 
                     # Assume `answer_row` is a list of values you want to write to the CSV
                     # For example, constructing `answer_row` might look like this:
-                    # answer_row = ["fail", this_row_or_line, "fail", use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_options, draft_task_attempt_log, readable_timestamp]
+                    # answer_row = ["fail", this_row_or_line, "fail", use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_ranked_choice_options, draft_task_attempt_log, readable_timestamp]
                     # Make sure `answer_row` is a list here, not a string.
 
                     # # Strip newlines and spaces from each element if needed
@@ -5987,7 +6003,7 @@ def do_task_please(
 
                     # making csv row
                     print("if not task_ok_flag: making csv row...")
-                    # answer_row = f'"fail", "{this_row_or_line}", "fail", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_options}", "{replace_special_characters_with_text(draft_task_attempt_log)}", "{readable_timestamp}"\n'
+                    # answer_row = f'"fail", "{this_row_or_line}", "fail", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_ranked_choice_options}", "{replace_special_characters_with_text(draft_task_attempt_log)}", "{readable_timestamp}"\n'
                     # # print(f"answer_row -> {answer_row}")
                     # answer_row = strip_newlines_and_spaces(answer_row)
                     # answer_row = answer_row + "\n"
@@ -6028,7 +6044,7 @@ def do_task_please(
                         just_this_original_task_file_name, 
                         safe_task_from_instructions, 
                         safe_question_task_prompt, 
-                        list_of_options, 
+                        list_of_ranked_choice_options, 
                         safe_task_attempt_log,
                         readable_timestamp,
                     ]
@@ -6241,8 +6257,12 @@ task_file_config_dic_list = [
         "task_field_name": 'task',
         "index_of_task": 0,
         "index_of_options": 1,
-        "options_field_name": 'options',
+        "options_field_name": None,
         "scoring_field_name": 'answer',
+        "answer_option_choices_provided": False,
+        "validate_the_answer": True,
+        "use_history_context_dict_list": False,
+        "system_instructions": False,
         "output_structure_mode": "pipes",
         "input_state_context_mode": "one_string",
         "ranked_choice_output_structure_mode": "pipes",
