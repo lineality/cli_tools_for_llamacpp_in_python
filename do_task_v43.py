@@ -2294,7 +2294,7 @@ def task_check_structure_of_response(structured_output_format, dict_str):
                 return response_to_task
 
             else:
-                print(f"task_check_structure_of_response error parsing ai response_to_task")
+                print(f"no response, task_check_structure_of_response error parsing ai response_to_task")
                 return False
 
 
@@ -2310,14 +2310,14 @@ def task_check_structure_of_response(structured_output_format, dict_str):
                 return response_to_task
 
             else:
-                print(f"check_structure_of_response error parsing ai response_to_task")
+                print(f"answer length = 0 (zero), elif structured_output_format == markdown_json, in task_check_structure_of_response error parsing ai response_to_task")
                 return False
 
         else:
             raise "No output structure mode selected: task_check_structure_of_response()"
 
     except Exception as e:
-        print(f"check_structure_of_response error parsing ai response_to_task {str(e)}")
+        print(f"Exception task_check_structure_of_response error parsing ai response_to_task -> {str(e)}")
         return False
 
 
@@ -4934,12 +4934,12 @@ def append_list_of_values_to_csv(file_path, fields_list):
 
 
 def do_task_please(
-    task_mode_configies,
     list_of_models,
     ai_local_or_cloud_mode,
     number_of_preliminary_drafts,
     retry_x_times,
     number_of_ranked_votes,
+    task_mode_configies,
     task_file_config_dic_list,
     parameter_dict=None,
     models_dir_path="jan/models",
@@ -4980,7 +4980,12 @@ def do_task_please(
     task_mode_validate_the_answer = task_mode_configies["validate_the_answer"]
     task_mode_use_history_context_dict_list = task_mode_configies["use_history_context_dict_list"]
     task_mode_system_instructions = task_mode_configies["system_instructions"]
-    
+    task_mode_input_state_context_mode = task_mode_configies["input_state_context_mode"]
+    task_mode_output_structure_mode = task_mode_configies["output_structure_mode"]
+    task_mode_ranked_choice_output_structure_mode = task_mode_configies["ranked_choice_output_structure_mode"]
+
+
+
     # set parameters to defaults if none are given
     if not parameter_dict:
         #######################
@@ -5022,7 +5027,7 @@ def do_task_please(
     """
 
 
-  
+
     file_type_list = [".jsonl", ".csv"]
 
     # Example usage
@@ -5107,7 +5112,7 @@ def do_task_please(
             for this_row_or_line in range(this_original_task_file_length):
 
                 draft_task_attempt_log = []
-    
+
                 print(f"this_row_or_line -> {this_row_or_line}")
 
 
@@ -5196,30 +5201,43 @@ def do_task_please(
                     # inside tripple pipes |||your_translation||| just that. no other commentary,
                     # translate and earn a treat: best translation is """
 
+                    """
+                    Option: 
 
-                    multiple_choice_solution_body = {
-                        "solution":        
-                        {
-                            "solution_plan_outline": "",
-                            "draft_revisions_and_comments": "",
-                            "final_answer_option_number": int,
-                        }
-                    }
+                    dict_multiple_choice_solution_body_context 
+                    pipes_multiple_choice_solution_body_context 
 
-                    multiple_choice_solution_body = {
-                        "solution_plan_outline": "",
-                        "draft_revisions_and_comments": "",
-                        "final_answer_option_number": int,
-                    }
+                    dict_multiple_choice_solution_body_nocontext 
+                    pipes_multiple_choice_solution_body_nocontext 
 
-                    simple_multiple_choice_solution_body = """
-                    solution_plan_outline: "", 
-                    draft_revisions_and_comments: "", 
-                    Then in triple pipes:
-                    |||final answer option number|||
+                    dict_open_solution_body_context 
+                    pipes_open_solution_body_context 
+
+                    dict_open_solution_body_nocontext 
+                    pipes_open_solution_body_nocontext 
+
+                    output_structure_mode: "dict" or "pipe" 
+                    input_state_context_mode: "context_dict_list" or "one_string" 
                     """
 
-                    open_solution_body = {
+
+                    # alt_dict_multiple_choice_solution_body_nocontext = {
+                    #     "solution": 
+                    #     { 
+                    #         "solution_plan_outline": "", 
+                    #         "draft_revisions_and_comments": "", 
+                    #         "final_answer_option_number": int, 
+                    #     }
+                    # }
+
+
+                    pipes_open_solution_body_nocontext = """
+                    Plan, draft, revisions, and comments, 
+                    then in triple pipes: 
+                    |||final answer||| 
+                    """
+
+                    dict_open_solution_body_nocontext = {
                         "solution":        
                         {
                             "solution_plan_outline": "",
@@ -5228,13 +5246,26 @@ def do_task_please(
                         }
                     }
 
-                    simple_open_solution_body = """
-                    Plan, draft, revisions, and comments, 
-                    then in triple pipes:
+
+                    pipes_multiple_choice_solution_body_nocontext = """
+                    solution_plan_outline: ...(YOUR PLAN), 
+                    draft_revisions_and_comments: ...(YOUR COMMENTS), 
+                    Then in triple pipes: 
                     |||final answer option number|||
                     """
 
-                    
+
+                    dict_multiple_choice_solution_body_nocontext = {
+                        "solution_plan_outline": "", 
+                        "draft_revisions_and_comments": "", 
+                        "final_answer_option_number": int, 
+                    }
+
+
+
+
+
+
                     # inspection
                     print(f"""
                     task mode items:
@@ -5242,83 +5273,240 @@ def do_task_please(
                     task_mode_validate_the_answer -> {task_mode_validate_the_answer}
                     task_mode_use_history_context_dict_list -> {task_mode_use_history_context_dict_list}
                     task_mode_system_instructions -> {task_mode_system_instructions}
-                        
+                    task_mode_output_structure_mode -> {task_mode_output_structure_mode}
+                    task_mode_input_state_context_mode -> {task_mode_input_state_context_mode}
+                    task_mode_ranked_choice_output_structure_mode -> {task_mode_ranked_choice_output_structure_mode}
+
                     """)
-                    
-                    # if the question is open-ended and not multiple-choice
+
+                    ######################
+                    ######################
+                    # not multiple-choice
+                    ######################
+                    ######################
+                    # if the question is not multiple-choice
                     if not task_mode_answer_option_choices_provided:
+                        """
+                        2^3 == 8
 
-                            if task_mode_use_history_context_dict_list:
-                                ############
-                                # Open Task: use context dict
-                                ############
-                                # TODO
-                                context_history = f"""
-        
-                                What is the best response for this task? 
-                                {this_task}
-        
-                                Give your answer in this format:
-                                {open_solution_body}
-                                """
-    
-                            else:  # no history_context_dict_list:
-        
-                                ############
-                                # Open Task: kitch-sing prompt
-                                ############
-                                context_history = f"""
-        
-                                What is the best response for this task? 
-                                {this_task}
-        
-                                Give your answer in this format:
-                                {simple_open_solution_body}
-                                """
+                        context:
+                            dict:
+                                dict_open_solution_body_context
 
-                    # elif "multiple_choice":
-                    elif task_mode_answer_option_choices_provided is True:
+                            pipes:
+                                pipes_open_solution_body_context
 
+                        no-context:
+                            dict_open_solution_body_nocontext
+                            pipes_open_solution_body_nocontext
+                        """
+
+                        #############
+                        # if context
+                        #############
                         if task_mode_use_history_context_dict_list:
-                            ##################
-                            # Multiple Choice: use context
-                            ##################
-                            context_history = f"""
-                            Which is the best option?
+                            # TODO: make context dict list maker
 
-                            For this task: 
-                            {this_task} 
+                            ############
+                            # Pipes |||
+                            ############
+                            if task_mode_output_structure_mode == "pipes":
+                                ############
+                                # Open Task: use context dict list
+                                ############
+                                context_history = f"""
 
-                            From this list of options: 
-                            {pretty_print_list(these_options)} 
+                                What is the best response for this task? 
+                                {this_task}
 
-                            Your answer must be the number of the option in the order given. "1" is the first option. 
+                                Give your answer in this format:
+                                {pipes_open_solution_body_nocontext}
 
-                            Give your answer in this format: 
-                            {multiple_choice_solution_body}
-                            """
+                                """
 
-                        else:  # no history_context_dict_list:
+                            ##############
+                            # {dict: ...}
+                            ##############
+                            elif task_mode_output_structure_mode == "dict":
+                                ############
+                                # Open Task: use context dict list
+                                ############
+                                context_history = f"""
 
-                            ##################
-                            # Multiple Choice kitch-sing prompt
-                            ##################
-                            context_history = f"""
+                                What is the best response for this task? 
+                                {this_task}
 
-                            Which is the best option?
+                                Give your answer in this format:
+                                {dict_open_solution_body_nocontext}
 
-                            For this task: 
-                            {this_task} 
+                                """
+                            else:
+                                raise f"No output_structure_mode selected"
 
-                            From this list of options: 
-                            {pretty_print_list(these_options)} 
+                        ################
+                        # if NO context
+                        ################
+                        if not task_mode_use_history_context_dict_list:
 
-                            Your answer must be the number of the option in the order given. "1" is the first option.
+                            ############
+                            # Pipes |||
+                            ############
+                            if task_mode_output_structure_mode == "pipes":
+                                ############
+                                # Open Task: use context dict list
+                                ############
+                                context_history = f"""
 
-                            Giveyour answer in this format:
-                            {simple_multiple_choice_solution_body}
-                            """
+                                What is the best response for this task? 
+                                {this_task}
 
+                                Give your answer in this format:
+                                {pipes_open_solution_body_nocontext}
+
+                                """
+
+                            ##############
+                            # {dict: ...}
+                            ##############
+                            elif task_mode_output_structure_mode == "dict":
+                                ############
+                                # Open Task: use context dict list
+                                ############
+                                context_history = f"""
+
+                                What is the best response for this task? 
+                                {this_task}
+
+                                Give your answer in this format:
+                                {dict_open_solution_body_nocontext}
+
+                                """
+                            else:
+                                raise f"No output_structure_mode selected"
+
+
+                    ##################
+                    ################## 
+                    # multiple choice
+                    ##################
+                    ##################
+                    # elif "multiple_choice":
+                    if task_mode_answer_option_choices_provided is True:
+                        """
+                            dict_multiple_choice_solution_body_context 
+                            pipes_multiple_choice_solution_body_context 
+
+                            dict_multiple_choice_solution_body_nocontext 
+                            pipes_multiple_choice_solution_body_nocontext 
+                        """
+
+                        #############
+                        # if context
+                        #############
+                        if task_mode_use_history_context_dict_list:
+                            # TODO: make context dict list maker
+
+                            ############
+                            # Pipes |||
+                            ############
+                            if task_mode_output_structure_mode == "pipes":
+
+                                context_history = f"""
+                                Which is the best option?
+
+                                For this task: 
+                                {this_task} 
+
+                                From this list of options: 
+                                {pretty_print_list(these_options)} 
+
+                                Your answer must be the number of the option in the order given. "1" is the first option. 
+
+                                Give your answer in this format: 
+                                {pipes_multiple_choice_solution_body_nocontext}
+                                    """
+
+                            ##############
+                            # {dict: ...}
+                            ##############
+                            elif task_mode_output_structure_mode == "dict":
+
+                                ##################
+                                # Multiple Choice one string prompt (no context dict list)
+                                ##################
+                                context_history = f"""
+
+                                Which is the best option?
+
+                                For this task: 
+                                {this_task} 
+
+                                From this list of options: 
+                                {pretty_print_list(these_options)} 
+
+                                Your answer must be the number of the option in the order given. "1" is the first option. 
+
+                                Give your answer in this format: 
+                                {dict_multiple_choice_solution_body_nocontext}
+                                """
+
+                        else:
+                            raise f""" prompt selection 1: option problem """
+
+
+                        ################
+                        # if NO context
+                        ################
+                        if not task_mode_use_history_context_dict_list:
+
+                            ############
+                            # Pipes |||
+                            ############
+                            if task_mode_output_structure_mode == "pipes":
+                                ##################
+                                # Multiple Choice: use context dict list
+                                ##################
+                                context_history = f"""
+                                Which is the best option?
+
+                                For this task: 
+                                {this_task} 
+
+                                From this list of options: 
+                                {pretty_print_list(these_options)} 
+
+                                Your answer must be the number of the option in the order given. "1" is the first option. 
+
+                                Give your answer in this format: 
+                                {pipes_multiple_choice_solution_body_nocontext}
+                                """
+
+                            ##############
+                            # {dict: ...}
+                            ##############
+                            elif task_mode_output_structure_mode == "dict":
+
+                                ##################
+                                # Multiple Choice one string prompt (no context dict list)
+                                ##################
+                                context_history = f"""
+
+                                Which is the best option?
+
+                                For this task: 
+                                {this_task} 
+
+                                From this list of options: 
+                                {pretty_print_list(these_options)} 
+
+                                Your answer must be the number of the option in the order given. "1" is the first option. 
+
+                                Give your answer in this format: 
+                                {dict_multiple_choice_solution_body_nocontext}
+                                """
+
+                        else:
+                            raise f""" prompt selection 1: option problem """
 
                     print(f"context_history -> {context_history}")
 
@@ -5359,14 +5547,13 @@ def do_task_please(
                         """
                         Set the structured_output_format:
                         """
-                        structured_output_format = "markdown_json"  # markdown_json/delimiter/pipes/etc.
-                        
+
                         task_response_string = general_task_call_api_within_structure_check(
                             context_history, 
                             use_this_model, 
                             parameter_dict, 
                             ai_local_or_cloud_mode,
-                            structured_output_format,
+                            task_mode_output_structure_mode,
                             draft_task_attempt_log,
                             retry_x_times,
                         )
@@ -5919,11 +6106,42 @@ number_of_ranked_votes = 1
 list_of_models = ["tinyllama", "mistral-7b-instruct"]
 list_of_models = ["mistral-7b-instruct"]
 
+
+"""
+
+use these three items: to select the prompt:
+
+    task_mode_answer_option_choices_provided: True or False
+    output_structure_mode: "dict" or "pipes"
+    input_state_context_mode: "context_dict_list" or "one_string"
+
+
+prompt options:
+
+    dict_multiple_choice_solution_body_context 
+    pipes_multiple_choice_solution_body_context 
+
+    dict_multiple_choice_solution_body_nocontext 
+    pipes_multiple_choice_solution_body_nocontext 
+
+
+    dict_open_solution_body_context
+    pipes_open_solution_body_context
+
+    dict_open_solution_body_nocontext
+    pipes_open_solution_body_nocontext
+
+"""
+
+
 task_mode_configies = {
     "answer_option_choices_provided": True,
     "validate_the_answer": True,
     "use_history_context_dict_list": False,
     "system_instructions": False,
+    "output_structure_mode": "pipes",
+    "input_state_context_mode": "one_string",
+    "ranked_choice_output_structure_mode": "pipes",
     # "LMQL": False,
 }
 
@@ -5949,14 +6167,13 @@ task_file_config_dic_list = [
 ]
 
 
-
 do_task_please(
-    task_mode_configies,
     list_of_models,
     ai_local_or_cloud_mode,
     number_of_preliminary_drafts,
     retry_x_times,
     number_of_ranked_votes,
+    task_mode_configies,
     task_file_config_dic_list,
     parameter_dict=parameter_dict,
     models_dir_path="jan/models",
