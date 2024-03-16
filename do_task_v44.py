@@ -2232,11 +2232,12 @@ def check_structure_of_response(dict_str):
 
 
 # Helper Function
-def task_check_structure_of_response(structured_output_format, dict_str):
+def task_check_structure_of_response(
+        structured_output_format,
+        dict_str,
+        task_mode_answer_option_choices_provided):
     """
-
     checking the structure of the response...depends on what the desired structure is.
-
     """
     print(f"structured_output_format -> {structured_output_format}")
     print(f"dict_str -> {dict_str}")
@@ -2288,16 +2289,23 @@ def task_check_structure_of_response(structured_output_format, dict_str):
 
             strings_to_remove = [
                 "final answer option number",
-                "number"
+                "number",
+                "final answer",
+                "FINAL ANSWER",
+                "final_answer",
+                "NUMBER"
             ]
 
             matches_list = remove_specific_strings(matches_list, strings_to_remove)
 
-            matches_list = remove_non_integers_from_list(matches_list)
 
+            if task_mode_answer_option_choices_provided:
+                matches_list = remove_non_integers_from_list(matches_list)
 
-
-            response_to_task = matches_list[-1]
+            if matches_list:
+                response_to_task = matches_list[-1]
+            else:
+                response_to_task = ""
 
             # cleaned_matches_list = remove_underscores_from_strings_in_list(matches_list)
 
@@ -3099,18 +3107,20 @@ def call_api_within_structure_check(context_history,
 
 
 # helper function
-def general_task_call_api_within_structure_check(context_history, 
-                                                 use_this_model, 
-                                                 parameter_dict, 
-                                                 ai_local_or_cloud_mode,
-                                                 structured_output_format,
-                                                 draft_task_attempt_log,
-                                                 retry_x_times
-                                                 ):
+def general_task_call_api_within_structure_check(
+    context_history, 
+    use_this_model, 
+    parameter_dict, 
+    ai_local_or_cloud_mode,
+    task_mode_answer_option_choices_provided,
+    task_mode_output_structure_mode,
+    draft_task_attempt_log,
+    retry_x_times,
+):
     """
-    structured_output_format is passed to the output structure checker
+    task_mode_output_structure_mode is passed to the output structure checker
     """
-    
+
     retry_counter = 0
     json_ok_flag = False
 
@@ -3200,7 +3210,10 @@ def general_task_call_api_within_structure_check(context_history,
             print(f"Failed: {str(e)}")
 
 
-        jsonchecked_translation = task_check_structure_of_response(structured_output_format, dict_str)
+        jsonchecked_translation = task_check_structure_of_response(
+            task_mode_output_structure_mode, 
+            dict_str, 
+            task_mode_answer_option_choices_provided)
 
         if jsonchecked_translation:
             json_ok_flag = True
@@ -5618,6 +5631,7 @@ def do_task_please(
                             use_this_model, 
                             parameter_dict, 
                             ai_local_or_cloud_mode,
+                            task_mode_answer_option_choices_provided,
                             task_mode_output_structure_mode,
                             draft_task_attempt_log,
                             retry_x_times,
@@ -5633,17 +5647,32 @@ def do_task_please(
                         print(f"task_response_string -> {task_response_string}")
                         print(f"type task_response_string -> {type(task_response_string)}")
 
-                        task_response_string = str_to_int_or_none(task_response_string)
+                        # if NOT using a list of numbered options, string ok!
+                        if task_mode_answer_option_choices_provided:
+                            task_response_string = str_to_int_or_none(task_response_string)
+                            print("str_to_int_or_none(task_response_string)")
+                            print(f"new task_response_string -> {task_response_string}")
+
 
                         if task_response_string:
-                            list_of_ranked_choice_options.append(int(task_response_string))
+
+                            if task_mode_answer_option_choices_provided:
+                                list_of_ranked_choice_options.append(int(task_response_string))
+                                print("appended int")
+
+                            else:
+                                list_of_ranked_choice_options.append(str(task_response_string))
+                                print("appended string")
+
+                        print(f"list_of_ranked_choice_options -> {list_of_ranked_choice_options}")
+
 
                     #####################################################
-                    #####################################################
-                    #####################################################
-                    # Select Top Top Goodest Translation Star-Good-Prime
-                    #####################################################
-                    #####################################################
+                    ########################################################
+                    ###########################################################
+                    # Select Top Top Goodest Rankified Chooose Star-Good-Prime
+                    ###########################################################
+                    ########################################################
                     #####################################################
 
                     # reset context history for new 'conversation' about selection
@@ -5652,7 +5681,7 @@ def do_task_please(
                     date_time = datetime.now(UTC)
                     readable_timestamp = date_time.strftime("ymd_%Y-%m-%d")
 
-                    print("\n\n\nSelect Top Top Goodest Translation Star-Good-Prime")
+                    print("\n\n\nSelect Top Top Goodest Star-Good-Prime")
 
 
                     if list_of_ranked_choice_options:
@@ -5729,11 +5758,6 @@ def do_task_please(
                             # Place your evaluations in order as Pipe-Separated Values. like this four options |#|#|#|#| or just one item like this |#| 
                             # No additional comments. A tasty reward awaits your accurate selection """
 
-                            answer_form = {
-                                "option-1": "score_here", 
-                                "option-2": "score_here",
-                                "option-3": "score_here"
-                            }
 
                             # context_history = f"""
                             # Evaluate (0-10, 0 is terrible, 10 is great) each {target_language} translation for '{untranslated_task}' from these options: {dict_of_options}. 
@@ -5798,16 +5822,26 @@ def do_task_please(
                             # ''' 
                             # No additional comments. A tasty reward awaits your accurate selection."""
 
+                            answer_form = {
+                                "option-1": "score_here", 
+                                "option-2": "score_here",
+                                "option-3": "score_here"
+                            }
+
+                            sample_2 = '{"option-1": '
 
                             context_history = f"""
-                            For this origional task: '{task_summary}'. Evaluate only these {len(list_of_ranked_choice_options)} options: {pretty_print_option_list(dict_of_options)}. 
-                            Place your evaluations  (0-10, 0 is bad, 10 is good) as the value to a key in markdown ```json format. 
+                            For this original task: '{task_summary}'. Evaluate only these {len(list_of_ranked_choice_options)} 
+                            options: {pretty_print_option_list(dict_of_options)}. 
+                            (0-10; 0 is bad, 10 is good) Place your evaluation of each as the value to a key in markdown ```json format. 
                             as: 
                             ```json 
                             {answer_form} 
                             ```
-                            Just fill in the score, that's all. One key-value pair per each of the {len(list_of_ranked_choice_options)} options (one key, one value. not nested; not everything in the original question. -> "option-1": "your_score_here", ). 
-                            No additional comments. A tasty reward awaits your accurate markdown``` selection. ``json
+                            Just fill in the score, that's all. One key-value pair for each of the {len(list_of_ranked_choice_options)} 
+                            evaluated options (one key, one value. not nested; not everything in the original question. -> "option-1": "your_score_here", ). 
+                            No additional comments. A tasty reward awaits your accurate markdown selection. 
+                            Let's stare: {sample_2}
                             """
 
 

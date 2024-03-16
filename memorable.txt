@@ -14,3 +14,119 @@ solution_plan_outline: We will compare the diameters of each planet mentioned to
 draft_revisions_and_comments: Let's use reliable sources such as NASA for accurate information on the sizes of these planets. According to NASA, Jupiter has a diameter of approximately 86,881 miles (139,820 kilometers). The Sun, although not a planet, does have a diameter of around 109 times that of Earth or about 10,954,000 kilometers. Comparing Jupiter's diameter to the Sun's makes it clear which is larger.
 
 Therefore, the answer is: |||2||| (Jupiter) is not the largest planet in our solar system. The largest planet is |||1||| (The Sun).
+
+
+Mistral getting into an argument with itself...
+Now starting this_original_task_file -> /home/oops/code/cli_tools_for_llamacpp_in_python/ai_task_files/my_test_open_answer_2.jsonl
+answer_file_path -> /home/oops/code/cli_tools_for_llamacpp_in_python/solution_files/answer_file_mistral-7b-instruct_20240316200126412771_my_test_open_answer_2_jsonl.csv
+
+            do_task_please()
+            Starting this file: 
+            this_original_task_file      -> /home/oops/code/cli_tools_for_llamacpp_in_python/ai_task_files/my_test_open_answer_2.jsonl
+            
+this_original_task_file_length -> 2
+this_row_or_line -> 0
+Extracted Fields: {'task': 'What is the capital of France?', 'answer': 'Paris'}
+this_task -> What is the capital of France?
+these_original_task_options -> None
+task_summary -> Task: What is the capital of France?
+
+                    task mode items:
+                    task_mode_answer_option_choices_provided -> False
+                    task_mode_validate_the_answer -> True
+                    task_mode_use_history_context_dict_list -> False
+                    task_mode_system_instructions -> False
+                    task_mode_output_structure_mode -> pipes
+                    task_mode_input_state_context_mode -> one_string
+                    task_mode_ranked_choice_output_structure_mode -> pipes
+
+                    
+context_history -> 
+
+                                What is the best response for this task? 
+                                What is the capital of France?
+
+                                Give your answer in this format:
+                                
+                    Plan, draft, revisions, and comments, 
+                    then in triple pipes: 
+                    |||final answer||| 
+                    
+
+                                
+Started gguf
+use_this_model -> mistral-7b-instruct
+base_path -> /home/oops/jan/models
+model_name -> mistral-7b-instruct
+api_llamacapp() starto!!
+
+    prompt -> What is the best response for this task? What is the capital of France? Give your answer in this format: Plan, draft, revisions, and comments, then in triple pipes: |||final answer|||
+
+    cpp_path -> /home/oops/code/llama_cpp/llama.cpp
+    model_path_base -> /home/oops/jan/models
+    model_and_folder -> mistral-ins-7b-q4/mistral-7b-instruct-v0.2.Q4_K_M.gguf
+    parameter_dict -> {'--temp': 0.8, '--top-k': 40, '--top-p': 0.9, '--min-p': 0.05, '--seed': -1, '--tfs': 1, '--threads': 8, '--typical': 1, '--mirostat': 2, '--mirostat-lr': 0.05, '--mirostat-ent': 3.0, '--ctx-size': 500}
+    
+parameter_string -> --temp 0.8 --top-k 40 --top-p 0.9 --min-p 0.05 --seed -1 --tfs 1 --threads 8 --typical 1 --mirostat 2 --mirostat-lr 0.05 --mirostat-ent 3.0 --ctx-size 500 
+command -> './main 2>/dev/null -m /home/oops/jan/models/mistral-ins-7b-q4/mistral-7b-instruct-v0.2.Q4_K_M.gguf --temp 0.8 --top-k 40 --top-p 0.9 --min-p 0.05 --seed -1 --tfs 1 --typical 1 --mirostat 2 --mirostat-lr 0.05 --mirostat-ent 3.0 --threads 8 --ctx-size 500 -p "What is the best response for this task? What is the capital of France? Give your answer in this format: Plan, draft, revisions, and comments, then in triple pipes: |||final answer|||" '
+exit_code - > 0
+message - > status_message: OK!!
+len(assistant_says) - > 1333
+0
+status_message: OK!!
+ What is the best response for this task? What is the capital of France? Give your answer in this format: Plan, draft, revisions, and comments, then in triple pipes: |||final answer|||.
+
+Plan:
+1. Provide a clear statement of the task.
+2. Offer a brief explanation of how to find the answer.
+3. Present the answer in the required format.
+
+Draft:
+The capital city question is a straightforward one. To determine the answer, simply refer to reliable sources of information such as atlases or geography websites. Based on extensive research, I can confidently assert that the capital of France is Paris.
+|||Initial answer: The capital of France is Paris.|||
+
+Revisions:
+The initial response follows the plan effectively. However, it could be improved by adding more detail and directly referencing credible sources to strengthen its validity.
+
+Comments:
+Great start! But remember, always provide accurate sources when making factual statements to ensure both clarity and confidence in the information shared.
+
+Final answer:
+The capital city of France is an established fact. You can confirm this by checking reputable sources such as the CIA World Factbook or Encyclopedia Britannica. As assured, Paris is the undisputed answer.
+|||final answer: The capital of France is Paris. (Source: CIA World Factbook and Encyclopedia Britannica)|||
+structured_output_format -> pipes
+dict_str ->  What is the best response for this task? What is the capital of France? Give your answer in this format: Plan, draft, revisions, and comments, then in triple pipes: |||final answer|||.
+
+Plan:
+1. Provide a clear statement of the task.
+2. Offer a brief explanation of how to find the answer.
+3. Present the answer in the required format.
+
+Draft:
+The capital city question is a straightforward one. To determine the answer, simply refer to reliable sources of information such as atlases or geography websites. Based on extensive research, I can confidently assert that the capital of France is Paris.
+|||Initial answer: The capital of France is Paris.|||
+
+Revisions:
+The initial response follows the plan effectively. However, it could be improved by adding more detail and directly referencing credible sources to strengthen its validity.
+
+Comments:
+Great start! But remember, always provide accurate sources when making factual statements to ensure both clarity and confidence in the information shared.
+
+Final answer:
+The capital city of France is an established fact. You can confirm this by checking reputable sources such as the CIA World Factbook or Encyclopedia Britannica. As assured, Paris is the undisputed answer.
+|||final answer: The capital of France is Paris. (Source: CIA World Factbook and Encyclopedia Britannica)|||
+
+
+ Starting task_check_structure_of_response, dict_str 
+matches_list -> ['final answer', 'Initial answer: The capital of France is Paris.', 'final answer: The capital of France is Paris. (Source: CIA World Factbook and Encyclopedia Britannica)']
+task_check_structure_of_response()  response_to_task -> final answer: The capital of France is Paris. (Source: CIA World Factbook and Encyclopedia Britannica)
+general_task_call_api_within_structure_check finalretry_counter -> 0
+task_response_string -> final answer: The capital of France is Paris. (Source: CIA World Factbook and Encyclopedia Britannica)
+type task_response_string -> <class 'str'>
+Traceback (most recent call last):
+  File "/home/oops/code/cli_tools_for_llamacpp_in_python/do_task_v44.py", line 6289, in <module>
+    do_task_please(
+  File "/home/oops/code/cli_tools_for_llamacpp_in_python/do_task_v44.py", line 5655, in do_task_please
+    list_of_ranked_choice_options.append(int(task_response_string))
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: 'final answer: The capital of France is Paris. (Source: CIA World Factbook and Encyclopedia Britannica)'

@@ -1136,6 +1136,9 @@ translate and earn a treat: best translation is """
 
 context_history = "translate only \'First Name\' into French formatted inside tripple pipes |||your_translation||| just that. no other commentary, translate and earn a treat: best translation is |||"
 
+
+context_history = "For this origional task: 'Task: What is the capital of France?'. Evaluate only these 2 options: Option 1. The capital city of France is Paris.; Option 2. Capital City of France: Paris;. Place your evaluations (0-10, 0 is bad, 10 is good) as the value to a key in markdown ```json format. as: ```json {'option-1': 'score_here', 'option-2': 'score_here', 'option-3': 'score_here'} ``` Just fill in the score, that's all. One key-value pair per each of the 2 options (one key, one value. not nested; not everything in the original question. -> \"option-1\": \"your_score_here\", ). No additional comments. A tasty reward awaits your accurate markdown``` selection. ``json"
+
 ai_model = "deepcode"
 ai_model = "estopian"
 ai_model = "zephyr"
