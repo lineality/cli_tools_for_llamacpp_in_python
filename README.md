@@ -25,6 +25,8 @@ python call_llamacapp.py
 
 # TODO
 - maybe make an instruct...doc maker reader...thing
+- convert from csv to jsonl?
+- maybe convert csv to dict (like json to dict) to handle questions?
 - 
 
 
