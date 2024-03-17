@@ -3,7 +3,10 @@
 Preliminary tools for using llama.cpp e.g. selecting a model and using
 a local gguf model instead of a paid cloud api.
 
-
+Also see dev area: 
+- https://github.com/lineality/cli_tools_for_llamacpp_in_python  
+- https://github.com/lineality/STEM_Net_open_training_testing_benchmarks
+- https://github.com/lineality/object_relationship_spaces_ai_ml
 
 # llama.cpp install steps:
 
@@ -29,7 +32,7 @@ make
 
 ## Download Foundation Model(s)
 - e.g. ~any .gguf from https://huggingface.co/TheBloke 
-	- 
+
 
 Note: If gguf models are already downloaded for a platform such as Jan, you can simply use the file-path for any of those models in your cli call to llama.cpp.
 
@@ -53,17 +56,11 @@ make -j && ./main -m ./models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -p "What is a
 ```
 
 ### To see only output
-- https://github.com/ggerganov/llama.cpp/discussions/1758 
+- from: https://github.com/ggerganov/llama.cpp/discussions/1758 
 
 ```bash
 ./main 2>/dev/null -m /home/user/jan/models/tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -p "What is a horseshoe crab?"
 ```
-
-
-
-- save history as...file?
-- read in file as instruct?
-- separate files to avoid formatting issues?
 
 
 # To use: call_llamacapp.py
@@ -98,6 +95,7 @@ python json_translator(...).py
 ```
 Translations will appear per language x per file in translations directory.
 
+
 # To use: do_task(...).py
 1. close repo and cd inside (cd -> change directory)
 2. set path_to_model_foler as it exists on your system
@@ -106,9 +104,3 @@ Translations will appear per language x per file in translations directory.
 python call_llamacapp.py
 ```
 
-
-
-
-
-## Notes:
-- system prompts and conversation history 'context' are still not clear, not well implimented yet. 
