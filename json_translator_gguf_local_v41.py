@@ -12,7 +12,7 @@ json translator:
 """
 
 import string
-from module_llamacpp import gguf_api, mini_gguf_api, get_model_path_by_name
+from call_llamacpp import gguf_api, mini_gguf_api, get_model_path_by_name
 
 
 """
