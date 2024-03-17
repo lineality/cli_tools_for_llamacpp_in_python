@@ -5975,6 +5975,12 @@ def do_task_please(
 
 
                                 while not vote_check_ok:
+
+                                    # exit while loop if too many fails
+                                    if task_fail_counter > retry_x_times:
+                                        selected_option = None
+                                        break
+
                                     """
                                     TODO if a different function rank_vote_call_api_within_structure_check()
                                     you should be able to filter everything except numbers out of the answer
@@ -6367,6 +6373,8 @@ number_of_ranked_votes = 1
 
 list_of_models = ["tinyllama", "mistral-7b-instruct"]
 list_of_models = ["mistral-7b-instruct"]
+
+list_of_models = ["stablelm-zephyr-3b"]
 
 
 """
