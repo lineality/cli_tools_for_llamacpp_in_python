@@ -2407,13 +2407,6 @@ def extract_values_from_dict(dict_str):
             # Parse the string into a Python dictionary
             dict_str = json.loads(dict_str)
 
-        # sort
-        if isinstance(dict_str, dict):
-            print("sorted")
-            dict_str = sort_dict_by_key(dict_str)
-            print(f"dict_str -> {dict_str}")        
-            print(f"type(dict_str) -> {type(dict_str)}")
-        
         # Extract the values and convert to a list
         values_list = list(dict_str.values())
         print(f"values_list -> {values_list}")        
@@ -2979,11 +2972,6 @@ def extract_specific_fields(json_obj, fields):
     - dict: A dictionary containing only the specified fields from the original JSON object.
     """
     return {field: json_obj[field] for field in fields if field in json_obj}
-
-
-def sort_dict_by_key(input_dict):
-    """Sort a dictionary by its keys."""
-    return {k: input_dict[k] for k in sorted(input_dict)}
 
 
 def count_jsonl_lines(file_path):
@@ -6069,8 +6057,6 @@ def do_task_please(
                     # Scoring
                     ##########
                     ##########
-                    
-
                     print(f"""
                         Scoring:
                           selected_option       -> {selected_option}
