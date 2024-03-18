@@ -998,8 +998,6 @@ def set_translate__user_prompt(context_history, target_language, original_data):
 
 if __name__ == "__main__":
     # Code that should only run when the script is executed directly
-    print("This code will run only when the script is executed directly.")
-
 
     ################
     ################
@@ -1010,7 +1008,6 @@ if __name__ == "__main__":
     ################
     ################
     ################
-
 
 
 
