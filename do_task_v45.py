@@ -89,7 +89,7 @@ def make_answers_directory_and_csv_path(this_original_task_file, model_name):
     # Create directories if they don't exist
     os.makedirs(os.path.dirname(answer_file_path), exist_ok=True)
 
-    header_string = '"score", "this_row_or_line", "selected_option", "correct_option", "name_of_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_ranked_choice_options", "draft_task_attempt_log", "readable_timestamp"\n'
+    header_string = '"score","this_row_or_line","selected_option","correct_option","name_of_model","this_original_task_file","task_from_instructions","question_task_prompt","list_of_ranked_choice_options","draft_task_attempt_log","duration_of_single_task","readable_timestamp"\n'
 
     # Create an empty file (or just close it if it already exists)
     with open(answer_file_path, 'a', newline='') as csvfile:
@@ -1531,6 +1531,20 @@ def task_extract_markdown_json_to_dict(dict_str):
     # if ok...
     return dict_str
 
+
+def duration_min_sec(start_time, end_time):
+
+    duration = end_time - start_time
+
+    duration_seconds = duration.total_seconds()
+
+    minutes = int(duration_seconds // 60)
+    seconds = duration_seconds % 60
+    time_message = f"{minutes}_min__{seconds:.1f}_sec"
+
+    return time_message
+
+duration_min_sec(start_time_whole_single_task, end_time_whole_single_task)
 
 # Helper Function
 def set_translator__system_prompt(context_history, target_language):
@@ -4053,7 +4067,9 @@ def do_task_please(
         print(f"\n\n\n Now starting this_original_task_file -> {this_original_task_file}")
 
 
-
+        ############
+        # For Model
+        ############
         for use_this_model in list_of_models:
             ###
             # Make answers file pathway.
@@ -4100,10 +4116,18 @@ def do_task_please(
             print(f"this_original_task_file_length -> {this_original_task_file_length}")
 
 
+            ###3########################
+            ############################
+            # For this task in task-set
+            ############################
+            ############################
 
             # NON-header mode, skip first row
             for this_row_or_line in range(this_original_task_file_length):
 
+                # set start time
+                start_time_whole_single_task = datetime.now(UTC)
+                
                 draft_task_attempt_log = []
 
                 print(f"this_row_or_line -> {this_row_or_line}")
@@ -4135,11 +4159,7 @@ def do_task_please(
 
                     "What is 2+2?", [4, 2^2, 2**2, 2*2, all of the above]
                     """
-
                     # row_as_list = extract_row_from_csv(this_row_or_line, this_original_task_file)
-
-
-
                     """
                     jsonl mode
 
@@ -4961,6 +4981,13 @@ def do_task_please(
                     just_model_file_name = os.path.basename(use_this_model)
                     just_this_original_task_file_name = os.path.basename(this_original_task_file)
 
+                    # set rnf time
+                    end_time_whole_single_task = datetime.now(UTC)
+                    
+                    duration_of_single_task = duration_min_sec(start_time_whole_single_task, end_time_whole_single_task)
+                    
+                    # turn into min, sec
+                    
 
                     list_of_items_to_write_to_csv = [
                         score,
@@ -4973,6 +5000,7 @@ def do_task_please(
                         safe_question_task_prompt, 
                         list_of_ranked_choice_options, 
                         safe_task_attempt_log,
+                        duration_of_single_task,
                         readable_timestamp,
                     ]
 
