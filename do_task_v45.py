@@ -75,10 +75,10 @@ def make_answers_directory_and_csv_path(this_original_task_file, model_name):
     model_name_last_part = os.path.basename(model_name).replace('.', '_')  # Replacing dots to avoid file extension confusion
     original_task_file_last_part = os.path.basename(this_original_task_file).replace('.', '_')
 
-    answer_file_path = f"answer_file_{model_name_last_part}_{clean_timestamp}_{original_task_file_last_part}.csv" 
+    task_set_results_path = f"task_set_results_{model_name_last_part}_{clean_timestamp}_{original_task_file_last_part}.csv" 
 
     # Determine the path to the file that should be saved
-    answer_file_path = os.path.join(solution_dir_path, answer_file_path)
+    task_set_results_path = os.path.join(solution_dir_path, task_set_results_path)
 
     # TODO: 
     # 1. extract just the last part of {model_name}
@@ -87,15 +87,15 @@ def make_answers_directory_and_csv_path(this_original_task_file, model_name):
 
 
     # Create directories if they don't exist
-    os.makedirs(os.path.dirname(answer_file_path), exist_ok=True)
+    os.makedirs(os.path.dirname(task_set_results_path), exist_ok=True)
 
     header_string = '"score","this_row_or_line","selected_option","correct_option","name_of_model","this_original_task_file","task_from_instructions","question_task_prompt","list_of_ranked_choice_options","draft_task_attempt_log","error_log","duration_of_single_task","readable_timestamp"\n'
 
     # Create an empty file (or just close it if it already exists)
-    with open(answer_file_path, 'a', newline='') as csvfile:
+    with open(task_set_results_path, 'a', newline='') as csvfile:
         csvfile.write(header_string)
 
-    return answer_file_path
+    return task_set_results_path
 
 
 def merge_answer_csv_files():
@@ -4077,9 +4077,9 @@ def do_task_please(
             ###
             # Make answers file pathway.
             ###
-            answer_file_path = make_answers_directory_and_csv_path(this_original_task_file, use_this_model)
+            task_set_results_path = make_answers_directory_and_csv_path(this_original_task_file, use_this_model)
 
-            print(f"answer_file_path -> {answer_file_path}")
+            print(f"task_set_results_path -> {task_set_results_path}")
 
 
             ########################
@@ -5025,16 +5025,16 @@ def do_task_please(
                     # answer_row = answer_row + "\n"
                     # print(f"\n\nanswer_row -> {answer_row}")
 
-                    # append to answer_file_path
+                    # append to task_set_results_path
 
                     # # Check if the file exists to determine if the header needs to be written
-                    # file_exists = os.path.exists(answer_file_path)
+                    # file_exists = os.path.exists(task_set_results_path)
 
-                    # with open(answer_file_path, 'a', newline='') as csvfile:
+                    # with open(task_set_results_path, 'a', newline='') as csvfile:
                     #     # Write the data row
                     #     csvfile.write(answer_row)
 
-                    append_list_of_values_to_csv(answer_file_path, list_of_items_to_write_to_csv)
+                    append_list_of_values_to_csv(task_set_results_path, list_of_items_to_write_to_csv)
 
                     # Exit While
                     print("\nHats in the air, we can all leave. Buubye!!\n\n\n")
@@ -5044,9 +5044,9 @@ def do_task_please(
 
 
                     # # Check if the file exists
-                    # if not os.path.exists(answer_file_path):
+                    # if not os.path.exists(task_set_results_path):
                     #     # If the file doesn't exist, create it with the header
-                    #     with open(answer_file_path, 'w', newline='') as csvfile:  # Use 'w' mode to write the header
+                    #     with open(task_set_results_path, 'w', newline='') as csvfile:  # Use 'w' mode to write the header
                     #         csvwriter = csv.writer(csvfile, delimiter=',')
                     #         header = ["this_row_or_line", "selected_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_ranked_choice_options", "draft_task_attempt_log", "readable_timestamp"]
                     #         csvwriter.writerow(header)
@@ -5060,7 +5060,7 @@ def do_task_please(
                     # answer_row = [strip_newlines_and_spaces(str(item)) for item in answer_row]
 
                     # # Now, append this row to the CSV file
-                    # with open(answer_file_path, 'a', newline='') as csvfile:
+                    # with open(task_set_results_path, 'a', newline='') as csvfile:
                     #     csvwriter = csv.writer(csvfile, delimiter=',')
                     #     csvwriter.writerow(answer_row)
 
@@ -5081,11 +5081,11 @@ def do_task_please(
                     # answer_row = [strip_newlines_and_spaces(str(item)) for item in answer_row]
 
                     # # # Now, append this row to the CSV file
-                    # # with open(answer_file_path, 'a', newline='') as csvfile:
+                    # # with open(task_set_results_path, 'a', newline='') as csvfile:
                     # #     csvwriter = csv.writer(csvfile, delimiter=',')
                     # #     csvwriter.writerow(answer_row)
 
-                    # with open(answer_file_path, 'a', newline='') as csvfile:
+                    # with open(task_set_results_path, 'a', newline='') as csvfile:
                     #     csvfile.write(answer_row)
 
                     # nicely format some fields
@@ -5117,7 +5117,7 @@ def do_task_please(
                         readable_timestamp,
                     ]
 
-                    append_list_of_values_to_csv(answer_file_path, list_of_items_to_write_to_csv)
+                    append_list_of_values_to_csv(task_set_results_path, list_of_items_to_write_to_csv)
 
 
                     # Exit While
