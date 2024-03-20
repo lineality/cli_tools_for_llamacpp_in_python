@@ -4849,6 +4849,7 @@ def do_task_please(
                                     # exit while loop if too many fails
                                     if task_fail_counter > retry_x_times:
                                         selected_option = None
+                                        error_log.append("task_fail_counter more than retry_x_times")
                                         break
 
                                     """
@@ -4898,12 +4899,14 @@ def do_task_please(
                                         else:  # if len of list is wrong
                                             while_counter += 1
                                             task_fail_counter += 1
+                                            error_log.append("length of list is wrong.")
                                             print("len of list is wrong")
                                             print(f"while_counter:{while_counter}, task_fail_counter:{task_fail_counter}")
 
                                     else:  # if no list at all!
                                         while_counter += 1
                                         task_fail_counter += 1
+                                        error_log.append("No select_best list.")
                                         print("no list at all!")
                                         print(f"while_counter:{while_counter}, task_fail_counter:{task_fail_counter}")
 
