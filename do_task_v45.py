@@ -45,7 +45,7 @@ def make_answers_directory_and_csv_path(this_original_task_file, model_name):
     """
     Returns a list of .json files in the current working directory.
     """
-    solution_dir_path = "solution_files"
+    solution_dir_path = "task_set_results_files"
     date_time = datetime.now(UTC)
     clean_timestamp = date_time.strftime("%Y%m%d%H%M%S%f")
 
@@ -2114,7 +2114,7 @@ def score_tally(directory_path):
             report_list.append(report_line)
 
 
-        report_file_path = "solution_files/score_report.csv"
+        report_file_path = "task_set_results_files/score_report.csv"
 
         for report_line in report_list:
             print(report_line)
@@ -5262,4 +5262,4 @@ if __name__ == "__main__":
     #####################
     # Make a score tally
     #####################
-    score_tally("solution_files")
+    score_tally("task_set_results_files")
