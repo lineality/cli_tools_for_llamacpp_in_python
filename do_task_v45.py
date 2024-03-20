@@ -89,7 +89,7 @@ def make_answers_directory_and_csv_path(this_original_task_file, model_name):
     # Create directories if they don't exist
     os.makedirs(os.path.dirname(answer_file_path), exist_ok=True)
 
-    header_string = '"score","this_row_or_line","selected_option","correct_option","name_of_model","this_original_task_file","task_from_instructions","question_task_prompt","list_of_ranked_choice_options","draft_task_attempt_log","duration_of_single_task","readable_timestamp"\n'
+    header_string = '"score","this_row_or_line","selected_option","correct_option","name_of_model","this_original_task_file","task_from_instructions","question_task_prompt","list_of_ranked_choice_options","draft_task_attempt_log","error_log","duration_of_single_task","readable_timestamp"\n'
 
     # Create an empty file (or just close it if it already exists)
     with open(answer_file_path, 'a', newline='') as csvfile:
@@ -957,6 +957,7 @@ def extract_dictionaries_from_string_no_pips(input_string):
 
     return dictionaries
 
+
 # Helper Function
 def counter(timeout=10):
     count = 0
@@ -1370,7 +1371,7 @@ if you are not using openAI's web-api, these are commented out.
 
 
 # Helper Function
-def task_extract_markdown_json_to_dict(dict_str):
+def task_extract_markdown_json_to_dict(dict_str, error_log):
     """
     TODO or final_answer
 
@@ -1402,7 +1403,7 @@ def task_extract_markdown_json_to_dict(dict_str):
 
 
     # pre-check
-        # load
+    # load
     try:
         if "'" not in dict_str:
 
@@ -1430,7 +1431,7 @@ def task_extract_markdown_json_to_dict(dict_str):
 
             pattern = r'```json\n([\s\S]*?)\n```'
             match = re.search(pattern, dict_str)
-            dict_str =  match.group(1) if match else ''
+            dict_str = match.group(1) if match else ''
 
     except Exception as e:
         print(f"\nTRY AGAIN: check_function_description_keys() extraction from markdown failed: {e}")
@@ -1544,7 +1545,6 @@ def duration_min_sec(start_time, end_time):
 
     return time_message
 
-duration_min_sec(start_time_whole_single_task, end_time_whole_single_task)
 
 # Helper Function
 def set_translator__system_prompt(context_history, target_language):
@@ -1836,7 +1836,8 @@ def check_structure_of_response(dict_str):
 def task_check_structure_of_response(
         structured_output_format,
         dict_str,
-        task_mode_answer_option_choices_provided):
+        task_mode_answer_option_choices_provided,
+        error_log):
     """
     checking the structure of the response...depends on what the desired structure is.
     """
@@ -1907,7 +1908,7 @@ def task_check_structure_of_response(
         elif structured_output_format == "markdown_json":
 
             print(f"use context, structured_output_format -> {structured_output_format}")
-            response_to_task = task_extract_markdown_json_to_dict(dict_str)
+            response_to_task = task_extract_markdown_json_to_dict(dict_str, error_log)
 
             # inspection
             print(f"task_check_structure_of_response()  response_to_task -> {response_to_task}")
@@ -2472,6 +2473,7 @@ def general_task_call_api_within_structure_check(
     task_mode_output_structure_mode,
     draft_task_attempt_log,
     retry_x_times,
+    error_log,
 ):
     """
     task_mode_output_structure_mode is passed to the output structure checker
@@ -2575,7 +2577,8 @@ def general_task_call_api_within_structure_check(
         jsonchecked_translation = task_check_structure_of_response(
             task_mode_output_structure_mode, 
             dict_str, 
-            task_mode_answer_option_choices_provided)
+            task_mode_answer_option_choices_provided,
+            error_log)
 
         if jsonchecked_translation:
             json_ok_flag = True
@@ -4127,7 +4130,10 @@ def do_task_please(
 
                 # set start time
                 start_time_whole_single_task = datetime.now(UTC)
-                
+
+                # start/reset error log
+                error_log = []
+
                 draft_task_attempt_log = []
 
                 print(f"this_row_or_line -> {this_row_or_line}")
@@ -4585,6 +4591,7 @@ def do_task_please(
                             task_mode_output_structure_mode,
                             draft_task_attempt_log,
                             retry_x_times,
+                            error_log,
                         )
 
                         # # remove overt duplicates
@@ -4978,16 +4985,18 @@ def do_task_please(
 
                     safe_task_from_instructions = replace_special_characters_with_text(this_task)
 
+                    error_log_safe_string = replace_special_characters_with_text(error_log)
+
                     just_model_file_name = os.path.basename(use_this_model)
                     just_this_original_task_file_name = os.path.basename(this_original_task_file)
 
                     # set rnf time
                     end_time_whole_single_task = datetime.now(UTC)
-                    
+
                     duration_of_single_task = duration_min_sec(start_time_whole_single_task, end_time_whole_single_task)
-                    
+
                     # turn into min, sec
-                    
+
 
                     list_of_items_to_write_to_csv = [
                         score,
@@ -5000,6 +5009,7 @@ def do_task_please(
                         safe_question_task_prompt, 
                         list_of_ranked_choice_options, 
                         safe_task_attempt_log,
+                        error_log_safe_string,
                         duration_of_single_task,
                         readable_timestamp,
                     ]
@@ -5099,6 +5109,8 @@ def do_task_please(
                         safe_question_task_prompt, 
                         list_of_ranked_choice_options, 
                         safe_task_attempt_log,
+                        error_log_safe_string,
+                        duration_of_single_task,
                         readable_timestamp,
                     ]
 
