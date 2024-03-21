@@ -89,7 +89,7 @@ def make_answers_directory_and_csv_path(this_original_task_file, model_name):
     # Create directories if they don't exist
     os.makedirs(os.path.dirname(task_set_results_path), exist_ok=True)
 
-    header_string = '"score","this_row_or_line","selected_option","correct_option","name_of_model","this_original_task_file","task_from_instructions","question_task_prompt","list_of_ranked_choice_options","draft_task_attempt_log","error_log","duration_of_single_task","readable_timestamp"\n'
+    header_string = '"score","this_row_or_line_number","selected_option","correct_option","name_of_model","this_original_task_file","task_from_instructions","question_task_prompt","list_of_ranked_choice_options","draft_task_attempt_log","error_log","duration_of_single_task","readable_timestamp"\n'
 
     # Create an empty file (or just close it if it already exists)
     with open(task_set_results_path, 'a', newline='') as csvfile:
@@ -3112,12 +3112,12 @@ def read_jsonl_file(file_path):
             data.append((question, options))
     return data
 
-def extract_row_from_jsonl(this_row_or_line, this_path):
+def extract_row_from_jsonl(this_row_or_line_number, this_path):
     """
     Extracts a specific row from a CSV file, ensuring that commas within quotes are correctly parsed as part of the same field.
 
     Parameters:
-        this_row_or_line (int): The index of the row to extract from the CSV.
+        this_row_or_line_number (int): The index of the row to extract from the CSV.
         this_path (str): The path to the CSV file.
 
     Returns:
@@ -3128,7 +3128,7 @@ def extract_row_from_jsonl(this_row_or_line, this_path):
         with open(this_path, mode='r', newline='') as csvfile:
             reader = csv.reader(csvfile)
             for i, row in enumerate(reader):
-                if i == this_row_or_line:
+                if i == this_row_or_line_number:
                     return row
     except FileNotFoundError:
         print(f"File not found: {this_path}")
@@ -3969,7 +3969,6 @@ def do_task_please(
     task_mode_ranked_choice_output_structure_mode = task_mode_configies["ranked_choice_output_structure_mode"]
 
 
-
     # set parameters to defaults if none are given
     if not parameter_dict:
         #######################
@@ -4006,10 +4005,7 @@ def do_task_please(
     maybe keep a list of optional answers 
     then for each question write answer to
     the answer_(original_name)_model_name_timestamp)_file 
-
-
     """
-
 
 
     file_type_list = [".jsonl", ".csv"]
@@ -4024,9 +4020,11 @@ def do_task_please(
     # inspection
     print(f"Task files in folder -> {task_files_list}")
 
+    
+    #############################
+    # iterate task-set by config
+    #############################
     for this_task_config_dict in task_file_config_dic_list:
-
-
 
         # unpack task_file_config_dic_list
         file_name = this_task_config_dict["file_name"]
@@ -4037,7 +4035,9 @@ def do_task_please(
         index_of_options = this_task_config_dict["index_of_options"]
         options_field_name = this_task_config_dict['options_field_name']
         scoring_field_name = this_task_config_dict['scoring_field_name']
-
+        offset = this_task_config_dict['offset']
+        range = this_task_config_dict['range']        
+        
         """
         Over-ride!
         If the file config file has extra instructions, overide the defaults.
@@ -4064,7 +4064,6 @@ def do_task_please(
             task_mode_system_instructions = this_task_config_dict["system_instructions"]
 
 
-
         this_original_task_file = find_matching_file_paths(task_files_list, file_name)
 
         print(f"\n\n\n Now starting this_original_task_file -> {this_original_task_file}")
@@ -4086,15 +4085,12 @@ def do_task_please(
             # Iterate through tasks
             ########################
 
-
-            print(
-                f"""
+            print(f"""
             do_task_please()
             Starting this file: 
             this_original_task_file      -> {this_original_task_file}
             """
             )
-
 
             """
             To stay lite:
@@ -4102,9 +4098,7 @@ def do_task_please(
             - for each row, access that row only
             (note...a csv might be a little mega huge)
             https://colab.research.google.com/drive/1lVtU6RErVic3-LrL085eFNgkRirzfnUk#scrollTo=KXWL8qptpfRJ 
-
             """
-
 
             # if csv
             if ".csv" == get_file_extension(this_original_task_file):
@@ -4119,14 +4113,21 @@ def do_task_please(
             print(f"this_original_task_file_length -> {this_original_task_file_length}")
 
 
-            ###3########################
-            ############################
-            # For this task in task-set
-            ############################
-            ############################
+
 
             # NON-header mode, skip first row
-            for this_row_or_line in range(this_original_task_file_length):
+            # for this_row_or_line_number in range(this_original_task_file_length):
+                 
+            # NON-header mode, skip first row
+            start = offset
+            stop = min(offset + range, this_original_task_file_length)
+            ############################
+            ############################
+            # For this task in task-set
+            #  within offset and range
+            ############################
+            ############################
+            for this_row_or_line in range(start, stop):
 
                 # set start time
                 start_time_whole_single_task = datetime.now(UTC)
@@ -4136,7 +4137,7 @@ def do_task_please(
 
                 draft_task_attempt_log = []
 
-                print(f"this_row_or_line -> {this_row_or_line}")
+                print(f"this_row_or_line_number -> {this_row_or_line_number}")
 
 
                 """
@@ -4165,7 +4166,7 @@ def do_task_please(
 
                     "What is 2+2?", [4, 2^2, 2**2, 2*2, all of the above]
                     """
-                    # row_as_list = extract_row_from_csv(this_row_or_line, this_original_task_file)
+                    # row_as_list = extract_row_from_csv(this_row_or_line_number, this_original_task_file)
                     """
                     jsonl mode
 
@@ -4175,13 +4176,13 @@ def do_task_please(
                     """
 
                     # Specify the line number from which to extract the JSON object (e.g., line 2)
-                    line_number = this_row_or_line  # Remember, it's zero-indexed
+                    this_row_or_line_number  # Remember, it's zero-indexed
 
                     # Specify the fields you're interested in extracting from the JSON object
                     fields_of_interest = [task_field_name, options_field_name, scoring_field_name]
 
                     # Step 1: Extract the JSON object from the specified line
-                    json_object = extract_object_by_line_number(this_original_task_file, line_number)
+                    json_object = extract_object_by_line_number(this_original_task_file, this_row_or_line_number)
 
                     # Check if the json_object is not None to avoid errors in the next step
                     if json_object is not None:
@@ -5003,7 +5004,7 @@ def do_task_please(
 
                     list_of_items_to_write_to_csv = [
                         score,
-                        this_row_or_line, 
+                        this_row_or_line_number, 
                         selected_option, 
                         correct_option, 
                         just_model_file_name, 
@@ -5017,7 +5018,7 @@ def do_task_please(
                         readable_timestamp,
                     ]
 
-                    # answer_row = f'"{score}", "{this_row_or_line}", "{selected_option}", "{correct_option}", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_ranked_choice_options}", "{replace_special_characters_with_text(draft_task_attempt_log)}", "{readable_timestamp}"\n'
+                    # answer_row = f'"{score}", "{this_row_or_line_number}", "{selected_option}", "{correct_option}", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_ranked_choice_options}", "{replace_special_characters_with_text(draft_task_attempt_log)}", "{readable_timestamp}"\n'
                     # print(f"answer_row -> {answer_row}")
 
                     # answer_row = strip_newlines_and_spaces(answer_row)
@@ -5048,12 +5049,12 @@ def do_task_please(
                     #     # If the file doesn't exist, create it with the header
                     #     with open(task_set_results_path, 'w', newline='') as csvfile:  # Use 'w' mode to write the header
                     #         csvwriter = csv.writer(csvfile, delimiter=',')
-                    #         header = ["this_row_or_line", "selected_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_ranked_choice_options", "draft_task_attempt_log", "readable_timestamp"]
+                    #         header = ["this_row_or_line_number", "selected_option", "use_this_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_ranked_choice_options", "draft_task_attempt_log", "readable_timestamp"]
                     #         csvwriter.writerow(header)
 
                     # Assume `answer_row` is a list of values you want to write to the CSV
                     # For example, constructing `answer_row` might look like this:
-                    # answer_row = ["fail", this_row_or_line, "fail", use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_ranked_choice_options, draft_task_attempt_log, readable_timestamp]
+                    # answer_row = ["fail", this_row_or_line_number, "fail", use_this_model, this_original_task_file, task_from_instructions, question_task_prompt, list_of_ranked_choice_options, draft_task_attempt_log, readable_timestamp]
                     # Make sure `answer_row` is a list here, not a string.
 
                     # # Strip newlines and spaces from each element if needed
@@ -5069,7 +5070,7 @@ def do_task_please(
 
                     # making csv row
                     print("if not task_ok_flag: making csv row...")
-                    # answer_row = f'"fail", "{this_row_or_line}", "fail", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_ranked_choice_options}", "{replace_special_characters_with_text(draft_task_attempt_log)}", "{readable_timestamp}"\n'
+                    # answer_row = f'"fail", "{this_row_or_line_number}", "fail", "{use_this_model}", "{this_original_task_file}", "{task_from_instructions}", "{question_task_prompt}", "{list_of_ranked_choice_options}", "{replace_special_characters_with_text(draft_task_attempt_log)}", "{readable_timestamp}"\n'
                     # # print(f"answer_row -> {answer_row}")
                     # answer_row = strip_newlines_and_spaces(answer_row)
                     # answer_row = answer_row + "\n"
@@ -5103,7 +5104,7 @@ def do_task_please(
                     # replace some fields with 'fail'
                     list_of_items_to_write_to_csv = [
                         "fail",
-                        this_row_or_line, 
+                        this_row_or_line_number, 
                         "fail",
                         correct_option, 
                         just_model_file_name, 
@@ -5208,6 +5209,8 @@ task_file_config_dic_list = [
         "index_of_options": 1,
         "options_field_name": 'options',
         "scoring_field_name": 'answer_index_from_1',
+        "offset": None,
+        "range": None,
     },
     {
         "file_name": "my_test_open_answer_2.jsonl",
@@ -5225,6 +5228,8 @@ task_file_config_dic_list = [
         "output_structure_mode": "pipes",
         "input_state_context_mode": "one_string",
         "ranked_choice_output_structure_mode": "pipes",
+        "offset": None,
+        "range": None,
     }
 ]
 
