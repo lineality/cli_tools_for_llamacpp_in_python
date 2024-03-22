@@ -89,7 +89,7 @@ def make_answers_directory_and_csv_path(this_original_task_file, model_name):
     # Create directories if they don't exist
     os.makedirs(os.path.dirname(task_set_results_path), exist_ok=True)
 
-    header_string = '"score","this_row_or_line_number","selected_option","correct_option","task_failure_comment","name_of_model","this_original_task_file","task_from_instructions","question_task_prompt","list_of_ranked_choice_options","draft_task_attempt_log","error_log","duration_of_single_task","readable_timestamp"\n'
+    header_string = '"score","this_row_or_line_number","selected_option","correct_option","name_of_model","this_original_task_file","task_from_instructions","question_task_prompt","list_of_ranked_choice_options","draft_task_attempt_log","error_log","duration_of_single_task","readable_timestamp"\n'
 
     # Create an empty file (or just close it if it already exists)
     with open(task_set_results_path, 'a', newline='') as csvfile:
@@ -4031,7 +4031,6 @@ def do_task_please(
         file_type = this_task_config_dict["file_type"]
         file_structure = this_task_config_dict["file_structure"]
         task_field_name = this_task_config_dict["task_field_name"]
-        task_failure_comment_field_name = this_task_config_dict["task_failure_comment_field_name"]
         index_of_task = this_task_config_dict["index_of_task"]
         index_of_options = this_task_config_dict["index_of_options"]
         options_field_name = this_task_config_dict['options_field_name']
@@ -4180,12 +4179,7 @@ def do_task_please(
                     this_row_or_line_number  # Remember, it's zero-indexed
 
                     # Specify the fields you're interested in extracting from the JSON object
-                    fields_of_interest = [
-                        task_field_name, 
-                        options_field_name, 
-                        scoring_field_name, 
-                        task_failure_comment_field_name
-                        ]
+                    fields_of_interest = [task_field_name, options_field_name, scoring_field_name]
 
                     # Step 1: Extract the JSON object from the specified line
                     json_object = extract_object_by_line_number(this_original_task_file, this_row_or_line_number)
@@ -4204,7 +4198,6 @@ def do_task_please(
                     """
                     """
                     this_task = specific_fields[task_field_name]
-                    these_task_failure_comments = task_failure_comment_field_name
 
                     if 'options' in specific_fields:
                         these_original_task_options = specific_fields[options_field_name]
@@ -4938,21 +4931,6 @@ def do_task_please(
                     # Scoring
                     ##########
                     ##########
-                    
-                    def check_answer(answer_number, data):
-                        answer_index = answer_number - 1
-                        correct_answer_index = data["answer_from_index"].index(data["options"][0])
-                    
-                        if answer_index == correct_answer_index:
-                            return None
-                        else:
-                            error_reason = data["error_data_lookup_table"].get(str(answer_number))
-                            return error_reason
-                    
-                    # get task failure comment
-                    task_failure_comment = check_answer(selected_option, these_task_failure_comments)
-                    
-                    
                     print(f"""
                         Scoring:
                           selected_option       -> {selected_option}
@@ -5029,7 +5007,6 @@ def do_task_please(
                         this_row_or_line_number, 
                         selected_option, 
                         correct_option, 
-                        task_failure_comment,
                         just_model_file_name, 
                         just_this_original_task_file_name, 
                         safe_task_from_instructions, 
@@ -5123,16 +5100,13 @@ def do_task_please(
                     just_this_original_task_file_name = os.path.basename(this_original_task_file)
 
                     print(f"just_model_file_name -> {just_model_file_name}")
-                    
-                    task_failure_comment = "no answer given"
 
                     # replace some fields with 'fail'
                     list_of_items_to_write_to_csv = [
                         "fail",
                         this_row_or_line_number, 
                         "fail",
-                        correct_option,
-                        task_failure_comment,
+                        correct_option, 
                         just_model_file_name, 
                         just_this_original_task_file_name, 
                         safe_task_from_instructions, 
