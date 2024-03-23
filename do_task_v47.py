@@ -4,7 +4,6 @@ TODO:
 
 """
 import string
-from call_llamacpp import gguf_api, mini_gguf_api
 import os
 import time
 import csv
@@ -14,6 +13,9 @@ import json  # Added missing import
 # import requests
 import re
 
+from call_llamacpp import gguf_api, mini_gguf_api
+from html_all_reports_summary_from_csv import html_for_all_reports
+from html_tally_score import html_for_all_score_tallies
 
 """
 .env: get your environment variables:
@@ -2138,11 +2140,10 @@ def score_tally(directory_path):
             percentage = (
                 (score_data["total"] / total_scores) * 100 if total_scores > 0 else 0
             )
-            score = score_data["total"] / score_data["count"]
+            # where total is correct number and count is...the total
+            score = f"{score_data["total"]} / {score_data["count"]}"
             report_line = [percentage, model_name, score]
             report_list.append(report_line)
-
-        report_file_path = "task_set_results_files/score_report.csv"
 
         for report_line in report_list:
             print(report_line)
@@ -2151,15 +2152,7 @@ def score_tally(directory_path):
             readable_timestamp = date_time.strftime("%Y-%m-%d-%H:%M:%S%f")
             report_line.append(readable_timestamp)
 
-            append_list_of_values_to_csv(report_file_path, report_line)
-
-            values_dict = {
-                "percent": report_line[0],
-                "model": str(report_line[1]),
-                "score": report_line[2],
-                "time_stamp": readable_timestamp,
-            }
-            # append_dict_of_values_row_with_fields_list_to_csv(values_dict, fields_list, report_file_path)
+            append_list_of_values_to_csv(report_filename, report_line)
 
         print(f"Report appended to {report_filename}")
 
@@ -4129,11 +4122,11 @@ def do_task_please(
 
         # unpack task_file_config_dic_list
         file_name = this_task_config_dict["file_name"]
-        file_type = this_task_config_dict["file_type"]
-        file_structure = this_task_config_dict["file_structure"]
+        # file_type = this_task_config_dict["file_type"]
+        # file_structure = this_task_config_dict["file_structure"]
         task_field_name = this_task_config_dict["task_field_name"]
-        index_of_task = this_task_config_dict["index_of_task"]
-        index_of_options = this_task_config_dict["index_of_options"]
+        # index_of_task = this_task_config_dict["index_of_task"]
+        # index_of_options = this_task_config_dict["index_of_options"]
         options_field_name = this_task_config_dict["options_field_name"]
         scoring_field_name = this_task_config_dict["scoring_field_name"]
 
@@ -4260,9 +4253,9 @@ def do_task_please(
                 f"this_original_task_file_length -> {this_original_task_file_length} {type(this_original_task_file_length)}"
             )
 
-            # for this_row_or_line_number in range(start, stop + 1):
             # for this_row_or_line_number in range(this_original_task_file_length):
-            for this_row_or_line_number in range(this_original_task_file_length):
+            # for this_row_or_line_number in range(this_original_task_file_length):
+            for this_row_or_line_number in range(start, stop + 1):
 
                 # set start time
                 start_time_whole_single_task = datetime.now(UTC)
@@ -4334,9 +4327,9 @@ def do_task_please(
                         specific_fields = extract_specific_fields(
                             json_object, fields_of_interest
                         )
-                        print("Extracted Fields:", specific_fields)
+                        print("\nspecific_fields[] -> Extracted Fields:", specific_fields)
                     else:
-                        print("No JSON object found at the specified line.")
+                        print("\nNo JSON object found at the specified line.")
 
                     #################
                     # Task et Option
@@ -5116,22 +5109,55 @@ def do_task_please(
                     ##########
                     ##########
 
-                    def check_answer(answer_number, data):
-                        answer_index = answer_number - 1
-                        correct_answer_index = data[
-                            "answer_from_index_start_at_1"
-                        ].index(data["options"][0])
+                    def check_answer_in_raw_task(answer_number, data):
+                        print(
+                            f"""def check_answer(answer_number, data):
 
-                        if answer_index == correct_answer_index:
+                            Scoring:
+                            answer_number       -> {answer_number}
+                            type(answer_number) -> {type(answer_number)}
+
+                            data        -> {data}
+                            type(data)  -> {type(data)}
+
+                            """
+                        )
+
+                    def check_answer_in_dict(answer_number, data_dict):
+                        print(
+                            f"""def check_answer_in_dict(answer_number, data_dict):
+
+                            Scoring:
+                            answer_number       -> {answer_number}
+                            type(answer_number) -> {type(answer_number)}
+
+                            data_dict        -> {data_dict}
+                            type(data_dict)  -> {type(data_dict)}
+
+                            """
+                        )
+                        try:
+
+                            # make sure int type
+                            answer_number = int(answer_number)
+                            data_dict = {int(key): value for key, value in data_dict.items()}
+
+
+                            # check for string or int form in dict of errors
+                            if answer_number in data_dict:
+                                error_reason = data_dict[answer_number]
+                                return error_reason
+
+                            else:
+                                return None
+
+                        except Exception as e:
+                            print(f"check_answer_in_dict() issue: {str(e)}")
                             return None
-                        else:
-                            error_reason = data[
-                                error_comment_data_lookup_table_field_name
-                            ].get(str(answer_number))
-                            return error_reason
+
 
                     # get task failure comment
-                    task_failure_comment = check_answer(
+                    task_failure_comment = check_answer_in_dict(
                         selected_option, error_comment_data_lookup_table
                     )
 
@@ -5150,10 +5176,13 @@ def do_task_please(
                     # default
                     score = 0
 
+                    # make str
+                    selected_option = str(selected_option)
+                    correct_option = str(correct_option)
+
                     # if multiple choice and should check answer:
                     if (
-                        task_mode_validate_the_answer
-                        and task_mode_answer_option_choices_provided
+                        task_mode_validate_the_answer and task_mode_answer_option_choices_provided
                     ):
                         print(
                             f"selected_option -> {selected_option} type -> {type(selected_option)}"
@@ -5161,11 +5190,12 @@ def do_task_please(
                         print(
                             f"correct_option -> {correct_option} type -> {type(correct_option)}"
                         )
+
                         if selected_option == correct_option:
                             print("Score!")
                             score = 1
                         else:
-                            print("Oops")
+                            print(f"Oops: selected_option -> {selected_option} vs. correct_option -> {correct_option}")
                             score = 0
 
                         # making csv row
@@ -5218,6 +5248,7 @@ def do_task_please(
 
                     else:  # if error log is empty
                         error_log = ""
+                        error_log_safe_string = ""
 
                     just_model_file_name = os.path.basename(use_this_model)
                     just_this_original_task_file_name = os.path.basename(
@@ -5474,7 +5505,7 @@ task_file_config_dic_list = [
     #     "this_range": None,
     # },
     {
-        "file_name": "animal_multiple_choice_test_1.jsonl",
+        "file_name": "error_explained_test_1.jsonl",
         "file_type": ".jsonl",
         "header_exits": False,
         "file_structure": "",
@@ -5535,3 +5566,8 @@ if __name__ == "__main__":
     # Make a score tally
     #####################
     score_tally("task_set_results_files")
+
+
+# make html report
+html_for_all_reports()
+html_for_all_score_tallies()

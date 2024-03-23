@@ -2,13 +2,13 @@ import csv
 import html
 import glob
 import os
+from datetime import datetime
+
 
 def make_html_report(target_csv_file_sources_dir, path_out):
-    
-    
-    
+
     csv_files = glob.glob(os.path.join(target_csv_file_sources_dir, "*.csv"))
-    
+
     try:
         html_content = """
         <html>
@@ -19,6 +19,7 @@ def make_html_report(target_csv_file_sources_dir, path_out):
                     border: 1px solid black;
                     border-collapse: collapse;
                     padding: 5px;
+                    text-align: center;
                 }
             </style>
         </head>
@@ -40,7 +41,7 @@ def make_html_report(target_csv_file_sources_dir, path_out):
 
         for csv_file in csv_files:
             try:
-                with open(csv_file, 'r') as csvfile:
+                with open(csv_file, "r") as csvfile:
                     csvreader = csv.DictReader(csvfile)
                     for row in csvreader:
                         html_content += """
@@ -56,19 +57,23 @@ def make_html_report(target_csv_file_sources_dir, path_out):
                                 <td>{readable_timestamp}</td>
                             </tr>
                         """.format(
-                            score=html.escape(row['score']),
-                            selected_option=html.escape(row['selected_option']),
-                            correct_option=html.escape(row['correct_option']),
-                            
+                            score=html.escape(row["score"]),
+                            selected_option=html.escape(row["selected_option"]),
+                            correct_option=html.escape(row["correct_option"]),
                             # # TODO turn this back on
-                            # task_failure_comment=html.escape(row['task_failure_comment']),                            
-                            task_failure_comment="",
-                            
-                            name_of_model=html.escape(row['name_of_model']),
-                            task_from_instructions=html.escape(row['task_from_instructions']),
-                            error_log=html.escape(row['error_log']),
-                            duration_of_single_task=html.escape(row['duration_of_single_task']),
-                            readable_timestamp=html.escape(row['readable_timestamp'])
+                            task_failure_comment=html.escape(
+                                row["task_failure_comment"]
+                            ),
+                            # task_failure_comment="",
+                            name_of_model=html.escape(row["name_of_model"]),
+                            task_from_instructions=html.escape(
+                                row["task_from_instructions"]
+                            ),
+                            error_log=html.escape(row["error_log"]),
+                            duration_of_single_task=html.escape(
+                                row["duration_of_single_task"]
+                            ),
+                            readable_timestamp=html.escape(row["readable_timestamp"]),
                         )
             except Exception as e:
                 print(f"No dice on {csv_file} -> {e}")
@@ -80,19 +85,29 @@ def make_html_report(target_csv_file_sources_dir, path_out):
         </html>
         """
 
-        with open(path_out, 'w', encoding='utf-8') as html_file:
+        with open(path_out, "w", encoding="utf-8") as html_file:
             html_file.write(html_content)
         print(f"HTML summary generated successfully!")
     except Exception as e:
         print(f"No dice on generating HTML summary -> {e}")
         print("")
 
-from datetime import datetime
-date_time = datetime.now()
-clean_timestamp = date_time.strftime("%Y%m%d%H%M%S%f")
-
-target_csv_file_sources_dir = "task_set_results_files"
-report_destination = f"task_set_results_files/HTML_summary_{clean_timestamp}.html"
 
 
-make_html_report(target_csv_file_sources_dir, report_destination)
+def report_on_all():
+
+    date_time = datetime.now()
+    clean_timestamp = date_time.strftime("%Y%m%d%H%M%S%f")
+
+    target_csv_file_sources_dir = "task_set_results_files"
+    report_destination = f"task_set_results_files/HTML_summary_{clean_timestamp}.html"
+
+    make_html_report(target_csv_file_sources_dir, report_destination)
+
+
+######
+# Run
+######
+if __name__ == "__main__":
+
+    report_on_all()
