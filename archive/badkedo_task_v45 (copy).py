@@ -4946,7 +4946,7 @@ def do_task_please(
                         if answer_index == correct_answer_index:
                             return None
                         else:
-                            error_reason = data["error_data_lookup_table"].get(str(answer_number))
+                            error_reason = data["error_comment_data_lookup_table"].get(str(answer_number))
                             return error_reason
                     
                     # get task failure comment

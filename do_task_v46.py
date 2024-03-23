@@ -3938,15 +3938,15 @@ def do_task_please(
             "draft_revisions_and_comments":
             "final_answer":
         }
-        
-        
-        
+
+
+
     mode options 1:
     open, single, choice
-        
+
     mode options 2:
     context, instruction, simple
-        
+
     task_mode_configies = {
         "answer_option_choices_provided" = True,
         "validate_the_answer" = True,
@@ -3954,7 +3954,7 @@ def do_task_please(
         "system_instructions" = False,
         # "LMQL": False,
     }
-        
+
     """
 
     print_find_all_models(models_dir_path)
@@ -4020,7 +4020,7 @@ def do_task_please(
     # inspection
     print(f"Task files in folder -> {task_files_list}")
 
-    
+
     #############################
     # iterate task-set by config
     #############################
@@ -4036,10 +4036,10 @@ def do_task_please(
         options_field_name = this_task_config_dict['options_field_name']
         scoring_field_name = this_task_config_dict['scoring_field_name']
 
-        error_data_lookup_table_field_name = this_task_config_dict['error_data_lookup_table']
+        error_comment_data_lookup_table_field_name = this_task_config_dict['error_comment_data_lookup_table_field_name']
         offset = this_task_config_dict['offset']
         range = this_task_config_dict['range']        
-        
+
         """
         Over-ride!
         If the file config file has extra instructions, overide the defaults.
@@ -4120,15 +4120,28 @@ def do_task_please(
             # for this_row_or_line_number in range(this_original_task_file_length):
 
             # NON-header mode, skip first row
-            start = offset
-            stop = min(offset + range, this_original_task_file_length)
+
+            if offset and range:
+                print("offset and range found")
+                start = offset
+                stop = min(offset + range, this_original_task_file_length)
+
+            else:
+                print("NO offset and range found")
+                start = 0
+                stop = this_original_task_file_length
+
+
             ############################
             ############################
             # For this task in task-set
             #  within offset and range
             ############################
             ############################
-            for this_row_or_line_number in range(start, stop):
+            print(f"start -> {start} {type(start)}")
+            print(f"stop -> {stop} {type(stop)}")
+
+            for this_row_or_line_number in range(start, stop + 1):
 
                 # set start time
                 start_time_whole_single_task = datetime.now(UTC)
@@ -4162,6 +4175,7 @@ def do_task_please(
 
                     process csv assuming
                     this row = index
+
                     question is first item
                     string of options is second
 
@@ -4184,7 +4198,7 @@ def do_task_please(
                         task_field_name, 
                         options_field_name, 
                         scoring_field_name, 
-                        error_data_lookup_table_field_name,
+                        error_comment_data_lookup_table_field_name,
                     ]
 
                     # Step 1: Extract the JSON object from the specified line
@@ -4204,7 +4218,7 @@ def do_task_please(
                     """
                     """
                     this_task = specific_fields[task_field_name]
-                    these_task_failure_comments = specific_fields[error_data_lookup_table_field_name]
+                    error_comment_data_lookup_table = specific_fields[error_comment_data_lookup_table_field_name]
 
                     if 'options' in specific_fields:
                         these_original_task_options = specific_fields[options_field_name]
@@ -4948,11 +4962,11 @@ def do_task_please(
                         if answer_index == correct_answer_index:
                             return None
                         else:
-                            error_reason = data[error_data_lookup_table_field_name].get(str(answer_number))
+                            error_reason = data[error_comment_data_lookup_table_field_name].get(str(answer_number))
                             return error_reason
 
                     # get task failure comment
-                    task_failure_comment = check_answer(selected_option, these_task_failure_comments)
+                    task_failure_comment = check_answer(selected_option, error_comment_data_lookup_table)
 
                     print(f"""
                         Scoring:
@@ -5278,7 +5292,7 @@ task_file_config_dic_list = [
         "task_field_name": 'task',
         "options_field_name": 'options',
         "scoring_field_name": 'answer_from_index_start_at_1',
-        "error_data_lookup_table_field_name": 'error_data_lookup_table',
+        "error_comment_data_lookup_table_field_name": 'error_comment_data_lookup_table',
 
         "answer_option_choices_provided": True,
         "validate_the_answer": True,

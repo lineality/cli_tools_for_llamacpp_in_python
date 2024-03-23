@@ -94,7 +94,7 @@ open_question_append_to_jsonl(f"{task_file_directory}/my_open_answer_test_1.json
 #         "3. wrong answer", 
 #         "4. wrong answer",
 #     ],
-#     error_data_lookup_table:{
+#     error_comment_data_lookup_table:{
 #         2: "this reason",
 #         3: "this reason",
 #         4: "this reason",
@@ -116,7 +116,7 @@ data = {
             "3. 25 minutes",
             "4. 50 minutes"
         ],
-    "error_data_lookup_table": {
+    "error_comment_data_lookup_table": {
         2: "This is incorrect because brewing multiple cups of coffee simultaneously does not increase the brewing time. The coffee machine can brew all 10 cups at the same time.",
         3: "This is incorrect because it assumes that the brewing time increases linearly with the number of cups. However, the coffee machine can brew all 10 cups simultaneously, so the brewing time remains the same as brewing one cup.",
         4: "This is incorrect because it assumes that the brewing time increases proportionally with the number of cups. However, the coffee machine can brew all 10 cups simultaneously, so the brewing time remains the same as brewing one cup."
