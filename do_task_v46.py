@@ -41,7 +41,7 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 mistral_api_key = os.getenv("mistral_api_key") 
 
 
-def make_answers_directory_and_csv_path(this_original_task_file, model_name):
+def make_answers_directory_and_csv_path_header_string(this_original_task_file, model_name):
     """
     Returns a list of .json files in the current working directory.
     """
@@ -4031,11 +4031,12 @@ def do_task_please(
         file_type = this_task_config_dict["file_type"]
         file_structure = this_task_config_dict["file_structure"]
         task_field_name = this_task_config_dict["task_field_name"]
-        task_failure_comment_field_name = this_task_config_dict["task_failure_comment_field_name"]
         index_of_task = this_task_config_dict["index_of_task"]
         index_of_options = this_task_config_dict["index_of_options"]
         options_field_name = this_task_config_dict['options_field_name']
         scoring_field_name = this_task_config_dict['scoring_field_name']
+
+        error_data_lookup_table_field_name = this_task_config_dict['error_data_lookup_table']
         offset = this_task_config_dict['offset']
         range = this_task_config_dict['range']        
         
@@ -4077,7 +4078,7 @@ def do_task_please(
             ###
             # Make answers file pathway.
             ###
-            task_set_results_path = make_answers_directory_and_csv_path(this_original_task_file, use_this_model)
+            task_set_results_path = make_answers_directory_and_csv_path_header_string(this_original_task_file, use_this_model)
 
             print(f"task_set_results_path -> {task_set_results_path}")
 
@@ -4087,11 +4088,10 @@ def do_task_please(
             ########################
 
             print(f"""
-            do_task_please()
-            Starting this file: 
-            this_original_task_file      -> {this_original_task_file}
-            """
-            )
+                do_task_please()
+                Starting this file: 
+                this_original_task_file      -> {this_original_task_file}
+                """)
 
             """
             To stay lite:
@@ -4118,7 +4118,7 @@ def do_task_please(
 
             # NON-header mode, skip first row
             # for this_row_or_line_number in range(this_original_task_file_length):
-                 
+
             # NON-header mode, skip first row
             start = offset
             stop = min(offset + range, this_original_task_file_length)
@@ -4128,7 +4128,7 @@ def do_task_please(
             #  within offset and range
             ############################
             ############################
-            for this_row_or_line in range(start, stop):
+            for this_row_or_line_number in range(start, stop):
 
                 # set start time
                 start_time_whole_single_task = datetime.now(UTC)
@@ -4177,15 +4177,15 @@ def do_task_please(
                     """
 
                     # Specify the line number from which to extract the JSON object (e.g., line 2)
-                    this_row_or_line_number  # Remember, it's zero-indexed
+                    # this_row_or_line_number  # Remember, it's zero-indexed
 
                     # Specify the fields you're interested in extracting from the JSON object
                     fields_of_interest = [
                         task_field_name, 
                         options_field_name, 
                         scoring_field_name, 
-                        task_failure_comment_field_name
-                        ]
+                        error_data_lookup_table_field_name,
+                    ]
 
                     # Step 1: Extract the JSON object from the specified line
                     json_object = extract_object_by_line_number(this_original_task_file, this_row_or_line_number)
@@ -4204,7 +4204,7 @@ def do_task_please(
                     """
                     """
                     this_task = specific_fields[task_field_name]
-                    these_task_failure_comments = task_failure_comment_field_name
+                    these_task_failure_comments = specific_fields[error_data_lookup_table_field_name]
 
                     if 'options' in specific_fields:
                         these_original_task_options = specific_fields[options_field_name]
@@ -4933,26 +4933,27 @@ def do_task_please(
                         selected_option = None
 
 
+
                     ##########
                     ##########
                     # Scoring
                     ##########
                     ##########
-                    
+
+
                     def check_answer(answer_number, data):
                         answer_index = answer_number - 1
-                        correct_answer_index = data["answer_from_index"].index(data["options"][0])
-                    
+                        correct_answer_index = data["answer_from_index_start_at_1"].index(data["options"][0])
+
                         if answer_index == correct_answer_index:
                             return None
                         else:
-                            error_reason = data["error_data_lookup_table"].get(str(answer_number))
+                            error_reason = data[error_data_lookup_table_field_name].get(str(answer_number))
                             return error_reason
-                    
+
                     # get task failure comment
                     task_failure_comment = check_answer(selected_option, these_task_failure_comments)
-                    
-                    
+
                     print(f"""
                         Scoring:
                           selected_option       -> {selected_option}
@@ -5011,7 +5012,11 @@ def do_task_please(
 
                     safe_task_from_instructions = replace_special_characters_with_text(this_task)
 
-                    error_log_safe_string = replace_special_characters_with_text(error_log)
+                    if error_log:                
+                        error_log_safe_string = replace_special_characters_with_text(error_log)
+
+                    else:  # if error log is empty
+                        error_log = ""
 
                     just_model_file_name = os.path.basename(use_this_model)
                     just_this_original_task_file_name = os.path.basename(this_original_task_file)
@@ -5226,28 +5231,56 @@ task_mode_configies = {
 
 # configure each task-file
 task_file_config_dic_list = [
+    # {
+    #     "file_name": "my_test1.jsonl",
+    #     "file_type": ".jsonl",
+    #     "file_structure": "",
+    #     "task_field_name": 'task',
+    #     "index_of_task": 0,
+    #     "index_of_options": 1,
+    #     "options_field_name": 'options',
+    #     "scoring_field_name": 'answer_index_from_1',
+    #     "offset": None,
+    #     "range": None,
+    # },
+    # {
+    #     "file_name": "my_test_open_answer_2.jsonl",
+    #     "file_type": ".jsonl",
+    #     "file_structure": "",
+    #     "task_field_name": 'task',
+    #     "index_of_task": 0,
+    #     "index_of_options": 1,
+    #     "options_field_name": None,
+    #     "scoring_field_name": 'answer',
+    #     "answer_option_choices_provided": False,
+    #     "validate_the_answer": True,
+    #     "use_history_context_dict_list": False,
+    #     "system_instructions": False,
+    #     "output_structure_mode": "pipes",
+    #     "input_state_context_mode": "one_string",
+    #     "ranked_choice_output_structure_mode": "pipes",
+    #     "offset": None,
+    #     "range": None,
+    # },
     {
-        "file_name": "my_test1.jsonl",
+
+        "file_name": "animal_multiple_choice_test_1.jsonl",
         "file_type": ".jsonl",
+        "header_exits": False,
+
+
         "file_structure": "",
+
+        "index_of_task": None,
+        "index_of_options": None,
+
+        # Fields
         "task_field_name": 'task',
-        "index_of_task": 0,
-        "index_of_options": 1,
         "options_field_name": 'options',
-        "scoring_field_name": 'answer_index_from_1',
-        "offset": None,
-        "range": None,
-    },
-    {
-        "file_name": "my_test_open_answer_2.jsonl",
-        "file_type": ".jsonl",
-        "file_structure": "",
-        "task_field_name": 'task',
-        "index_of_task": 0,
-        "index_of_options": 1,
-        "options_field_name": None,
-        "scoring_field_name": 'answer',
-        "answer_option_choices_provided": False,
+        "scoring_field_name": 'answer_from_index_start_at_1',
+        "error_data_lookup_table_field_name": 'error_data_lookup_table',
+
+        "answer_option_choices_provided": True,
         "validate_the_answer": True,
         "use_history_context_dict_list": False,
         "system_instructions": False,
@@ -5271,7 +5304,7 @@ retry_x_times = 2
 # Pick Models
 ##############
 list_of_models = ["tinyllama", "mistral-7b-instruct", "stablelm-zephyr-3b"]
-
+list_of_models = ["mistral-7b-instruct"]
 
 ######
 # Run

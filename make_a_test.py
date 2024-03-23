@@ -5,7 +5,7 @@ def multiple_choice_append_to_jsonl(file_path, task, options, answer_index_from_
     data = {
         "task": task,
         "options": options,
-        "answer_from_index": answer_index_from_1,
+        "answer_from_index_start_at_1": answer_index_from_1,
     }
 
     with open(file_path, "a", encoding="utf-8") as file:
@@ -88,7 +88,7 @@ open_question_append_to_jsonl(f"{task_file_directory}/my_open_answer_test_1.json
 # data = {
 #     "task": task,
 #     "options": options,
-#     "answer_from_index": [
+#     "answer_from_index_start_at_1": [
 #         "1. right answer", 
 #         "2. wrong answer", 
 #         "3. wrong answer", 
@@ -110,7 +110,7 @@ data = {
             "3. 25 minutes",
             "4. 50 minutes"
         ],
-        "answer_from_index": [
+        "answer_from_index_start_at_1": [
             "1. 5 minutes",
             "2. 10 minutes",
             "3. 25 minutes",

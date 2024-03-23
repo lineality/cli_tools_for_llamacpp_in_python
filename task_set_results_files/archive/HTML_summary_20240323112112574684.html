@@ -1,0 +1,175 @@
+
+        <html>
+        <head>
+            <title>CSV Summary</title>
+            <style>
+                table, th, td {
+                    border: 1px solid black;
+                    border-collapse: collapse;
+                    padding: 5px;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>CSV Summary</h1>
+            <table>
+                <tr>
+                    <th>Score</th>
+                    <th>Selected Option</th>
+                    <th>Correct Option</th>
+                    <th>Task Failure Comment</th>
+                    <th>Name of Model</th>
+                    <th>Task from Instructions</th>
+                    <th>Error Log</th>
+                    <th>Duration of Single Task</th>
+                    <th>Readable Timestamp</th>
+                </tr>
+        
+                            <tr>
+                                <td>0</td>
+                                <td></td>
+                                <td>1</td>
+                                <td></td>
+                                <td>tinyllama</td>
+                                <td>What is the capital of France?</td>
+                                <td>(left square bracket)(right square bracket)</td>
+                                <td>0_min__15.0_sec</td>
+                                <td>ymd_2024-03-20</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>0</td>
+                                <td></td>
+                                <td>2</td>
+                                <td></td>
+                                <td>tinyllama</td>
+                                <td>What is the largest planet in our solar system?</td>
+                                <td>(left square bracket)(right square bracket)</td>
+                                <td>0_min__15.9_sec</td>
+                                <td>ymd_2024-03-20</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td></td>
+                                <td>mistral-7b-instruct</td>
+                                <td>What is the capital of France?</td>
+                                <td>(left square bracket)(right square bracket)</td>
+                                <td>1_min__40.7_sec</td>
+                                <td>ymd_2024-03-20</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>2</td>
+                                <td></td>
+                                <td>mistral-7b-instruct</td>
+                                <td>What is the largest planet in our solar system?</td>
+                                <td>(left square bracket)(right square bracket)</td>
+                                <td>2_min__28.1_sec</td>
+                                <td>ymd_2024-03-20</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>0</td>
+                                <td></td>
+                                <td>1</td>
+                                <td></td>
+                                <td>stablelm-zephyr-3b</td>
+                                <td>What is the capital of France?</td>
+                                <td>(left square bracket)(right square bracket)</td>
+                                <td>1_min__57.3_sec</td>
+                                <td>ymd_2024-03-20</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>0</td>
+                                <td></td>
+                                <td>2</td>
+                                <td></td>
+                                <td>stablelm-zephyr-3b</td>
+                                <td>What is the largest planet in our solar system?</td>
+                                <td>(left square bracket)(right square bracket)</td>
+                                <td>0_min__50.0_sec</td>
+                                <td>ymd_2024-03-20</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>0</td>
+                                <td></td>
+                                <td>Paris</td>
+                                <td></td>
+                                <td>tinyllama</td>
+                                <td>What is the capital of France?</td>
+                                <td>(left square bracket)(right square bracket)</td>
+                                <td>0_min__5.9_sec</td>
+                                <td>ymd_2024-03-20</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>0</td>
+                                <td></td>
+                                <td>Jupiter</td>
+                                <td></td>
+                                <td>tinyllama</td>
+                                <td>What is the largest planet in our solar system?</td>
+                                <td>(left square bracket)(right square bracket)</td>
+                                <td>0_min__6.5_sec</td>
+                                <td>ymd_2024-03-20</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>0</td>
+                                <td>Paris is the capital city of France.</td>
+                                <td>Paris</td>
+                                <td></td>
+                                <td>mistral-7b-instruct</td>
+                                <td>What is the capital of France?</td>
+                                <td>(left square bracket)(right square bracket)</td>
+                                <td>2_min__50.9_sec</td>
+                                <td>ymd_2024-03-20</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>0</td>
+                                <td>final answer: The largest planet in our solar system is Jupiter, with a diameter of approximately 86,881 miles (139,822 kilometers) and a mass that is two-and-a-half times greater than all the other planets combined.</td>
+                                <td>Jupiter</td>
+                                <td></td>
+                                <td>mistral-7b-instruct</td>
+                                <td>What is the largest planet in our solar system?</td>
+                                <td>(left square bracket)(right square bracket)</td>
+                                <td>3_min__5.9_sec</td>
+                                <td>ymd_2024-03-20</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>0</td>
+                                <td>The capital of France is Paris.</td>
+                                <td>Paris</td>
+                                <td></td>
+                                <td>stablelm-zephyr-3b</td>
+                                <td>What is the capital of France?</td>
+                                <td>(left square bracket)(single quote or apostrophe)No select_best list.(single quote or apostrophe)(comma) (single quote or apostrophe)No select_best list.(single quote or apostrophe)(comma) (single quote or apostrophe)No select_best list.(single quote or apostrophe)(comma) (single quote or apostrophe)task_fail_counter more than retry_x_times(single quote or apostrophe)(right square bracket)</td>
+                                <td>2_min__44.0_sec</td>
+                                <td>ymd_2024-03-20</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>0</td>
+                                <td>Plan, draft, revisions, and comments, then in triple pipes: </td>
+                                <td>Jupiter</td>
+                                <td></td>
+                                <td>stablelm-zephyr-3b</td>
+                                <td>What is the largest planet in our solar system?</td>
+                                <td>(left square bracket)(single quote or apostrophe)No select_best list.(single quote or apostrophe)(comma) (single quote or apostrophe)No select_best list.(single quote or apostrophe)(comma) (single quote or apostrophe)No select_best list.(single quote or apostrophe)(comma) (single quote or apostrophe)task_fail_counter more than retry_x_times(single quote or apostrophe)(right square bracket)</td>
+                                <td>2_min__48.9_sec</td>
+                                <td>ymd_2024-03-20</td>
+                            </tr>
+                        
+            </table>
+        </body>
+        </html>
+        
