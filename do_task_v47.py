@@ -3458,7 +3458,7 @@ def add_ranks_votes_to_candidate(vote_list, candidate_dictionary):
     keys = list(candidate_dictionary.keys())
 
     for index, value in enumerate(vote_list):
-        # Ensure the index is within the this_range of available keys
+        # Ensure the index is within the this_range_inclusive of available keys
         if index < len(keys):
             # Append the item to the list for the corresponding key based on sequence position
             candidate_dictionary[keys[index]].append(value)
@@ -4134,7 +4134,7 @@ def do_task_please(
             "error_comment_data_lookup_table_field_name"
         ]
         this_offset = this_task_config_dict["this_offset"]
-        this_range = this_task_config_dict["this_range"]
+        this_range_inclusive = this_task_config_dict["this_range_inclusive"]
 
         """
         Over-ride!
@@ -4231,20 +4231,20 @@ def do_task_please(
 
             # NON-header mode, skip first row
 
-            if this_offset and this_range:
-                print("this_offset and this_range found")
+            if this_offset and this_range_inclusive:
+                print("this_offset and this_range_inclusive found")
                 start = this_offset
-                stop = min(this_offset + this_range, this_original_task_file_length)
+                stop = min(this_offset + this_range_inclusive, this_original_task_file_length)
 
             else:
-                print("NO this_offset and this_range found")
+                print("NO this_offset and this_range_inclusive found")
                 start = 0
                 stop = this_original_task_file_length
 
             ############################
             ############################
             # For this task in task-set
-            #  within this_offset and this_range
+            #  within this_offset and this_range_inclusive
             ############################
             ############################
             print(f"start -> {start} {type(start)}")
@@ -5483,7 +5483,7 @@ task_file_config_dic_list = [
     #     "options_field_name": 'options',
     #     "scoring_field_name": 'answer_index_from_1',
     #     "this_offset": None,
-    #     "this_range": None,
+    #     "this_range_inclusive": None,
     # },
     # {
     #     "file_name": "my_test_open_answer_2.jsonl",
@@ -5502,10 +5502,32 @@ task_file_config_dic_list = [
     #     "input_state_context_mode": "one_string",
     #     "ranked_choice_output_structure_mode": "pipes",
     #     "this_offset": None,
-    #     "this_range": None,
+    #     "this_range_inclusive": None,
     # },
+    # {
+    #     "file_name": "error_explained_test_1.jsonl",
+    #     "file_type": ".jsonl",
+    #     "header_exits": False,
+    #     "file_structure": "",
+    #     "index_of_task": None,
+    #     "index_of_options": None,
+    #     # Fields
+    #     "task_field_name": "task",
+    #     "options_field_name": "options",
+    #     "scoring_field_name": "answer_from_index_start_at_1",
+    #     "error_comment_data_lookup_table_field_name": "error_comment_data_lookup_table",
+    #     "answer_option_choices_provided": True,
+    #     "validate_the_answer": True,
+    #     "use_history_context_dict_list": False,
+    #     "system_instructions": False,
+    #     "output_structure_mode": "pipes",
+    #     "input_state_context_mode": "one_string",
+    #     "ranked_choice_output_structure_mode": "pipes",
+    #     "this_offset": None,
+    #     "this_range_inclusive": None,
+    # }
     {
-        "file_name": "error_explained_test_1.jsonl",
+        "file_name": "winograd_schemas_test_file.jsonl",
         "file_type": ".jsonl",
         "header_exits": False,
         "file_structure": "",
@@ -5515,7 +5537,7 @@ task_file_config_dic_list = [
         "task_field_name": "task",
         "options_field_name": "options",
         "scoring_field_name": "answer_from_index_start_at_1",
-        "error_comment_data_lookup_table_field_name": "error_comment_data_lookup_table",
+        "error_comment_data_lookup_table_field_name": None,
         "answer_option_choices_provided": True,
         "validate_the_answer": True,
         "use_history_context_dict_list": False,
@@ -5523,9 +5545,11 @@ task_file_config_dic_list = [
         "output_structure_mode": "pipes",
         "input_state_context_mode": "one_string",
         "ranked_choice_output_structure_mode": "pipes",
-        "this_offset": None,
-        "this_range": None,
+        "this_offset": 0,
+        "this_range_inclusive": 3,
     }
+
+
 ]
 
 #####################

@@ -41,9 +41,9 @@ def process_xml(xml_file, jsonl_file):
                 quote = None
 
             data = {
-                'question': question,
-                'answers': answers,
-                'answer_index': answer_index,
+                'task': question,
+                'options': answers,
+                'answer_from_index_start_at_1': answer_index,
                 # 'quote': quote
             }
 
