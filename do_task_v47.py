@@ -90,7 +90,7 @@ def make_answers_directory_and_csv_path_header_string(
     # Create directories if they don't exist
     os.makedirs(os.path.dirname(task_set_results_path), exist_ok=True)
 
-    header_string = '"score","this_row_or_line_number","selected_option","correct_option","task_failure_comment","name_of_model","this_original_task_file","task_from_instructions","question_task_prompt","list_of_ranked_choice_options","draft_task_attempt_log","error_log","duration_of_single_task","readable_timestamp"\n'
+    header_string = '"score","this_row_or_line_number","selected_option","correct_option","task_failure_comment","name_of_model","task_file","task_from_instructions","question_task_prompt","list_of_ranked_choice_options","draft_task_attempt_log","error_log","duration_of_single_task","readable_timestamp"\n'
 
     # Create an empty file (or just close it if it already exists)
     with open(task_set_results_path, "a", newline="") as csvfile:
@@ -165,7 +165,7 @@ def list_files_in_aitaskfiles_dir(file_type_list=None):
         # flattened_list
         output_list = [item for sublist in output_list for item in sublist]
 
-        print(output_list)
+        # print(output_list)
         if not output_list:
             message = f"\n\nExit Dungeon: Your file list in /{file_path}/ is empty, add a file and try!\n\n"
             sys.exit(message)
@@ -2085,14 +2085,19 @@ def json_number_check_structure_of_response_to_list(dict_str) -> list:
     return number_list
 
 
-def score_tally(directory_path):
+def make_score_tally(directory_path):
+    """
+    Sorry, this is an attrocity that I will replace
+    with real code
+    as soon as I have time (so...maybe never)
+    """
     solution_dir_path = os.path.abspath(directory_path)
 
     # Ensure the directory exists
     os.makedirs(solution_dir_path, exist_ok=True)
 
     report_filename = os.path.join(solution_dir_path, "score_report.csv")
-    tally_header_string_list = ["percent", "model", "score", "time_stamp"]
+    tally_header_string_list = ["percent", "model", "score", "task_file", "time_stamp"]
 
     # # Check if the file exists and is empty to decide on writing the header
     if not os.path.exists(report_filename) or os.path.getsize(report_filename) == 0:
@@ -2104,7 +2109,7 @@ def score_tally(directory_path):
         )
 
     try:
-        model_scores = {}
+        report_data_dict = {}
         total_scores = 0
         # Iterate over CSV files and tally scores
         for filename in os.listdir(directory_path):
@@ -2127,22 +2132,27 @@ def score_tally(directory_path):
                                     f"name_of_model -> {model_name}"
                                 )  # Confirming model name retrieval
                                 score = int(row.get("score", 0))
-                                model_scores.setdefault(
-                                    model_name, {"total": 0, "count": 0}
+                                task_file = row.get("task_file", "")  # Get the task_file field
+                                report_data_dict.setdefault(
+                                    # model_name, {"total": 0, "count": 0}
+                                    model_name, {"total": 0, "count": 0, "task_files": []}
                                 )
-                                model_scores[model_name]["total"] += score
-                                model_scores[model_name]["count"] += 1
+                                report_data_dict[model_name]["total"] += score
+                                report_data_dict[model_name]["count"] += 1
+                                report_data_dict[model_name]["task_files"].append(task_file)  # Append task_file to the list
+
                                 total_scores += 1
 
         # Prepare report lines excluding the header https://stackoverflow.com/questions/2363731/how-to-append-a-new-row-to-an-old-csv-file-in-python
         report_list = []
-        for model_name, score_data in model_scores.items():
+        for model_name, score_data in report_data_dict.items():
             percentage = (
                 (score_data["total"] / total_scores) * 100 if total_scores > 0 else 0
             )
             # where total is correct number and count is...the total
             score = f"{score_data["total"]} / {score_data["count"]}"
-            report_line = [percentage, model_name, score]
+            task_files = ", ".join(score_data["task_files"])  # Join task_files into a comma-separated string
+            report_line = [percentage, model_name, task_files, score]
             report_list.append(report_line)
 
         for report_line in report_list:
@@ -4048,7 +4058,6 @@ def do_task_please(
     }
 
     """
-
     print_find_all_models(models_dir_path)
 
     # task mode items:
@@ -4113,7 +4122,7 @@ def do_task_please(
         raise "No task files were provided."
 
     # inspection
-    print(f"Task files in folder -> {task_files_list}")
+    print(f"\nTask set files in folder -> {task_files_list}")
 
     #############################
     # iterate task-set by config
@@ -4130,9 +4139,13 @@ def do_task_please(
         options_field_name = this_task_config_dict["options_field_name"]
         scoring_field_name = this_task_config_dict["scoring_field_name"]
 
-        error_comment_data_lookup_table_field_name = this_task_config_dict[
-            "error_comment_data_lookup_table_field_name"
-        ]
+        if "error_comment_data_lookup_table_field_name" in this_task_config_dict:
+            error_comment_data_lookup_table_field_name = this_task_config_dict[
+                "error_comment_data_lookup_table_field_name"
+            ]
+        else: 
+            error_comment_data_lookup_table_field_name = None
+
         this_offset = this_task_config_dict["this_offset"]
         this_range_inclusive = this_task_config_dict["this_range_inclusive"]
         use_offset_and_range = this_task_config_dict["use_offset_and_range"]
@@ -4255,8 +4268,6 @@ def do_task_please(
             print(f"start -> {start} {type(start)}")
             print(f"stop -> {stop} {type(stop)}")
 
-            # for this_row_or_line_number in range(this_original_task_file_length):
-            # for this_row_or_line_number in range(this_original_task_file_length):
             for this_row_or_line_number in range(start, stop + 1):
 
                 # set start time
@@ -5579,7 +5590,7 @@ retry_x_times = 2
 # Pick Models
 ##############
 # list_of_models = ["tinyllama", "mistral-7b-instruct", "stablelm-zephyr-3b"]
-list_of_models = ["mistral-7b-instruct"]
+list_of_models = ["stable-zephyr-3b"]
 
 
 
@@ -5624,9 +5635,8 @@ if __name__ == "__main__":
     #####################
     # Make a score tally
     #####################
-    score_tally("task_set_results_files")
+    make_score_tally("task_set_results_files")
 
-
-# make html report
-html_for_all_reports()
-html_for_all_score_tallies()
+    # make html report
+    html_for_all_reports()
+    html_for_all_score_tallies()

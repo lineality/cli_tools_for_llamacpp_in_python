@@ -1,4 +1,4 @@
-"score", "this_row_or_line", "selected_option", "correct_option", "name_of_model", "this_original_task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"
+"score", "this_row_or_line", "selected_option", "correct_option", "name_of_model", "task_file", "task_from_instructions", "question_task_prompt", "list_of_options", "draft_task_attempt_log", "readable_timestamp"
 "0","0","","1","mistral-7b-instruct","/home/oops/code/cli_tools_for_llamacpp_in_python/ai_task_files/my_test1.jsonl","","
                                 Which is the best option?
 
