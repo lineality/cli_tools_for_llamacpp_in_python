@@ -5495,39 +5495,85 @@ task_mode_configies = {
 
 # configure each task-file
 task_file_config_dic_list = [
-    {
-        "file_name": "my_test1.jsonl",
-        "file_type": ".jsonl",
-        "file_structure": "",
-        "task_field_name": 'task',
-        "index_of_task": 0,
-        "index_of_options": 1,
-        "options_field_name": 'options',
-        "scoring_field_name": 'answer_index_from_1',
-        "this_offset": 0,
-        "this_range_inclusive": 1,
-        "use_offset_and_range": True,
-    },
-    {
-        "file_name": "my_test_open_answer_2.jsonl",
-        "file_type": ".jsonl",
-        "file_structure": "",
-        "task_field_name": 'task',
-        "index_of_task": 0,
-        "index_of_options": 1,
-        "options_field_name": None,
-        "scoring_field_name": 'answer',
-        "answer_option_choices_provided": False,
-        "validate_the_answer": True,
-        "use_history_context_dict_list": False,
-        "system_instructions": False,
-        "output_structure_mode": "pipes",
-        "input_state_context_mode": "one_string",
-        "ranked_choice_output_structure_mode": "pipes",
-        "this_offset": 0,
-        "this_range_inclusive": 1,
-        "use_offset_and_range": True,
-    },
+    # {
+    #     "file_name": "my_test1.jsonl",
+    #     "file_type": ".jsonl",
+    #     "file_structure": "",
+    #     "task_field_name": 'task',
+    #     "index_of_task": 0,
+    #     "index_of_options": 1,
+    #     "options_field_name": 'options',
+    #     "scoring_field_name": 'answer_index_from_1',
+    #     "this_offset": 0,
+    #     "this_range_inclusive": 1,
+    #     "use_offset_and_range": True,
+    # },
+    # {
+    #     "file_name": "my_test_open_answer_2.jsonl",
+    #     "file_type": ".jsonl",
+    #     "file_structure": "",
+    #     "task_field_name": 'task',
+    #     "index_of_task": 0,
+    #     "index_of_options": 1,
+    #     "options_field_name": None,
+    #     "scoring_field_name": 'answer',
+    #     "answer_option_choices_provided": False,
+    #     "validate_the_answer": True,
+    #     "use_history_context_dict_list": False,
+    #     "system_instructions": False,
+    #     "output_structure_mode": "pipes",
+    #     "input_state_context_mode": "one_string",
+    #     "ranked_choice_output_structure_mode": "pipes",
+    #     "this_offset": 0,
+    #     "this_range_inclusive": 1,
+    #     "use_offset_and_range": True,
+    # },
+    # {
+    #     "file_name": "error_explained_test_1.jsonl",
+    #     "file_type": ".jsonl",
+    #     "header_exits": False,
+    #     "file_structure": "",
+    #     "index_of_task": None,
+    #     "index_of_options": None,
+    #     # Fields
+    #     "task_field_name": "task",
+    #     "options_field_name": "options",
+    #     "scoring_field_name": "answer_from_index_start_at_1",
+    #     "error_comment_data_lookup_table_field_name": "error_comment_data_lookup_table",
+    #     "answer_option_choices_provided": True,
+    #     "validate_the_answer": True,
+    #     "use_history_context_dict_list": False,
+    #     "system_instructions": False,
+    #     "output_structure_mode": "pipes",
+    #     "input_state_context_mode": "one_string",
+    #     "ranked_choice_output_structure_mode": "pipes",
+    #     "this_offset": 0,
+    #     "this_range_inclusive": 1,
+    #     "use_offset_and_range": True,
+    # },
+    # {
+    #     "file_name": "winograd_schemas_test_file.jsonl",
+    #     "file_type": ".jsonl",
+    #     "header_exits": False,
+    #     "file_structure": "",
+    #     "index_of_task": None,
+    #     "index_of_options": None,
+    #     # Fields
+    #     "task_field_name": "task",
+    #     "options_field_name": "options",
+    #     "scoring_field_name": "answer_from_index_start_at_1",
+    #     "error_comment_data_lookup_table_field_name": None,
+    #     "answer_option_choices_provided": True,
+    #     "validate_the_answer": True,
+    #     "use_history_context_dict_list": False,
+    #     "system_instructions": False,
+    #     "output_structure_mode": "pipes",
+    #     "input_state_context_mode": "one_string",
+    #     "ranked_choice_output_structure_mode": "pipes",
+    #     "this_offset": 7,
+    #     "this_range_inclusive": 9,
+    #     "use_offset_and_range": True,
+    # },
     {
         "file_name": "error_explained_test_1.jsonl",
         "file_type": ".jsonl",
@@ -5547,41 +5593,17 @@ task_file_config_dic_list = [
         "output_structure_mode": "pipes",
         "input_state_context_mode": "one_string",
         "ranked_choice_output_structure_mode": "pipes",
-        "this_offset": 0,
-        "this_range_inclusive": 1,
+        "this_offset": 1,
+        "this_range_inclusive": 2,
         "use_offset_and_range": True,
     },
-    {
-        "file_name": "winograd_schemas_test_file.jsonl",
-        "file_type": ".jsonl",
-        "header_exits": False,
-        "file_structure": "",
-        "index_of_task": None,
-        "index_of_options": None,
-        # Fields
-        "task_field_name": "task",
-        "options_field_name": "options",
-        "scoring_field_name": "answer_from_index_start_at_1",
-        "error_comment_data_lookup_table_field_name": None,
-        "answer_option_choices_provided": True,
-        "validate_the_answer": True,
-        "use_history_context_dict_list": False,
-        "system_instructions": False,
-        "output_structure_mode": "pipes",
-        "input_state_context_mode": "one_string",
-        "ranked_choice_output_structure_mode": "pipes",
-        "this_offset": 7,
-        "this_range_inclusive": 9,
-        "use_offset_and_range": True,
-    }
-
-
 ]
 
 #####################
-# High Level Choices
+# Whole Task Choices
 #####################
 ai_local_or_cloud_mode = "gguf"
+ai_local_or_cloud_mode = "cloud"
 number_of_preliminary_drafts = 2
 number_of_ranked_votes = 1
 retry_x_times = 2
@@ -5591,6 +5613,7 @@ retry_x_times = 2
 ##############
 # list_of_models = ["tinyllama", "mistral-7b-instruct", "stablelm-zephyr-3b"]
 list_of_models = ["stable-zephyr-3b"]
+list_of_models = ["mistral-tiny"]
 
 
 

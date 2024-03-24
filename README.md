@@ -110,3 +110,16 @@ Translations will appear per language x per file in translations directory.
 python call_llamacapp.py
 ```
 
+
+# For Cloudy API
+- Create a .env file
+1. Run:
+```python
+touch .env
+```
+
+2. Add this text, where you can put your real keys.
+```
+OPENAI_API_KEY = "xxx"
+mistral_api_key = "xxx"
+```
