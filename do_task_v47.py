@@ -4337,9 +4337,14 @@ def do_task_please(
                     """
                     """
                     this_task = specific_fields[task_field_name]
-                    error_comment_data_lookup_table = specific_fields[
-                        error_comment_data_lookup_table_field_name
-                    ]
+
+                    if error_comment_data_lookup_table_field_name:
+                        error_comment_data_lookup_table = specific_fields[
+                            error_comment_data_lookup_table_field_name
+                        ]
+                    else:
+                        error_comment_data_lookup_table = None
+
 
                     if "options" in specific_fields:
                         these_original_task_options = specific_fields[
@@ -5156,22 +5161,26 @@ def do_task_please(
                             return None
 
 
-                    # get task failure comment
-                    task_failure_comment = check_answer_in_dict(
-                        selected_option, error_comment_data_lookup_table
-                    )
+                    if error_comment_data_lookup_table:
+                        # get task failure comment
+                        task_failure_comment = check_answer_in_dict(
+                            selected_option, error_comment_data_lookup_table
+                        )
 
-                    print(
-                        f"""
-                        Scoring:
-                          selected_option       -> {selected_option}
-                          type(selected_option) -> {type(selected_option)}
+                        print(
+                            f"""
+                            Scoring:
+                            selected_option       -> {selected_option}
+                            type(selected_option) -> {type(selected_option)}
 
-                          correct_option        -> {correct_option}
-                          type(correct_option)  -> {type(correct_option)}
+                            correct_option        -> {correct_option}
+                            type(correct_option)  -> {type(correct_option)}
 
-                          """
-                    )
+                            """
+                        )
+
+                    else: 
+                        task_failure_comment = ""
 
                     # default
                     score = 0
