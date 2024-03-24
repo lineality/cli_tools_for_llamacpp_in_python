@@ -9,6 +9,7 @@ Preliminary tools for using llama.cpp e.g. selecting a model and using
 a local gguf model instead of a paid cloud api.
 
 Also see dev area: 
+- https://github.com/stemnetbenchmarks/lets_test_models 
 - https://github.com/lineality/cli_tools_for_llamacpp_in_python  
 - https://github.com/lineality/STEM_Net_open_training_testing_benchmarks
 - https://github.com/lineality/object_relationship_spaces_ai_ml
