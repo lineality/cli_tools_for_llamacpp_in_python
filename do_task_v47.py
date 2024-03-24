@@ -1,18 +1,28 @@
 # -*- coding: utf-8 -*-
-"""
-TODO:
 
 """
-import string
+Uncomment for cloud mode
+"""
+import requests
+from dotenv import load_dotenv
 import os
+load_dotenv()
+openai_api_key = os.getenv("OPENAI_API_KEY")
+mistral_api_key = os.getenv("mistral_api_key")
+
+
+"""
+Offline and Vanilla OK!
+"""
+import string
+
 import time
 import csv
 import sys
 from datetime import datetime, UTC
 import json  # Added missing import
-# import requests
 import re
-
+import os
 from call_llamacpp import gguf_api, mini_gguf_api
 from html_all_reports_summary_from_csv import html_for_all_reports
 from html_tally_score import html_for_all_score_tallies
@@ -28,16 +38,16 @@ from html_tally_score import html_for_all_score_tallies
 # # mistral_api_key = 'xxx'
 # openai_api_key = userdata.get("open_ai_key")
 
-# from dotenv import load_dotenv
+
 
 """# make a list of json files"""
 # import openai
 # from google.colab import userdata
 
 # Load environment variables from .env file
-# load_dotenv()
-openai_api_key = os.getenv("OPENAI_API_KEY")
-mistral_api_key = os.getenv("mistral_api_key")
+
+
+
 
 
 def make_answers_directory_and_csv_path_header_string(
@@ -796,21 +806,7 @@ api async
 """
 
 
-# using google secretes
-# from google.colab import userdata
 
-# mistral_api_key = userdata.get("mistral_api_key")
-mistral_api_key = "xxx"
-
-# Define the endpoint URL
-endpoint_url = "https://api.mistral.ai/v1/chat/completions"
-
-# Set the headers
-headers = {
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-    "Authorization": f"Bearer {mistral_api_key}",
-}
 
 """
 # mode: [{"role": "user", "content": "say yes"}]
@@ -873,7 +869,7 @@ def segment_for_adding_to_context_history(role, comment):
 
 
 # Helper Function
-def add_to_context_history(user_input, context_history, role):
+def add_to_and_return_context_history(user_input, context_history, role):
 
     if role == "user":
         segment = {"role": "user", "content": user_input}
@@ -893,6 +889,326 @@ def add_to_context_history(user_input, context_history, role):
 
     return context_history
 
+
+import requests
+import json
+import os
+import re
+
+from google.colab import userdata
+
+
+# mistral_api_key = userdata.get('mistral_api_key')
+
+# Define the endpoint URL
+endpoint_url = "https://api.mistral.ai/v1/chat/completions"
+
+# Set the headers
+headers = {
+  "Content-Type": "application/json",
+  "Accept": "application/json",
+  "Authorization": f"Bearer {mistral_api_key}"
+}
+
+"""
+# mode: [{"role": "user", "content": "say yes"}]
+
+    # Define the request body
+    request_body = {
+      "model": "mistral-small",
+      "messages": [{"role": "user", "content": user_input}]
+    }
+
+    # Send the request
+    response = requests.post(endpoint_url, headers=headers, json=request_body)
+"""
+
+# conversation-history setup
+context_history = []
+
+
+def print_rec_ai(response, context_history):
+
+    # Get the response data
+    response_data = response.json()
+
+    # Print the Mistral response
+
+    ##
+    ##
+    # Turn this print on to see full return data
+    ##
+    ##
+    """
+    e.g.
+    {
+      "id": "635cb8d445ujhe5546bb64e5e7",
+      "object": "chat.completion",
+      "created": 170hrjfjf7084,
+      "model": "mistral-tiny",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Enjoy your cup of tea!"
+          },
+          "finish_reason": "stop",
+          "logprobs": null
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 575,
+        "total_tokens": 629,
+        "completion_tokens": 54
+      }
+    }
+    """
+    # print(json.dumps(response_data, indent=2))
+    # print(type(response_data))
+
+    output = response_data
+    # print(type(output))
+    # print(type(output["choices"][0]))
+
+    # extract just the 'what they said' part out
+    assistant_says = output["choices"][0]['message']['content']
+
+    # print(assistant_says)
+
+    new_comment = {"role": "assistant", "content": assistant_says}
+
+    # add what assistant said to context history
+    context_history.append(new_comment)
+
+    return assistant_says, context_history
+
+
+def add_to_context_history(role, comment):
+
+    if role == 'user':
+        segment = {"role": "user", "content": comment}
+
+    elif role == 'assistant':
+        segment = {"role": "assistant", "content": comment}
+
+    elif role == 'system':
+        segment = {"role": "system", "content": comment}
+
+    else:
+        print("add_to_context_history(role, comment)")
+        print(role, comment)
+        print('error')
+
+    return segment
+
+
+def prompt_user(user_input, context_history):
+
+    context_history.append( add_to_context_history("user", user_input) )
+
+    return context_history
+
+
+def go_user(user_input, context_history, use_this_model):
+    """
+    Input: context_history
+    Ouput Tuple: assistant_says, context_history
+    """
+
+    # prompt user
+    context_history = prompt_user(user_input, context_history)
+
+    # prompt assistant
+    response = ask_mistral_api(context_history, use_this_model)
+
+    # ETL: Extract, Transform, & Load
+    assistant_says, context_history = print_rec_ai(response, context_history)
+
+    return assistant_says, context_history
+
+
+def ask_mistral_api(context_history, use_this_model):
+    # Define the request body
+    request_body = {
+      "model": use_this_model,
+      "messages": context_history
+    }
+
+    #################
+    #################
+    # Hit the ai api
+    #################
+    #################
+    # Send the request
+    response = requests.post(endpoint_url, headers=headers, json=request_body)
+
+    # Check the response status code
+    if response.status_code != 200:
+      raise Exception(f"Error: {response.status_code} {response.text}")
+
+    return response
+
+
+def simple_ask_mistral_cloud(input_string, use_this_model):
+    """
+    you have: a string
+    you need: a response
+
+    1. make minimal history contexxt
+    2. make a generic system instruction, for show
+    3. make system-user context: string input
+    4. ask mistral for that model
+    5. extract just the response string
+    6. return only reply (no 'history')
+    """
+
+    # 1. make minimal history contexxt
+    context_history = []
+
+    # 2. make a generic system instruction
+    generic_system_instruction = "You are helpful and answer accurately."
+    context_history.append( add_to_context_history("system", generic_system_instruction) )
+
+    # 3. make system-user context: string input
+    context_history.append( add_to_context_history("user", input_string) )
+
+    # 4. ask mistral for that model
+    response = ask_mistral_api(context_history, use_this_model)
+
+
+    # Get the response data
+    response_data = response.json()
+
+
+    # 5. extract just the response string
+
+    ##
+    ##
+    # Turn this print on to see full return data
+    ##
+    ##
+    """
+    e.g.
+    {
+      "id": "635cb8d445ujhe5546bb64e5e7",
+      "object": "chat.completion",
+      "created": 170hrjfjf7084,
+      "model": "mistral-tiny",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Enjoy your cup of tea!"
+          },
+          "finish_reason": "stop",
+          "logprobs": null
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 575,
+        "total_tokens": 629,
+        "completion_tokens": 54
+      }
+    }
+    """
+    # print(json.dumps(response_data, indent=2))
+    # print(type(response_data))
+
+    output = response_data
+    # print(type(output))
+    # print(type(output["choices"][0]))
+
+    # extract just the 'what they said' part out
+    assistant_says = output["choices"][0]['message']['content']
+
+    # 6. return only reply (no 'history')
+    return assistant_says
+
+
+def strip_non_alpha(text):
+    # regex to leave only a-z characters
+    pattern = re.compile('[^a-z]')
+    return pattern.sub('', text).lower()
+
+
+def keep_talking(context_history, use_this_model):
+    """
+    A very minimal chat with memory.
+
+    Uses:
+      query(input_string)
+      strip_non_alpha(text)
+    """
+    still_talking = True
+    dialogue_history = ""
+
+    while still_talking:
+
+        user_input = input("Say...")
+
+        exit_phrase_list = [
+            "exit",
+            "quit",
+            "quite",
+            "!q",
+            "q",
+            "done",
+            "finish",
+            "end",
+            "bye",
+            "good bye",
+        ]
+
+        # check if user is exiting convesation
+        if strip_non_alpha(user_input) in exit_phrase_list:
+            print("\nAll Done!")
+            break
+
+        else:
+            assistant_says, context_history = go_user(user_input, context_history, use_this_model)
+
+            print( assistant_says )
+
+            # save dialogue so far
+            dialogue_history = context_history
+
+    # when out of loop, return history
+    return dialogue_history
+
+
+# save history
+def record_history_save_files(dialogue_history):
+
+    date_time = dt.utcnow()
+    timestamp = date_time.strftime('%Y/%m/%d  %H:%M:%S:%f')
+    clean_timestamp = date_time.strftime('%Y%m%d%H%M')
+
+    # To save the data directly as a JSON file:
+
+    # Convert the Python dictionary list to a JSON string
+    json_data = json.dumps(dialogue_history)
+
+    # Open a file for writing in JSON format
+    with open(f'json_dialog_{clean_timestamp}.json', 'w') as json_file:
+        # Write the JSON string to the file
+        json_file.write(json_data)
+
+
+    # To save the data as a file readable as a script:
+
+    # Create a new file for writing
+    with open(f'script_dialog_{clean_timestamp}.txt', 'w') as script_file:
+
+        # add timestamp
+        text = timestamp + "\n\n"
+        script_file.write(text)
+
+        # Iterate over the dictionary list
+        for item in dialogue_history:
+            # Write the role and content of each item to the file, separated by a newline
+            script_file.write(f"{item['role']}: {item['content']}\n\n")
 
 def find_matching_file_paths(file_paths, target_file_name):
     """
@@ -1002,6 +1318,18 @@ def replace_special_characters_with_text(input_item):
 
 # Helper Function
 def ask_mistral_model(context_history, use_this_model):
+
+    # Define the endpoint URL
+    endpoint_url = "https://api.mistral.ai/v1/chat/completions"
+
+    # Set the headers
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": f"Bearer {mistral_api_key}",
+    }
+
+
     # Define the request body
     request_body = {"model": use_this_model, "messages": context_history}
 
@@ -2600,7 +2928,7 @@ def general_task_call_api_within_structure_check(
             ################
             elif use_this_model in mistal_model_list:
                 print(f"Mistral api selected...{use_this_model}")
-                dict_str = ask_mistral_model(context_history, use_this_model)
+                dict_str = simple_ask_mistral_cloud(context_history, use_this_model)
 
             elif use_this_model in open_ai_model_list:
                 print(f"openAI api selected...{use_this_model}")
@@ -2850,7 +3178,8 @@ def task_number_call_api_within_structure_check(
             ################
             elif use_this_model in mistal_model_list:
                 print(f"Mistral api selected...{use_this_model}")
-                dict_str = ask_mistral_model(context_history, use_this_model)
+                dict_str = simple_ask_mistral_cloud(context_history, use_this_model)
+
 
             elif use_this_model in open_ai_model_list:
                 print(f"openAI api selected...{use_this_model}")
