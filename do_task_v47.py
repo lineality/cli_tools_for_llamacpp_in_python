@@ -4135,6 +4135,7 @@ def do_task_please(
         ]
         this_offset = this_task_config_dict["this_offset"]
         this_range_inclusive = this_task_config_dict["this_range_inclusive"]
+        use_offset_and_range = this_task_config_dict["use_offset_and_range"]
 
         """
         Over-ride!
@@ -4226,15 +4227,14 @@ def do_task_please(
             # if directory of json files
             print(f"this_original_task_file_length -> {this_original_task_file_length}")
 
-            # NON-header mode, skip first row
-            # for this_row_or_line_number in range(this_original_task_file_length):
 
-            # NON-header mode, skip first row
+            # offset and range (note: dont' redefine "range" as a saved-word)
+            if use_offset_and_range:
 
-            if this_offset and this_range_inclusive:
-                print("this_offset and this_range_inclusive found")
-                start = this_offset
-                stop = min(this_offset + this_range_inclusive, this_original_task_file_length)
+                if isinstance(this_offset, int) and isinstance(this_range_inclusive, int):
+                    print("this_offset and this_range_inclusive found")
+                    start = this_offset
+                    stop = min(this_offset + this_range_inclusive, this_original_task_file_length)
 
             else:
                 print("NO this_offset and this_range_inclusive found")
@@ -4247,11 +4247,13 @@ def do_task_please(
             #  within this_offset and this_range_inclusive
             ############################
             ############################
-            print(f"start -> {start} {type(start)}")
-            print(f"stop -> {stop} {type(stop)}")
+            print(f"start -> {this_offset} {type(this_offset)}")
+            print(f"start -> {this_range_inclusive} {type(this_range_inclusive)}")
             print(
                 f"this_original_task_file_length -> {this_original_task_file_length} {type(this_original_task_file_length)}"
             )
+            print(f"start -> {start} {type(start)}")
+            print(f"stop -> {stop} {type(stop)}")
 
             # for this_row_or_line_number in range(this_original_task_file_length):
             # for this_row_or_line_number in range(this_original_task_file_length):
@@ -5556,6 +5558,7 @@ task_file_config_dic_list = [
         "ranked_choice_output_structure_mode": "pipes",
         "this_offset": 0,
         "this_range_inclusive": 3,
+        "use_offset_and_range": True,
     }
 
 
