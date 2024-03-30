@@ -1,10 +1,10 @@
 {
 "task": "If it takes 30 minutes to dry one shirt in the sun, how long does it take to dry 10 shirts in the sun simultaneously?",
 "options": [
-"1. 30 minutes",
-"2. 60 minutes",
-"3. 150 minutes",
-"4. 300 minutes"
+"30 minutes",
+"60 minutes",
+"150 minutes",
+"300 minutes"
 ],
 "answer_from_index_start_at_1": "1",
 "error_comment_data_lookup_table": {
@@ -16,10 +16,10 @@
 {
 "task": "If it takes 5 minutes to cook one pancake on a griddle, how long does it take to cook 8 pancakes simultaneously using the same griddle?",
 "options": [
-"1. 5 minutes",
-"2. 10 minutes",
-"3. 20 minutes",
-"4. 40 minutes"
+"5 minutes",
+"10 minutes",
+"20 minutes",
+"40 minutes"
 ],
 "answer_from_index_start_at_1": "1",
 "error_comment_data_lookup_table": {
@@ -31,10 +31,10 @@
 {
   "task": "If it takes 30 minutes to wash one load of laundry in the washing machine, how long does it take to wash 4 loads of laundry simultaneously using the same washing machine at the same setting, assuming the load fits in?",
   "options": [
-    "1. 30 minutes",
-    "2. 1 hour",
-    "3. 2 hours",
-    "4. 4 hours"
+    "30 minutes",
+    "1 hour",
+    "2 hours",
+    "4 hours"
   ],
   "answer_from_index_start_at_1": "1",
   "error_comment_data_lookup_table": {
@@ -46,10 +46,10 @@
 {
 "task": "If it takes 30 minutes to wash one load of laundry in the washing machine, how long does it take to wash 4 loads of laundry sequentially one at a time using the same washing machine?",
 "options": [
-"1. 30 minutes",
-"2. 1 hour",
-"3. 2 hours",
-"4. 4 hours"
+"30 minutes",
+"1 hour",
+"2 hours",
+"4 hours"
 ],
 "answer_from_index_start_at_1": "3",
 "error_comment_data_lookup_table": {
@@ -61,10 +61,10 @@
 {
 "task": "If it takes 1 hour to complete one homework assignment, how long does it take to complete 5 homework assignments?",
 "options": [
-"1. 1 hour",
-"2. 2 hours",
-"3. 5 hours",
-"4. 10 hours"
+"1 hour",
+"2 hours",
+"5 hours",
+"10 hours"
 ],
 "answer_from_index_start_at_1": "3",
 "error_comment_data_lookup_table": {

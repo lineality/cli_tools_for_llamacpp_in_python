@@ -17,7 +17,7 @@ Uncomment for cloud mode
 Offline and Vanilla OK!
 """
 import string
-
+import random
 import time
 import csv
 import sys
@@ -3712,6 +3712,42 @@ def extract_string_value_by_path(json_object, this_path):
     return json_object_copy
 
 
+
+
+
+def randomize_list(original_list):
+    """
+    index from one, produces
+    randomized_list, 
+    original_to_randomized, 
+    randomized_to_original
+
+    # Example usage
+    original_list = [1, 2, 3, 4, 5]
+    randomized_list, original_to_randomized, randomized_to_original = randomize_list(original_list)
+
+    print("Original List:", original_list)
+    print("Randomized List:", randomized_list)
+    print("Original to Randomized Lookup Table:", original_to_randomized)
+    print("Randomized to Original Lookup Table:", randomized_to_original)
+    """
+    # Create a copy of the original list
+    randomized_list = original_list[:]
+    
+    # Shuffle the list in-place
+    random.shuffle(randomized_list)
+    
+    # Create lookup tables
+    original_to_randomized = {}
+    randomized_to_original = {}
+    
+    for i, item in enumerate(original_list, start=1):
+        original_to_randomized[i] = randomized_list.index(item) + 1
+        randomized_to_original[randomized_list.index(item) + 1] = i
+    
+    return randomized_list, original_to_randomized, randomized_to_original
+
+
 def lower_clean_string(input_string):
     """
     Cleans the input string by converting it to lowercase, removing spaces,
@@ -4856,9 +4892,12 @@ def do_task_please(
                     )
                     print(f"task_summary -> {task_summary}")
                     
-                    """
-                    option choice randomization
-                    """
+                    ##############################
+                    ##############################
+                    # option choice randomization
+                    ##############################
+                    ##############################
+
                     # setting default values
                     displayed_option_choices = []
                     randomized_option_list = []
@@ -4866,49 +4905,26 @@ def do_task_please(
                     randomized_to_original_lookup = {}
                     
                     
-                    import random
-
-                    def randomize_list(original_list):
-                        """
-                        index from one, produces
-                        randomized_list, 
-                        original_to_randomized, 
-                        randomized_to_original
-
-                        # Example usage
-                        original_list = [1, 2, 3, 4, 5]
-                        randomized_list, original_to_randomized, randomized_to_original = randomize_list(original_list)
-
-                        print("Original List:", original_list)
-                        print("Randomized List:", randomized_list)
-                        print("Original to Randomized Lookup Table:", original_to_randomized)
-                        print("Randomized to Original Lookup Table:", randomized_to_original)
-                        """
-                        # Create a copy of the original list
-                        randomized_list = original_list[:]
-                        
-                        # Shuffle the list in-place
-                        random.shuffle(randomized_list)
-                        
-                        # Create lookup tables
-                        original_to_randomized = {}
-                        randomized_to_original = {}
-                        
-                        for i, item in enumerate(original_list, start=1):
-                            original_to_randomized[i] = randomized_list.index(item) + 1
-                            randomized_to_original[randomized_list.index(item) + 1] = i
-                        
-                        return randomized_list, original_to_randomized, randomized_to_original
-
 
                     
                     # if there are options and you want to randomize them
                     if (randomize_option_choices is True) and these_original_task_options:
+                        print("\nRandomizing Task Option Choices")
                                                 
                         randomized_option_list, original_to_randomized_lookup, randomized_to_original_lookup = randomize_list(these_original_task_options)
                     
                         displayed_option_choices = randomized_option_list
-                    
+
+                        print(f"""
+                            
+                            these_original_task_options   -> {these_original_task_options}
+                            randomized_option_list        -> {randomized_option_list}
+                            
+                            original_to_randomized_lookup -> {original_to_randomized_lookup}
+                            randomized_to_original_lookup -> {randomized_to_original_lookup}
+                            
+                            """)
+                                                            
                     else:
                         displayed_option_choices = these_original_task_options
 
@@ -5669,10 +5685,24 @@ def do_task_please(
                                         
                     # if there are options and you want to randomize them
                     if (randomize_option_choices is True) and these_original_task_options:
+                            print(f""" Inspection
+                            
+                            these_original_task_options   -> {these_original_task_options}
+                            randomized_option_list        -> {randomized_option_list}
+                            
+                            original_to_randomized_lookup -> {original_to_randomized_lookup}
+                            randomized_to_original_lookup -> {randomized_to_original_lookup}
+                            
+                            Original selected_option      -> {selected_option}
+                            """)
                                                                         
+                                                                                                                                              
                         if selected_option is not None:
                             selected_option = randomized_to_original_lookup[selected_option]
                     
+                            print(f""" 
+                            selected_option               -> {selected_option}
+                            """ 
 
                     def check_answer_in_raw_task(answer_number, data):
                         print(
@@ -5687,6 +5717,7 @@ def do_task_please(
 
                             """
                         )
+
 
                     def check_answer_in_dict(answer_number, data_dict):
                         print(
@@ -5777,7 +5808,7 @@ def do_task_please(
                     formatting_notes = ""
                     
                     if randomize_option_choices is True:
-                        formatting_notes += str(randomized_)
+                        formatting_notes += str(randomize_option_choices)
                     
                     
                     formatting_notes = replace_special_characters_with_text(
@@ -6114,6 +6145,7 @@ task_file_config_dic_list = [
         "scoring_field_name": "answer_from_index_start_at_1",
         "error_comment_data_lookup_table_field_name": "error_comment_data_lookup_table",
         "answer_option_choices_provided": True,
+        "randomize_option_choices": True, 
         "validate_the_answer": True,
         "use_history_context_dict_list": False,
         "system_instructions": False,
@@ -6137,7 +6169,7 @@ task_file_config_dic_list = [
         "scoring_field_name": "answer_from_index_start_at_1",
         "error_comment_data_lookup_table_field_name": None,
         "answer_option_choices_provided": True,
-        "randomize_option_choices": True, 
+        "randomize_option_choices": False, 
         "validate_the_answer": True,
         "use_history_context_dict_list": False,
         "system_instructions": False,
