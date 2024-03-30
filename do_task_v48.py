@@ -2317,9 +2317,14 @@ def task_check_structure_of_response(
             matches_list = remove_specific_strings(matches_list, strings_to_remove)
 
             if task_mode_answer_option_choices_provided:
+                print(f"matches_list before filer ->  {matches_list}")
                 matches_list = remove_non_integers_from_list(matches_list)
+                
+                # remove any 'option' this is not a real option
+                matches_list = [item for item in matches_list if item in task_mode_answer_option_choices_provided]
 
             if matches_list:
+                print(f"matches_list before filer ->  {matches_list}")
                 response_to_task = matches_list[-1]
             else:
                 response_to_task = ""
@@ -6142,7 +6147,7 @@ task_file_config_dic_list = [
         "input_state_context_mode": "one_string",
         "ranked_choice_output_structure_mode": "pipes",
         "this_offset": 0,
-        "this_range_inclusive": 1,
+        "this_range_inclusive": 2,
         "use_offset_and_range": True,
     },
     {
@@ -6209,9 +6214,10 @@ retry_x_times = 2
 ##############
 # list_of_models = ["mistral-tiny"]
 # list_of_models = ["tinyllama", "mistral-7b-instruct", "stablelm-zephyr-3b"]
-list_of_models = ["stable-zephyr-3b"]
+# list_of_models = ["stable-zephyr-3b"]
 # list_of_models = ["claude-2.1"]
 # list_of_models = ["claude-3-opus-20240229"]
+list_of_models = ["mistral-7b-instruct"]
 
 
 
