@@ -308,6 +308,107 @@ def create_empty_selectbest_frame(original_data, new_file_path):
 
 """# put translation into list_skeleton_json"""
 
+import json
+import subprocess
+import sys
+import re
+
+
+
+def output_of_function__stdout_stderr(code_markdown, test_cases, function_name, error_log):
+    """
+    ```python
+    def calculate_area(x,y):\n
+        return x*y
+    ```
+    # Function to extract code from markdown, assuming it's already defined
+    # Function to create_challenge_json, assuming it's already defined
+
+    # Assuming challenge_data and other necessary variables are already defined
+
+    # Example usage: Get the code from the test-taker (in Markdown format)
+    code_markdown = input
+
+    # Load the challenge JSON file to get function name and test cases
+    with open("challenge.json", "r") as file:
+    challenge_data = json.load(file)
+
+    function_name = challenge_data["function_name"]
+    test_cases = challenge_data["test_cases"]
+
+    # Run the test
+    run_test(code_markdown, test_cases, function_name)
+    """
+    
+    # Extract the code from the Markdown
+    code = extract_code_from_markdown(code_markdown)
+
+    print(code)
+
+    for test_case in test_cases:
+        input_values = test_case["input"]
+        expected_output = test_case["expected_output"]
+        
+        # Construct the full script with the test case applied
+        # This script defines the function from the markdown, then calls it with the current test case's inputs
+        full_script = f"{code}\n\nprint({function_name}(*{input_values}))"
+
+        # Run the full script using subprocess
+        process = subprocess.run(
+            [sys.executable, "-c", full_script],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+        )
+
+        stdout = process.stdout.strip()
+
+        # Assuming the function output is directly printed, compare stdout to expected output
+        if stdout == str(expected_output):
+            print(f"Test Case Passed: Input = {input_values}, Expected Output = {expected_output}")
+        else:
+            print(f"Test Case Failed: Input = {input_values}, Expected Output = {expected_output}, Actual Output = {stdout}")
+
+
+
+# def output_of_function__stdout_stderr(
+#                 script,
+#                 retry_x_times, 
+#                 this_task_config_dict, 
+#                 error_log):
+#     """
+#     Extract code from output...
+#     ```python
+#     ```
+    
+#     """
+    
+#     try:
+
+#         # Run the script using subprocess
+#         process = subprocess.run(
+#             [sys.executable, "-c", script],
+#             stdout=subprocess.PIPE,
+#             stderr=subprocess.PIPE,
+#             universal_newlines=True,
+#         )
+
+#         # Get the output
+#         stdout = process.stdout
+#         stderr = process.stderr
+
+#         # Print the output
+#         print(f"output_of_function__stdout_stderr, Standard Output -<> {stdout}")
+#         print(f"output_of_function__stdout_stderr, Standard Error -> {stderr}")
+
+#         error_log.append(stderr)            
+    
+#         return stdout
+    
+#     except Exception as e:
+#         print(f"ERROR: exception in output_of_function e -> {str(e)}")
+#         return None        
+                
 
 # Helper Function
 def populate_skeleton_json_with_data(skeleton_json, source_data):
@@ -2991,11 +3092,19 @@ def general_task_call_api_within_structure_check(
     draft_task_attempt_log,
     retry_x_times,
     these_original_task_options,
+    this_task_config_dict,
     error_log,
 ):
     """
     task_mode_output_structure_mode is passed to the output structure checker
     """
+
+    if "function_writing" in this_task_config_dict:
+        function_writing = this_task_config_dict[
+            "function_writing"
+        ]
+    else: 
+        function_writing = False  
 
     # default
     dict_str = ""
@@ -3101,7 +3210,7 @@ def general_task_call_api_within_structure_check(
                 raise f"No known model option chosen...use_this_model -> {use_this_model}"
 
         except Exception as e:
-            jsonchecked_translation = None
+            task_response_string = None
             print(f"\n\nMaybe incorrect model choice, use_this_model -> {use_this_model}: general_task_call_api_within_structure_check Failed: {str(e)}")
 
         if not dict_str:
@@ -3110,15 +3219,25 @@ def general_task_call_api_within_structure_check(
             )
             return False
 
-        jsonchecked_translation = task_check_structure_of_response(
-            task_mode_output_structure_mode,
-            dict_str,
-            task_mode_answer_option_choices_provided_boolean,
-            these_original_task_options,
-            error_log,
-        )
-
-        if jsonchecked_translation:
+        
+        if write_function:
+            
+            task_response_string = output_of_function__stdout_stderr(
+                code_markdown=dict_str, 
+                test_cases=test_cases, 
+                function_name=function_name, 
+                error_log=error_log)
+        
+        else:
+            task_response_string = task_check_structure_of_response(
+                task_mode_output_structure_mode,
+                dict_str,
+                task_mode_answer_option_choices_provided_boolean,
+                these_original_task_options,
+                error_log,
+            )
+    
+        if task_response_string:
             json_ok_flag = True
 
         else:
@@ -3134,7 +3253,7 @@ def general_task_call_api_within_structure_check(
         f"general_task_call_api_within_structure_check finalretry_counter -> {retry_counter}"
     )
 
-    return jsonchecked_translation
+    return task_response_string
 
 
 """ call_api_within_number_check"""
@@ -4694,7 +4813,22 @@ def do_task_please(
         # index_of_options = this_task_config_dict["index_of_options"]
         options_field_name = this_task_config_dict["options_field_name"]
         scoring_field_name = this_task_config_dict["scoring_field_name"]
-
+        
+        if "function_name__field_name" in this_task_config_dict:
+            function_name__field_name = this_task_config_dict[
+                "function_name__field_name"
+            ]
+        else: 
+            function_name__field_name = None    
+        
+        if "function_test_cases__field_name" in this_task_config_dict:
+            function_test_cases__field_name = this_task_config_dict[
+                "function_test_cases__field_name"
+            ]
+        else: 
+            function_test_cases__field_name = None        
+        
+        
         if "error_comment_data_lookup_table_field_name" in this_task_config_dict:
             error_comment_data_lookup_table_field_name = this_task_config_dict[
                 "error_comment_data_lookup_table_field_name"
@@ -4709,6 +4843,14 @@ def do_task_please(
         else: 
             randomize_option_choices = False
 
+        if "function_writing" in this_task_config_dict:
+            function_writing = this_task_config_dict[
+                "function_writing"
+            ]
+        else: 
+            function_writing = False
+        
+        
         
         this_offset = this_task_config_dict["this_offset"]
         this_range_inclusive = this_task_config_dict["this_range_inclusive"]
@@ -4891,6 +5033,8 @@ def do_task_please(
                         options_field_name,
                         scoring_field_name,
                         error_comment_data_lookup_table_field_name,
+                        function_test_cases__field_name,
+                        function_name__field_name,
                     ]
 
                     # Step 1: Extract the JSON object from the specified line
@@ -5086,50 +5230,80 @@ def do_task_please(
                             pipes_open_solution_body_nocontext
                         """
 
-                        #############
-                        # if context
-                        #############
-                        if task_mode_use_history_context_dict_list:
-                            # TODO: make context dict list maker
-
-                            ############
-                            # Pipes |||
-                            ############
-                            if task_mode_output_structure_mode == "pipes":
+                        if not make_function:
                                 ############
-                                # Open Task: use context dict list
+                                # Pipes |||
                                 ############
-                                context_history = f"""
+                                if task_mode_output_structure_mode == "markdowwn":
+                                    ############
+                                    # Open Task: use context dict list
+                                    ############
+                                    context_history = f"""
 
-                                What is the best response for this task? 
-                                {this_task}
+                                    {this_task}
 
-                                Give your answer in this format:
-                                {pipes_open_solution_body_nocontext}
+                                    Put your python code in markdown ```python #code here ```, 
+                                    Without hard-coding any answers into the function.
+                                    
+                                    
+                                    Any other comments or plans write outside of the python markdown and write before you write the function. Only the function
+                                    in the markdown last.
+                                    
+                                    """
+                                    
+                                else:
+                                    print(
+                                        f""" exit: prompt selection 1: option problem task_mode_output_structure_mode {task_mode_output_structure_mode}"""
+                                    )
+                                    sys.exit()
+                            
+                        else:     
+                            #############
+                            # if context
+                            #############
+                            if task_mode_use_history_context_dict_list:
+                                # TODO: make context dict list maker
 
-                                """
-
-                            ##############
-                            # {dict: ...}
-                            ##############
-                            elif task_mode_output_structure_mode == "dict":
                                 ############
-                                # Open Task: use context dict list
+                                # Pipes |||
                                 ############
-                                context_history = f"""
+                                if task_mode_output_structure_mode == "pipes":
+                                    ############
+                                    # Open Task: use context dict list
+                                    ############
+                                    context_history = f"""
 
-                                What is the best response for this task? 
-                                {this_task}
+                                    What is the best response for this task? 
+                                    {this_task}
 
-                                Give your answer in this format:
-                                {dict_open_solution_body_nocontext}
+                                    Give your answer in this format:
+                                    {pipes_open_solution_body_nocontext}
 
-                                """
-                            else:
-                                print(
-                                    f""" exit: prompt selection 1: option problem task_mode_output_structure_mode {task_mode_output_structure_mode}"""
-                                )
-                                sys.exit()
+                                    """
+
+                                ##############
+                                # {dict: ...}
+                                ##############
+                                elif task_mode_output_structure_mode == "dict":
+                                    ############
+                                    # Open Task: use context dict list
+                                    ############
+                                    context_history = f"""
+
+                                    What is the best response for this task? 
+                                    {this_task}
+
+                                    Give your answer in this format:
+                                    {dict_open_solution_body_nocontext}
+
+                                    """
+                                else:
+                                    print(
+                                        f""" exit: prompt selection 1: option problem task_mode_output_structure_mode {task_mode_output_structure_mode}"""
+                                    )
+                                    sys.exit()
+
+                                
 
                         ################
                         # if NO context
@@ -5357,6 +5531,7 @@ def do_task_please(
                                 draft_task_attempt_log,
                                 retry_x_times,
                                 these_original_task_options,
+                                this_task_config_dict,
                                 error_log,
                             )
                         )
@@ -6213,7 +6388,7 @@ task_file_config_dic_list = [
     #     "use_offset_and_range": True,
     # },
     {
-        "file_name": "write_functions_test_1.jsonl",
+        "file_name": "write_a_function_1.jsonl",
         "file_type": ".jsonl",
         "header_exits": False,
         "file_structure": "",
@@ -6229,7 +6404,11 @@ task_file_config_dic_list = [
         "validate_the_answer": True,
         "use_history_context_dict_list": False,
         "system_instructions": False,
+        
         "function_writing": True,
+        "function_test_cases__field_name": "test_cases",
+        "function_name__field_name": "function_name",     
+
         "output_structure_mode": "pipes",
         "input_state_context_mode": "one_string",
         "ranked_choice_output_structure_mode": "pipes",
