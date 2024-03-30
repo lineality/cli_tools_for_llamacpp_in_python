@@ -25,15 +25,15 @@ def create_challenge_json(function_name, input_parameters, output_description, t
 # Example usage
 function_name = "calculate_area"
 input_parameters = ["length", "width"]
-output_description = "The area of a rectangle as a float, only a number"
+output_description = "The area of a rectangle, only return a number"
 test_cases = [
     {
         "input": [5, 3],
-        "expected_output": 15
+        "expected_output": 15.0
     },
     {
         "input": [2.5, 4],
-        "expected_output": 10
+        "expected_output": 10.0
     }
 ]
 create_challenge_json(function_name, input_parameters, output_description, test_cases)

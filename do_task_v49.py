@@ -384,16 +384,40 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
 
         stdout = process.stdout.strip()
 
-        # Assuming the function output is directly printed, compare stdout to expected output
-        if stdout == str(expected_output):
-            print(f"Test Case Passed: Input = {input_values}, Expected Output = {expected_output}")
-            pass_flag_set.add('pass')
-        else:
-            print(f"Test Case Failed: Input = {input_values}, Expected Output = {expected_output}, Actual Output = {stdout}")
-            error_log.append(stdout)
-            pass_flag_set.add('fail')
+        # Compare the actual output with the expected output
+        try:
+            # Try to evaluate the actual output and expected output as numbers
+            actual_output = float(stdout)
+            expected_output = float(expected_output)
 
-    if pass_flag_set == {'pass'}
+            if abs(actual_output - expected_output) < 1e-9:
+                print(f"Test Case Passed: Input = {input_values}, Expected Output = {expected_output}")
+                pass_flag_set.add('pass')
+            else:
+                print(f"Test Case Failed: Input = {input_values}, Expected Output = {expected_output}, Actual Output = {actual_output}")
+                error_log.append(stdout)
+                pass_flag_set.add('fail')
+
+        except ValueError:
+            # If the conversion to numbers fails, compare the string representations
+            if stdout == str(expected_output):
+                print(f"Test Case Passed: Input = {input_values}, Expected Output = {expected_output}")
+                pass_flag_set.add('pass')
+            else:
+                print(f"Test Case Failed: Input = {input_values}, Expected Output = {expected_output}, Actual Output = {stdout}")
+                error_log.append(stdout)
+                pass_flag_set.add('fail')
+
+        # # Assuming the function output is directly printed, compare stdout to expected output
+        # if stdout == str(expected_output):
+        #     print(f"Test Case Passed: Input = {input_values}, Expected Output = {expected_output}")
+        #     pass_flag_set.add('pass')
+        # else:
+        #     print(f"Test Case Failed: Input = {input_values}, Expected Output = {expected_output}, Actual Output = {stdout}")
+        #     error_log.append(stdout)
+        #     pass_flag_set.add('fail')
+
+    if pass_flag_set == {'pass'}:
         return 'pass'
     else:
         return False
@@ -5600,8 +5624,7 @@ def do_task_please(
                             f"list_of_ranked_choice_options -> {list_of_ranked_choice_options}"
                         )
                         
-                        if function_writing:
-                            if task_response_string = 'pass'
+                        if function_writing and (task_response_string == 'pass'):
                             print("Pass: Made function, ok to move on.")
                             break
 
