@@ -315,7 +315,7 @@ import re
 
 
 
-def output_of_function__stdout_stderr(code_markdown, test_cases, function_name, error_log):
+def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, function_name, error_log):
     """
     ```python
     def calculate_area(x,y):\n
@@ -366,49 +366,12 @@ def output_of_function__stdout_stderr(code_markdown, test_cases, function_name, 
         # Assuming the function output is directly printed, compare stdout to expected output
         if stdout == str(expected_output):
             print(f"Test Case Passed: Input = {input_values}, Expected Output = {expected_output}")
+            return 'pass'
         else:
             print(f"Test Case Failed: Input = {input_values}, Expected Output = {expected_output}, Actual Output = {stdout}")
+            error_log.append(stdout)
+            return None
 
-
-
-# def output_of_function__stdout_stderr(
-#                 script,
-#                 retry_x_times, 
-#                 this_task_config_dict, 
-#                 error_log):
-#     """
-#     Extract code from output...
-#     ```python
-#     ```
-    
-#     """
-    
-#     try:
-
-#         # Run the script using subprocess
-#         process = subprocess.run(
-#             [sys.executable, "-c", script],
-#             stdout=subprocess.PIPE,
-#             stderr=subprocess.PIPE,
-#             universal_newlines=True,
-#         )
-
-#         # Get the output
-#         stdout = process.stdout
-#         stderr = process.stderr
-
-#         # Print the output
-#         print(f"output_of_function__stdout_stderr, Standard Output -<> {stdout}")
-#         print(f"output_of_function__stdout_stderr, Standard Error -> {stderr}")
-
-#         error_log.append(stderr)            
-    
-#         return stdout
-    
-#     except Exception as e:
-#         print(f"ERROR: exception in output_of_function e -> {str(e)}")
-#         return None        
-                
 
 # Helper Function
 def populate_skeleton_json_with_data(skeleton_json, source_data):
@@ -3222,11 +3185,14 @@ def general_task_call_api_within_structure_check(
         
         if write_function:
             
-            task_response_string = output_of_function__stdout_stderr(
+            task_response_string = pass_fail_unit_test_function__stdout_stderr(
                 code_markdown=dict_str, 
                 test_cases=test_cases, 
                 function_name=function_name, 
                 error_log=error_log)
+            
+            if task_response_string == 'pass':
+                return task_response_string
         
         else:
             task_response_string = task_check_structure_of_response(
@@ -5089,6 +5055,24 @@ def do_task_please(
                     )
                     print(f"task_summary -> {task_summary}")
                     
+                    
+                    # code
+                    if function_test_cases__field_name:
+                        test_cases = specific_fields[
+                            function_test_cases__field_name
+                        ]
+                        print(f"test_cases -> {test_cases}{type(test_cases)}")
+                    else:
+                        test_cases = None        
+                    
+                    if function_name__field_name:
+                        function_name = specific_fields[
+                            function_name__field_name
+                        ]
+                        print(f"function_name -> {function_name}{type(function_name)}")                        
+                    else:
+                        function_name = None
+                    
                     ##############################
                     ##############################
                     # option choice randomization
@@ -5909,9 +5893,7 @@ def do_task_please(
                     If the list has been randomized, adjust the AI's choice
                     to be as if it had not been.
                     """
-                    
-                    
-                                        
+
                     # if there are options and you want to randomize them
                     if (randomize_option_choices is True) and these_original_task_options:
                         print(f""" Inspection
@@ -5963,8 +5945,13 @@ def do_task_please(
                     selected_option = str(selected_option)
                     correct_option = str(correct_option)
 
+                    
+                    # for write function
+                    if write_function and (select_option == 'Pass'):
+                        score = 1
+
                     # if multiple choice and should check answer:
-                    if (
+                    elif (
                         task_mode_validate_the_answer and task_mode_answer_option_choices_provided_boolean
                     ):
                         print(
@@ -5997,7 +5984,7 @@ def do_task_please(
                     formatting_notes = replace_special_characters_with_text(
                         formatting_notes
                     )
-                    
+
                     
                     # if open-answer and should check answer:
                     """
@@ -6315,54 +6302,54 @@ task_file_config_dic_list = [
     #     "this_range_inclusive": 1,
     #     "use_offset_and_range": True,
     # },
-    {
-        "file_name": "error_explained_test_1.jsonl",
-        "file_type": ".jsonl",
-        "header_exits": False,
-        "file_structure": "",
-        "index_of_task": None,
-        "index_of_options": None,
-        # Fields
-        "task_field_name": "task",
-        "options_field_name": "options",
-        "scoring_field_name": "answer_from_index_start_at_1",
-        "error_comment_data_lookup_table_field_name": "error_comment_data_lookup_table",
-        "answer_option_choices_provided": True,
-        "randomize_option_choices": True, 
-        "validate_the_answer": True,
-        "use_history_context_dict_list": False,
-        "system_instructions": False,
-        "output_structure_mode": "pipes",
-        "input_state_context_mode": "one_string",
-        "ranked_choice_output_structure_mode": "pipes",
-        "this_offset": 3,
-        "this_range_inclusive": 1,
-        "use_offset_and_range": True,
-    },
-    {
-        "file_name": "winograd_schemas_test_file.jsonl",
-        "file_type": ".jsonl",
-        "header_exits": False,
-        "file_structure": "",
-        "index_of_task": None,
-        "index_of_options": None,
-        # Fields
-        "task_field_name": "task",
-        "options_field_name": "options",
-        "scoring_field_name": "answer_from_index_start_at_1",
-        "error_comment_data_lookup_table_field_name": None,
-        "answer_option_choices_provided": True,
-        "randomize_option_choices": True, 
-        "validate_the_answer": True,
-        "use_history_context_dict_list": False,
-        "system_instructions": False,
-        "output_structure_mode": "pipes",
-        "input_state_context_mode": "one_string",
-        "ranked_choice_output_structure_mode": "pipes",
-        "this_offset": 10,
-        "this_range_inclusive": 2,
-        "use_offset_and_range": True,
-    },
+    # {
+    #     "file_name": "error_explained_test_1.jsonl",
+    #     "file_type": ".jsonl",
+    #     "header_exits": False,
+    #     "file_structure": "",
+    #     "index_of_task": None,
+    #     "index_of_options": None,
+    #     # Fields
+    #     "task_field_name": "task",
+    #     "options_field_name": "options",
+    #     "scoring_field_name": "answer_from_index_start_at_1",
+    #     "error_comment_data_lookup_table_field_name": "error_comment_data_lookup_table",
+    #     "answer_option_choices_provided": True,
+    #     "randomize_option_choices": True, 
+    #     "validate_the_answer": True,
+    #     "use_history_context_dict_list": False,
+    #     "system_instructions": False,
+    #     "output_structure_mode": "pipes",
+    #     "input_state_context_mode": "one_string",
+    #     "ranked_choice_output_structure_mode": "pipes",
+    #     "this_offset": 3,
+    #     "this_range_inclusive": 1,
+    #     "use_offset_and_range": True,
+    # },
+    # {
+    #     "file_name": "winograd_schemas_test_file.jsonl",
+    #     "file_type": ".jsonl",
+    #     "header_exits": False,
+    #     "file_structure": "",
+    #     "index_of_task": None,
+    #     "index_of_options": None,
+    #     # Fields
+    #     "task_field_name": "task",
+    #     "options_field_name": "options",
+    #     "scoring_field_name": "answer_from_index_start_at_1",
+    #     "error_comment_data_lookup_table_field_name": None,
+    #     "answer_option_choices_provided": True,
+    #     "randomize_option_choices": True, 
+    #     "validate_the_answer": True,
+    #     "use_history_context_dict_list": False,
+    #     "system_instructions": False,
+    #     "output_structure_mode": "pipes",
+    #     "input_state_context_mode": "one_string",
+    #     "ranked_choice_output_structure_mode": "pipes",
+    #     "this_offset": 10,
+    #     "this_range_inclusive": 2,
+    #     "use_offset_and_range": True,
+    # },
     # # Cloud
     # {
     #     "file_name": "error_explained_test_1.jsonl",
@@ -6399,8 +6386,8 @@ task_file_config_dic_list = [
         "options_field_name": "options",
         "scoring_field_name": "answer_from_index_start_at_1",
         "error_comment_data_lookup_table_field_name": None,
-        "answer_option_choices_provided": True,
-        "randomize_option_choices": True, 
+        "answer_option_choices_provided": False,
+        "randomize_option_choices": False, 
         "validate_the_answer": True,
         "use_history_context_dict_list": False,
         "system_instructions": False,
@@ -6412,9 +6399,9 @@ task_file_config_dic_list = [
         "output_structure_mode": "pipes",
         "input_state_context_mode": "one_string",
         "ranked_choice_output_structure_mode": "pipes",
-        "this_offset": 10,
-        "this_range_inclusive": 2,
-        "use_offset_and_range": True,
+        "this_offset": 0,
+        "this_range_inclusive": 1,
+        "use_offset_and_range": False,
     },
 
 ]
@@ -6436,8 +6423,8 @@ retry_x_times = 2
 # list_of_models = ["stable-zephyr-3b"]
 # list_of_models = ["claude-2.1"]
 # list_of_models = ["claude-3-opus-20240229"]
-list_of_models = ["mistral-7b-instruct", "gemma-2b-it", "stablelm-zephyr-3b"]
-
+# list_of_models = ["mistral-7b-instruct", "gemma-2b-it", "stablelm-zephyr-3b"]
+list_of_models = ["mistral-7b-instruct"]
 
 
 
