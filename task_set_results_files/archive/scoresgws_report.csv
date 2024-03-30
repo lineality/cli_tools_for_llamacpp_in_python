@@ -1,0 +1,2 @@
+"percent","model","score","task_file","time_stamp"
+"33.33333333333333","mistral-7b-instruct","error_explained_test_1.jsonl, error_explained_test_1.jsonl, error_explained_test_1.jsonl, error_explained_test_1.jsonl, winograd_schemas_test_file.jsonl, winograd_schemas_test_file.jsonl","2 / 6","2024-03-30-17:17:10969817"

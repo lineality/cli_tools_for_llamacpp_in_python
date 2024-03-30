@@ -1,2 +1,4 @@
 "percent","model","score","task_file","time_stamp"
-"25.0","stable-zephyr-3b","error_explained_test_1.jsonl, error_explained_test_1.jsonl, winograd_schemas_test_file.jsonl, winograd_schemas_test_file.jsonl","1 / 4","2024-03-30-14:32:34275768"
+"40.0","mistral-7b-instruct","error_explained_test_1.jsonl, error_explained_test_1.jsonl, winograd_schemas_test_file.jsonl, winograd_schemas_test_file.jsonl, winograd_schemas_test_file.jsonl","2 / 5","2024-03-30-18:18:07649580"
+"0.0","gemma-2b-it","error_explained_test_1.jsonl, error_explained_test_1.jsonl, winograd_schemas_test_file.jsonl, winograd_schemas_test_file.jsonl, winograd_schemas_test_file.jsonl","0 / 5","2024-03-30-18:18:07652897"
+"40.0","stablelm-zephyr-3b","error_explained_test_1.jsonl, error_explained_test_1.jsonl, winograd_schemas_test_file.jsonl, winograd_schemas_test_file.jsonl, winograd_schemas_test_file.jsonl","2 / 5","2024-03-30-18:18:07653175"

@@ -2277,7 +2277,8 @@ def check_structure_of_response(dict_str):
 def task_check_structure_of_response(
     structured_output_format,
     dict_str,
-    task_mode_answer_option_choices_provided,
+    task_mode_answer_option_choices_provided_boolean,
+    these_original_task_options,
     error_log,
 ):
     """
@@ -2316,15 +2317,25 @@ def task_check_structure_of_response(
 
             matches_list = remove_specific_strings(matches_list, strings_to_remove)
 
-            if task_mode_answer_option_choices_provided:
+            if task_mode_answer_option_choices_provided_boolean:
                 print(f"matches_list before filer ->  {matches_list}")
+
                 matches_list = remove_non_integers_from_list(matches_list)
-                
+
+                print(f"remove_non_integers_from_list(matches_list) matches_list ->  {matches_list}")
+
+                """
+                Use a list of strings of option-number-integers:
+                """          
                 # remove any 'option' this is not a real option
-                matches_list = [item for item in matches_list if item in task_mode_answer_option_choices_provided]
+                option_number_list = []
+                for this_int in range (1, len(these_original_task_options) + 1):
+                    option_number_list.append(str(this_int))
+                print(f"option_number_list ->  {option_number_list}")
+                matches_list = [item for item in matches_list if item in option_number_list]
 
             if matches_list:
-                print(f"matches_list before filer ->  {matches_list}")
+                print(f"matches_list after option-number-string-only cleaned ->  {matches_list}")
                 response_to_task = matches_list[-1]
             else:
                 response_to_task = ""
@@ -2975,10 +2986,11 @@ def general_task_call_api_within_structure_check(
     use_this_model,
     parameter_dict,
     ai_local_or_cloud_mode,
-    task_mode_answer_option_choices_provided,
+    task_mode_answer_option_choices_provided_boolean,
     task_mode_output_structure_mode,
     draft_task_attempt_log,
     retry_x_times,
+    these_original_task_options,
     error_log,
 ):
     """
@@ -3101,7 +3113,8 @@ def general_task_call_api_within_structure_check(
         jsonchecked_translation = task_check_structure_of_response(
             task_mode_output_structure_mode,
             dict_str,
-            task_mode_answer_option_choices_provided,
+            task_mode_answer_option_choices_provided_boolean,
+            these_original_task_options,
             error_log,
         )
 
@@ -4604,7 +4617,7 @@ def do_task_please(
     print_find_all_models(models_dir_path)
 
     # task mode items:
-    task_mode_answer_option_choices_provided = task_mode_configies[
+    task_mode_answer_option_choices_provided_boolean = task_mode_configies[
         "answer_option_choices_provided"
     ]
     task_mode_validate_the_answer = task_mode_configies["validate_the_answer"]
@@ -4721,7 +4734,7 @@ def do_task_please(
             ]
 
         if "answer_option_choices_provided" in this_task_config_dict:
-            task_mode_answer_option_choices_provided = this_task_config_dict[
+            task_mode_answer_option_choices_provided_boolean = this_task_config_dict[
                 "answer_option_choices_provided"
             ]
 
@@ -5040,7 +5053,7 @@ def do_task_please(
                     print(
                         f"""
                     task mode items:
-                    task_mode_answer_option_choices_provided -> {task_mode_answer_option_choices_provided}
+                    task_mode_answer_option_choices_provided_boolean -> {task_mode_answer_option_choices_provided_boolean}
                     task_mode_validate_the_answer -> {task_mode_validate_the_answer}
                     task_mode_use_history_context_dict_list -> {task_mode_use_history_context_dict_list}
                     task_mode_system_instructions -> {task_mode_system_instructions}
@@ -5057,7 +5070,7 @@ def do_task_please(
                     ######################
                     ######################
                     # if the question is not multiple-choice
-                    if not task_mode_answer_option_choices_provided:
+                    if not task_mode_answer_option_choices_provided_boolean:
                         """
                         2^3 == 8
 
@@ -5168,7 +5181,7 @@ def do_task_please(
                     ##################
                     ##################
                     # elif "multiple_choice":
-                    if task_mode_answer_option_choices_provided is True:
+                    if task_mode_answer_option_choices_provided_boolean is True:
                         """
                         dict_multiple_choice_solution_body_context
                         pipes_multiple_choice_solution_body_context
@@ -5339,10 +5352,11 @@ def do_task_please(
                                 use_this_model,
                                 parameter_dict,
                                 ai_local_or_cloud_mode,
-                                task_mode_answer_option_choices_provided,
+                                task_mode_answer_option_choices_provided_boolean,
                                 task_mode_output_structure_mode,
                                 draft_task_attempt_log,
                                 retry_x_times,
+                                these_original_task_options,
                                 error_log,
                             )
                         )
@@ -5359,7 +5373,7 @@ def do_task_please(
                         )
 
                         # if NOT using a list of numbered options, string ok!
-                        if task_mode_answer_option_choices_provided:
+                        if task_mode_answer_option_choices_provided_boolean:
                             task_response_string = str_to_int_or_none(
                                 task_response_string
                             )
@@ -5368,7 +5382,7 @@ def do_task_please(
 
                         if task_response_string:
 
-                            if task_mode_answer_option_choices_provided:
+                            if task_mode_answer_option_choices_provided_boolean:
                                 list_of_ranked_choice_options.append(
                                     int(task_response_string)
                                 )
@@ -5776,7 +5790,7 @@ def do_task_please(
 
                     # if multiple choice and should check answer:
                     if (
-                        task_mode_validate_the_answer and task_mode_answer_option_choices_provided
+                        task_mode_validate_the_answer and task_mode_answer_option_choices_provided_boolean
                     ):
                         print(
                             f"selected_option -> {selected_option} type -> {type(selected_option)}"
@@ -5818,7 +5832,7 @@ def do_task_please(
                     - without spaces 
                     """
                     if task_mode_validate_the_answer and (
-                        not task_mode_answer_option_choices_provided
+                        not task_mode_answer_option_choices_provided_boolean
                     ):
                         print("checking substring")
                         print(
@@ -6146,8 +6160,8 @@ task_file_config_dic_list = [
         "output_structure_mode": "pipes",
         "input_state_context_mode": "one_string",
         "ranked_choice_output_structure_mode": "pipes",
-        "this_offset": 0,
-        "this_range_inclusive": 2,
+        "this_offset": 3,
+        "this_range_inclusive": 1,
         "use_offset_and_range": True,
     },
     {
@@ -6163,7 +6177,7 @@ task_file_config_dic_list = [
         "scoring_field_name": "answer_from_index_start_at_1",
         "error_comment_data_lookup_table_field_name": None,
         "answer_option_choices_provided": True,
-        "randomize_option_choices": False, 
+        "randomize_option_choices": True, 
         "validate_the_answer": True,
         "use_history_context_dict_list": False,
         "system_instructions": False,
@@ -6171,7 +6185,7 @@ task_file_config_dic_list = [
         "input_state_context_mode": "one_string",
         "ranked_choice_output_structure_mode": "pipes",
         "this_offset": 10,
-        "this_range_inclusive": 1,
+        "this_range_inclusive": 2,
         "use_offset_and_range": True,
     },
     # # Cloud
@@ -6217,7 +6231,7 @@ retry_x_times = 2
 # list_of_models = ["stable-zephyr-3b"]
 # list_of_models = ["claude-2.1"]
 # list_of_models = ["claude-3-opus-20240229"]
-list_of_models = ["mistral-7b-instruct"]
+list_of_models = ["mistral-7b-instruct", "gemma-2b-it", "stablelm-zephyr-3b"]
 
 
 
