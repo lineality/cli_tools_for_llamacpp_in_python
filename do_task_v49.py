@@ -4981,7 +4981,9 @@ def do_task_please(
             else:
                 print("NO this_offset and this_range_inclusive found")
                 start = 0
-                stop = this_original_task_file_length
+                
+                # set -1 because len is from 1, but index is from 0
+                stop = this_original_task_file_length - 1
 
             ############################
             ############################
@@ -5073,7 +5075,9 @@ def do_task_please(
                         )
                         print("\nspecific_fields[] -> Extracted Fields:", specific_fields)
                     else:
-                        print("\nNo JSON object found at the specified line.")
+                        print("\nExit here, stop waiting for Godot. No JSON object found at the specified line.")
+                        task_ok_flag = True
+                        break
 
                     #################
                     # Task et Option
