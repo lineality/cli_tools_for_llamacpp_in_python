@@ -133,7 +133,7 @@ error_exaplain_equestion_append_to_jsonl(f"{task_file_directory}/error_explained
 
 
 
-# code
+# write code
 import json
 
 def create_challenge_json(function_name, input_parameters, output_description, test_cases):
@@ -144,7 +144,7 @@ def create_challenge_json(function_name, input_parameters, output_description, t
         "test_cases": test_cases
     }
 
-    with open("challenge.json", "a") as file:
+    with open("write_a_make_a_function_challenge.jsonl", "a") as file:
         json.dump(challenge_data, file, indent=4)
 
     print("Challenge JSON file created successfully.")

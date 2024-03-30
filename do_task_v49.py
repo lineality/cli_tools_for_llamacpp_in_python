@@ -24,6 +24,7 @@ import sys
 from datetime import datetime, UTC
 import json  # Added missing import
 import re
+import subprocess
 
 from call_llamacpp import gguf_api, mini_gguf_api
 from html_all_reports_summary_from_csv import html_for_all_reports
@@ -308,13 +309,31 @@ def create_empty_selectbest_frame(original_data, new_file_path):
 
 """# put translation into list_skeleton_json"""
 
-import json
-import subprocess
-import sys
-import re
 
 
+# helper function for coding layer
+def extract_code_from_markdown(markdown_text):
+    # Regular expression pattern to match code blocks
+    code_block_pattern = r'```(python)?\n([\s\S]*?)\n```'
 
+    # Find all code blocks in the Markdown text
+    code_blocks = re.findall(code_block_pattern, markdown_text, re.MULTILINE)
+
+    # Extract the code from the code blocks
+    extracted_code = ''
+    for block in code_blocks:
+        language, code = block
+        if language == 'python':
+            # If the code block is explicitly marked as Python, use it as is
+            extracted_code += code + '\n'
+        else:
+            # If the code block is not explicitly marked, assume it's Python code
+            extracted_code += code + '\n'
+
+    return extracted_code.strip()
+
+
+# helper function for coding layer
 def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, function_name, error_log):
     """
     ```python
@@ -3057,6 +3076,8 @@ def general_task_call_api_within_structure_check(
     these_original_task_options,
     this_task_config_dict,
     error_log,
+    test_cases=None,
+    function_name=None
 ):
     """
     task_mode_output_structure_mode is passed to the output structure checker
@@ -3183,7 +3204,9 @@ def general_task_call_api_within_structure_check(
             return False
 
         
-        if write_function:
+        if function_writing:
+            
+            
             
             task_response_string = pass_fail_unit_test_function__stdout_stderr(
                 code_markdown=dict_str, 
@@ -4784,13 +4807,16 @@ def do_task_please(
             function_name__field_name = this_task_config_dict[
                 "function_name__field_name"
             ]
+            print(f"function_name__field_name -> {function_name__field_name}")
         else: 
             function_name__field_name = None    
+
         
         if "function_test_cases__field_name" in this_task_config_dict:
             function_test_cases__field_name = this_task_config_dict[
                 "function_test_cases__field_name"
             ]
+            print(f"function_test_cases__field_name -> {function_test_cases__field_name}")
         else: 
             function_test_cases__field_name = None        
         
@@ -5040,8 +5066,17 @@ def do_task_please(
                     else:
                         these_original_task_options = None
 
-                    correct_option = specific_fields[scoring_field_name]
-                    print(f"correct_option -> {correct_option}")
+                    # correct option and scoring
+
+                    if scoring_field_name in specific_fields:
+                        correct_option = specific_fields[scoring_field_name]
+                        print(f"correct_option -> {correct_option}")
+                    elif function_writing:
+                        correct_option = 'pass'
+                    else:
+                        correct_option = None
+                    
+
 
                     
                     if these_original_task_options:
@@ -5057,7 +5092,7 @@ def do_task_please(
                     
                     
                     # code
-                    if function_test_cases__field_name:
+                    if function_test_cases__field_name in specific_fields:
                         test_cases = specific_fields[
                             function_test_cases__field_name
                         ]
@@ -5214,7 +5249,7 @@ def do_task_please(
                             pipes_open_solution_body_nocontext
                         """
 
-                        if not make_function:
+                        if not function_writing:
                                 ############
                                 # Pipes |||
                                 ############
@@ -5517,7 +5552,8 @@ def do_task_please(
                                 these_original_task_options,
                                 this_task_config_dict,
                                 error_log,
-                            )
+                                test_cases,
+                                function_name)
                         )
 
                         # # remove overt duplicates
@@ -5947,7 +5983,7 @@ def do_task_please(
 
                     
                     # for write function
-                    if write_function and (select_option == 'Pass'):
+                    if function_writing and (select_option == 'Pass'):
                         score = 1
 
                     # if multiple choice and should check answer:
@@ -6375,7 +6411,7 @@ task_file_config_dic_list = [
     #     "use_offset_and_range": True,
     # },
     {
-        "file_name": "write_a_function_1.jsonl",
+        "file_name": "write_a_make_a_function_challenge2.jsonl",
         "file_type": ".jsonl",
         "header_exits": False,
         "file_structure": "",
