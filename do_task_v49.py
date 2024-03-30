@@ -362,6 +362,8 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
     # Extract the code from the Markdown
     code = extract_code_from_markdown(code_markdown)
 
+    pass_flag_set = set()
+    
     print(code)
 
     for test_case in test_cases:
@@ -385,12 +387,17 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
         # Assuming the function output is directly printed, compare stdout to expected output
         if stdout == str(expected_output):
             print(f"Test Case Passed: Input = {input_values}, Expected Output = {expected_output}")
-            return 'pass'
+            pass_flag_set.add('pass')
         else:
             print(f"Test Case Failed: Input = {input_values}, Expected Output = {expected_output}, Actual Output = {stdout}")
             error_log.append(stdout)
-            return None
+            pass_flag_set.add('fail')
 
+    if pass_flag_set == {'pass'}
+        return 'pass'
+    else:
+        return False
+        
 
 # Helper Function
 def populate_skeleton_json_with_data(skeleton_json, source_data):
@@ -5592,6 +5599,11 @@ def do_task_please(
                         print(
                             f"list_of_ranked_choice_options -> {list_of_ranked_choice_options}"
                         )
+                        
+                        if function_writing:
+                            if task_response_string = 'pass'
+                            print("Pass: Made function, ok to move on.")
+                            break
 
                     #####################################################
                     ########################################################
@@ -5983,7 +5995,7 @@ def do_task_please(
 
                     
                     # for write function
-                    if function_writing and (select_option == 'Pass'):
+                    if function_writing and (selected_option == 'pass'):
                         score = 1
 
                     # if multiple choice and should check answer:
