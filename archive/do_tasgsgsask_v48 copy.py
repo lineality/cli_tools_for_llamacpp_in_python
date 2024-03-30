@@ -4,15 +4,13 @@ import os
 """
 Uncomment for cloud mode
 """
-# import requests
-# import anthropic
-# from dotenv import load_dotenv
-# load_dotenv()
-# openai_api_key = os.getenv("OPENAI_API_KEY")
-# mistral_api_key = os.getenv("mistral_api_key")
-# anthropic_api_key = os.getenv("anthropic_api_key")
-
-
+import requests
+import anthropic
+from dotenv import load_dotenv
+load_dotenv()
+openai_api_key = os.getenv("OPENAI_API_KEY")
+mistral_api_key = os.getenv("mistral_api_key")
+anthropic_api_key = os.getenv("anthropic_api_key")
 """
 Offline and Vanilla OK!
 """
@@ -102,35 +100,12 @@ def make_answers_directory_and_csv_path_header_string(
     # Create directories if they don't exist
     os.makedirs(os.path.dirname(task_set_results_path), exist_ok=True)
 
-    # header_string = '"score","this_row_or_line_number","selected_option","correct_option","task_failure_comment","name_of_model","task_file","task_from_instructions","question_task_prompt","list_of_ranked_choice_options","draft_task_attempt_log","error_log","duration_of_single_task","readable_timestamp"\n'
-
-    # # Create an empty file (or just close it if it already exists)
-    # with open(task_set_results_path, "a", newline="") as csvfile:
-    #     csvfile.write(header_string)
-
-    header_string_list = [
-        "score",
-        "this_row_or_line_number",
-        "selected_option",
-        "correct_option",
-        "task_failure_comment",
-        "name_of_model",
-        "task_file",
-        "task_from_instructions",
-        "question_task_prompt",
-        "list_of_ranked_choice_options",
-        "draft_task_attempt_log",
-        "formatting_notes",
-        "error_log",
-        "duration_of_single_task",
-        "readable_timestamp",
-    ]
+    header_string = '"score","this_row_or_line_number","selected_option","correct_option","task_failure_comment","name_of_model","task_file","task_from_instructions","question_task_prompt","list_of_ranked_choice_options","draft_task_attempt_log","error_log","duration_of_single_task","readable_timestamp"\n'
 
     # Create an empty file (or just close it if it already exists)
     with open(task_set_results_path, "a", newline="") as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(header_string_list)
-    
+        csvfile.write(header_string)
+
     return task_set_results_path
 
 
@@ -4613,14 +4588,6 @@ def do_task_please(
         else: 
             error_comment_data_lookup_table_field_name = None
 
-        if "randomize_option_choices" in this_task_config_dict:
-            randomize_option_choices = this_task_config_dict[
-                "randomize_option_choices"
-            ]
-        else: 
-            randomize_option_choices = False
-
-        
         this_offset = this_task_config_dict["this_offset"]
         this_range_inclusive = this_task_config_dict["this_range_inclusive"]
         use_offset_and_range = this_task_config_dict["use_offset_and_range"]
@@ -4844,7 +4811,6 @@ def do_task_please(
                     correct_option = specific_fields[scoring_field_name]
                     print(f"correct_option -> {correct_option}")
 
-                    
                     if these_original_task_options:
                         task_summary = f"Task: {this_task}, Options: {pretty_print_list(these_original_task_options)}"
                     else:
@@ -4855,63 +4821,6 @@ def do_task_please(
                         f"these_original_task_options -> {these_original_task_options}"
                     )
                     print(f"task_summary -> {task_summary}")
-                    
-                    """
-                    option choice randomization
-                    """
-                    # setting default values
-                    displayed_option_choices = []
-                    randomized_option_list = []
-                    original_to_randomized_lookup = {}
-                    randomized_to_original_lookup = {}
-                    
-                    
-                    import random
-
-                    def randomize_list(original_list):
-                        """
-                        index from one, produces
-                        randomized_list, 
-                        original_to_randomized, 
-                        randomized_to_original
-
-                        # Example usage
-                        original_list = [1, 2, 3, 4, 5]
-                        randomized_list, original_to_randomized, randomized_to_original = randomize_list(original_list)
-
-                        print("Original List:", original_list)
-                        print("Randomized List:", randomized_list)
-                        print("Original to Randomized Lookup Table:", original_to_randomized)
-                        print("Randomized to Original Lookup Table:", randomized_to_original)
-                        """
-                        # Create a copy of the original list
-                        randomized_list = original_list[:]
-                        
-                        # Shuffle the list in-place
-                        random.shuffle(randomized_list)
-                        
-                        # Create lookup tables
-                        original_to_randomized = {}
-                        randomized_to_original = {}
-                        
-                        for i, item in enumerate(original_list, start=1):
-                            original_to_randomized[i] = randomized_list.index(item) + 1
-                            randomized_to_original[randomized_list.index(item) + 1] = i
-                        
-                        return randomized_list, original_to_randomized, randomized_to_original
-
-
-                    
-                    # if there are options and you want to randomize them
-                    if (randomize_option_choices is True) and these_original_task_options:
-                                                
-                        randomized_option_list, original_to_randomized_lookup, randomized_to_original_lookup = randomize_list(these_original_task_options)
-                    
-                        displayed_option_choices = randomized_option_list
-                    
-                    else:
-                        displayed_option_choices = these_original_task_options
-
 
                     # make empty conversation
                     # reset context history for new 'conversation' about translation
@@ -5144,7 +5053,7 @@ def do_task_please(
                                 {this_task} 
 
                                 From this list of options: 
-                                {pretty_print_list(displayed_option_choices)} 
+                                {pretty_print_list(these_original_task_options)} 
 
                                 Your answer must be the number of the option in the order given. "1" is the first option. 
 
@@ -5168,7 +5077,7 @@ def do_task_please(
                                 {this_task} 
 
                                 From this list of options: 
-                                {pretty_print_list(displayed_option_choices)} 
+                                {pretty_print_list(these_original_task_options)} 
 
                                 Your answer must be the number of the option in the order given. "1" is the first option. 
 
@@ -5201,7 +5110,7 @@ def do_task_please(
                                 {this_task} 
 
                                 From this list of options: 
-                                {pretty_print_list(displayed_option_choices)} 
+                                {pretty_print_list(these_original_task_options)} 
 
                                 Your answer must be the number of the option in the order given. "1" is the first option. 
 
@@ -5225,7 +5134,7 @@ def do_task_please(
                                 {this_task} 
 
                                 From this list of options: 
-                                {pretty_print_list(displayed_option_choices)} 
+                                {pretty_print_list(these_original_task_options)} 
 
                                 Your answer must be the number of the option in the order given. "1" is the first option. 
 
@@ -5659,20 +5568,6 @@ def do_task_please(
                     # Scoring
                     ##########
                     ##########
-                    """
-                    Scoring depends whether the option list has been randomized.
-                    If the list has been randomized, adjust the AI's choice
-                    to be as if it had not been.
-                    """
-                    
-                    
-                                        
-                    # if there are options and you want to randomize them
-                    if (randomize_option_choices is True) and these_original_task_options:
-                                                                        
-                        if selected_option is not None:
-                            selected_option = randomized_to_original_lookup[selected_option]
-                    
 
                     def check_answer_in_raw_task(answer_number, data):
                         print(
@@ -5770,25 +5665,10 @@ def do_task_please(
                         # making csv row
                         print("with score: making csv row...")
 
-                    """
-                    Formatting Notes Section
-                    Add question order randomization to formatting notes.
-                    """
-                    formatting_notes = ""
-                    
-                    if randomize_option_choices is True:
-                        formatting_notes += str(randomized_)
-                    
-                    
-                    formatting_notes = replace_special_characters_with_text(
-                        formatting_notes
-                    )
-                    
-                    
                     # if open-answer and should check answer:
                     """
                     If open answer contains
-                    - without capitalization
+                    - without capitcaliaation
                     - without puncutation
                     - without spaces 
                     """
@@ -5860,7 +5740,6 @@ def do_task_please(
                         safe_question_task_prompt,
                         list_of_ranked_choice_options,
                         safe_task_attempt_log,
-                        formatting_notes,
                         error_log_safe_string,
                         duration_of_single_task,
                         readable_timestamp,
@@ -5969,7 +5848,6 @@ def do_task_please(
                         safe_question_task_prompt,
                         list_of_ranked_choice_options,
                         safe_task_attempt_log,
-                        formatting_notes,
                         error_log_safe_string,
                         duration_of_single_task,
                         readable_timestamp,
@@ -6101,29 +5979,29 @@ task_file_config_dic_list = [
     #     "this_range_inclusive": 1,
     #     "use_offset_and_range": True,
     # },
-    {
-        "file_name": "error_explained_test_1.jsonl",
-        "file_type": ".jsonl",
-        "header_exits": False,
-        "file_structure": "",
-        "index_of_task": None,
-        "index_of_options": None,
-        # Fields
-        "task_field_name": "task",
-        "options_field_name": "options",
-        "scoring_field_name": "answer_from_index_start_at_1",
-        "error_comment_data_lookup_table_field_name": "error_comment_data_lookup_table",
-        "answer_option_choices_provided": True,
-        "validate_the_answer": True,
-        "use_history_context_dict_list": False,
-        "system_instructions": False,
-        "output_structure_mode": "pipes",
-        "input_state_context_mode": "one_string",
-        "ranked_choice_output_structure_mode": "pipes",
-        "this_offset": 0,
-        "this_range_inclusive": 1,
-        "use_offset_and_range": True,
-    },
+    # {
+    #     "file_name": "error_explained_test_1.jsonl",
+    #     "file_type": ".jsonl",
+    #     "header_exits": False,
+    #     "file_structure": "",
+    #     "index_of_task": None,
+    #     "index_of_options": None,
+    #     # Fields
+    #     "task_field_name": "task",
+    #     "options_field_name": "options",
+    #     "scoring_field_name": "answer_from_index_start_at_1",
+    #     "error_comment_data_lookup_table_field_name": "error_comment_data_lookup_table",
+    #     "answer_option_choices_provided": True,
+    #     "validate_the_answer": True,
+    #     "use_history_context_dict_list": False,
+    #     "system_instructions": False,
+    #     "output_structure_mode": "pipes",
+    #     "input_state_context_mode": "one_string",
+    #     "ranked_choice_output_structure_mode": "pipes",
+    #     "this_offset": 0,
+    #     "this_range_inclusive": 1,
+    #     "use_offset_and_range": True,
+    # },
     {
         "file_name": "winograd_schemas_test_file.jsonl",
         "file_type": ".jsonl",
@@ -6137,7 +6015,6 @@ task_file_config_dic_list = [
         "scoring_field_name": "answer_from_index_start_at_1",
         "error_comment_data_lookup_table_field_name": None,
         "answer_option_choices_provided": True,
-        "randomize_option_choices": True, 
         "validate_the_answer": True,
         "use_history_context_dict_list": False,
         "system_instructions": False,
@@ -6178,7 +6055,7 @@ task_file_config_dic_list = [
 # Whole Task Choices
 #####################
 ai_local_or_cloud_mode = "gguf"
-# ai_local_or_cloud_mode = "cloud"
+ai_local_or_cloud_mode = "cloud"
 number_of_preliminary_drafts = 2
 number_of_ranked_votes = 1
 retry_x_times = 2
@@ -6189,8 +6066,8 @@ retry_x_times = 2
 # list_of_models = ["mistral-tiny"]
 # list_of_models = ["tinyllama", "mistral-7b-instruct", "stablelm-zephyr-3b"]
 list_of_models = ["stable-zephyr-3b"]
-# list_of_models = ["claude-2.1"]
-# list_of_models = ["claude-3-opus-20240229"]
+list_of_models = ["claude-2.1"]
+list_of_models = ["claude-3-opus-20240229"]
 
 
 
