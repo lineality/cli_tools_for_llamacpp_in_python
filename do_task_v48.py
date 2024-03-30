@@ -1948,6 +1948,41 @@ def duration_min_sec(start_time, end_time):
     return time_message
 
 
+
+def check_answer_in_dict(answer_number, data_dict):
+    print(
+        f"""def check_answer_in_dict(answer_number, data_dict):
+
+        Scoring:
+        answer_number       -> {answer_number}
+        type(answer_number) -> {type(answer_number)}
+
+        data_dict        -> {data_dict}
+        type(data_dict)  -> {type(data_dict)}
+
+        """
+    )
+    try:
+
+        # make sure int type
+        answer_number = int(answer_number)
+        data_dict = {int(key): value for key, value in data_dict.items()}
+
+
+        # check for string or int form in dict of errors
+        if answer_number in data_dict:
+            error_reason = data_dict[answer_number]
+            return error_reason
+
+        else:
+            return None
+
+    except Exception as e:
+        print(f"check_answer_in_dict() issue: {str(e)}")
+        return None
+
+
+
 # Helper Function
 def set_translator__system_prompt(context_history, target_language):
 
@@ -5685,71 +5720,25 @@ def do_task_please(
                                         
                     # if there are options and you want to randomize them
                     if (randomize_option_choices is True) and these_original_task_options:
-                            print(f""" Inspection
-                            
-                            these_original_task_options   -> {these_original_task_options}
-                            randomized_option_list        -> {randomized_option_list}
-                            
-                            original_to_randomized_lookup -> {original_to_randomized_lookup}
-                            randomized_to_original_lookup -> {randomized_to_original_lookup}
-                            
-                            Original selected_option      -> {selected_option}
-                            """)
+                        print(f""" Inspection
+
+                        these_original_task_options   -> {these_original_task_options}
+                        randomized_option_list        -> {randomized_option_list}
+
+                        original_to_randomized_lookup -> {original_to_randomized_lookup}
+                        randomized_to_original_lookup -> {randomized_to_original_lookup}
+
+                        Original selected_option      -> {selected_option}
+                        """)
                                                                         
-                                                                                                                                              
+                                                                                                                                                
                         if selected_option is not None:
                             selected_option = randomized_to_original_lookup[selected_option]
                     
                             print(f""" 
                             selected_option               -> {selected_option}
-                            """ 
+                            """) 
 
-                    def check_answer_in_raw_task(answer_number, data):
-                        print(
-                            f"""def check_answer(answer_number, data):
-
-                            Scoring:
-                            answer_number       -> {answer_number}
-                            type(answer_number) -> {type(answer_number)}
-
-                            data        -> {data}
-                            type(data)  -> {type(data)}
-
-                            """
-                        )
-
-
-                    def check_answer_in_dict(answer_number, data_dict):
-                        print(
-                            f"""def check_answer_in_dict(answer_number, data_dict):
-
-                            Scoring:
-                            answer_number       -> {answer_number}
-                            type(answer_number) -> {type(answer_number)}
-
-                            data_dict        -> {data_dict}
-                            type(data_dict)  -> {type(data_dict)}
-
-                            """
-                        )
-                        try:
-
-                            # make sure int type
-                            answer_number = int(answer_number)
-                            data_dict = {int(key): value for key, value in data_dict.items()}
-
-
-                            # check for string or int form in dict of errors
-                            if answer_number in data_dict:
-                                error_reason = data_dict[answer_number]
-                                return error_reason
-
-                            else:
-                                return None
-
-                        except Exception as e:
-                            print(f"check_answer_in_dict() issue: {str(e)}")
-                            return None
 
 
                     if error_comment_data_lookup_table:
