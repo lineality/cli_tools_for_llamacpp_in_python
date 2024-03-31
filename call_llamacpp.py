@@ -1172,22 +1172,15 @@ if __name__ == "__main__":
     # context_history = """For this original task: \'Task: What is the capital of France?\'. Evaluate only these 2 options: Option 1. final draft; Option 2. Final answer: Paris;. (0-10; 0 is bad, 10 is good) Place your evaluation of each as the value to a key in markdown ```json format. as: ```json {\'option-1\': \'score_here\', \'option-2\': \'score_here\', \'option-3\': \'score_here\'} ``` Just fill in the score, that\'s all. One key-value pair for each of the 2 evaluated options (one key, one value. not nested; not everything in the original question. -> \\"option-1\\": \\"your_score_here\\", ). No additional comments. A tasty reward awaits your accurate markdown selection."""
 
     # Remove duplicate spaces
-    
-    
-
-    contest_history "Write a python function called calculate_area(), such that given input(s) are (length, width), so, def calculate_area(length, width): and the output is The area of a rectangle, only return a number Put your python code in markdown ```python #code here ```, Without hard-coding any answers into the function. Any other comments or plans write outside of the python markdown and write before you write the function. Only the function in the markdown last"
-    
-    # clean context
     # context_history = re.sub(r'\s+', ' ', context_history.strip())
-
     
+    context_history = "Write a python function called calculate_area(), such that given input(s) are (length, width), so, def calculate_area(length, width): and the output is The area of a rectangle, only return a number Put your python code in markdown format without hard-coding any answers into the function. Any other comments or plans write outside of the python markdown and write before you write the function. Only the function in the markdown last."
+
     ai_model = "deepcode"
     ai_model = "estopian"
     ai_model = "zephyr"
     ai_model = "mistral-7b-instruct-v0.2.Q4_K_M"
     # ai_model = "gemma"
-    ai_model = "hermes"
-
 
     configies_dict = {
         'model_path_base': add_segment_to_absolute_base_path("jan/models/"),

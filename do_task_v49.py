@@ -314,8 +314,27 @@ def create_empty_selectbest_frame(original_data, new_file_path):
 
 # helper function for coding layer
 def extract_code_from_markdown(markdown_text):
+    """
+    variation cases:
+    
+    variations include
+    ```
+    ```
+    
+    ```markdown
+    ```
+    
+    ```python
+    ```
+    
+    ```code
+    ```
+    
+    """    
+    
     # Regular expression pattern to match code blocks
-    code_block_pattern = r'```(python)?\n([\s\S]*?)\n```'
+    # code_block_pattern = r'```(python)?\n([\s\S]*?)\n```'
+    code_block_pattern = r'```(python|markdown|code)?\n([\s\S]*?)\n```'
 
     # Find all code blocks in the Markdown text
     code_blocks = re.findall(code_block_pattern, markdown_text, re.MULTILINE)
@@ -337,7 +356,7 @@ def extract_code_from_markdown(markdown_text):
 # helper function for coding layer
 def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, function_name, retry_or_error_event_counter_list, error_log):
     """
-    ```python
+    ```
     def calculate_area(x,y):\n
         return x*y
     ```
@@ -5350,13 +5369,11 @@ def do_task_please(
 
                                     {this_task}
 
-                                    Put your python code in markdown ```python #code here ```, 
-                                    Without hard-coding any answers into the function.
-                                    
+                                    Put your python code in markdown format (three pips)
+                                    without hard-coding any answers into the function.
                                     
                                     Any other comments or plans write outside of the python markdown and write before you write the function. Only the function
                                     in the markdown last.
-                                    
                                     """
                                     
                                 else:
@@ -6563,8 +6580,8 @@ retry_x_times = 6
 # list_of_models = ["claude-2.1"]
 # list_of_models = ["claude-3-opus-20240229"]
 list_of_models = ["llamacorn", "tinyllama", "stablelm-zephyr-3b"]
-# list_of_models = ["mistral-7b-instruct"]
-list_of_models = ["llamacorn", "tinyllama"]
+list_of_models = ["mistral-7b-instruct"]
+# list_of_models = ["llamacorn", "tinyllama"]
 
 
 
