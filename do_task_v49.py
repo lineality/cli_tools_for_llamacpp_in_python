@@ -122,6 +122,7 @@ def make_answers_directory_and_csv_path_header_string(
         "list_of_ranked_choice_options",
         "draft_task_attempt_log",
         "formatting_notes",
+        "retry_counter",
         "error_log",
         "duration_of_single_task",
         "readable_timestamp",
@@ -334,7 +335,7 @@ def extract_code_from_markdown(markdown_text):
 
 
 # helper function for coding layer
-def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, function_name, error_log):
+def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, function_name, retry_or_error_event_counter_list, error_log):
     """
     ```python
     def calculate_area(x,y):\n
@@ -397,6 +398,7 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
             else:
                 print(f"Test Case Failed: Input = {input_values}, Expected Output = {expected_output}, Actual Output = {actual_output}")
                 error_log.append(stdout)
+                retry_or_error_event_counter_list.append(True)
                 pass_flag_set.add('fail')
 
         except ValueError:
@@ -407,6 +409,7 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
             else:
                 print(f"Test Case Failed: Input = {input_values}, Expected Output = {expected_output}, Actual Output = {stdout}")
                 error_log.append(stdout)
+                retry_or_error_event_counter_list.append(True)
                 pass_flag_set.add('fail')
 
         # # Assuming the function output is directly printed, compare stdout to expected output
@@ -2394,6 +2397,7 @@ def task_check_structure_of_response(
     dict_str,
     task_mode_answer_option_choices_provided_boolean,
     these_original_task_options,
+    retry_or_error_event_counter_list,
     error_log,
 ):
     """
@@ -3107,6 +3111,7 @@ def general_task_call_api_within_structure_check(
     retry_x_times,
     these_original_task_options,
     this_task_config_dict,
+    retry_or_error_event_counter_list,
     error_log,
     test_cases=None,
     function_name=None
@@ -3254,7 +3259,8 @@ def general_task_call_api_within_structure_check(
             task_response_string, error_message = pass_fail_unit_test_function__stdout_stderr(
                 code_markdown=dict_str, 
                 test_cases=test_cases, 
-                function_name=function_name, 
+                function_name=function_name,
+                retry_or_error_event_counter_list=retry_or_error_event_counter_list, 
                 error_log=error_log)
             
             if task_response_string == 'pass':
@@ -3269,6 +3275,7 @@ def general_task_call_api_within_structure_check(
                 dict_str,
                 task_mode_answer_option_choices_provided_boolean,
                 these_original_task_options,
+                retry_or_error_event_counter_list,
                 error_log,
             )
     
@@ -5021,6 +5028,9 @@ def do_task_please(
 
                 # start/reset error log
                 error_log = []
+                
+                # the length of this list is the goal
+                retry_or_error_event_counter_list = []
 
                 draft_task_attempt_log = []
 
@@ -5946,6 +5956,7 @@ def do_task_please(
                                         else:  # if len of list is wrong
                                             while_counter += 1
                                             task_fail_counter += 1
+                                            retry_or_error_event_counter_list.append(True)
                                             error_log.append("length of list is wrong.")
                                             print("len of list is wrong")
                                             print(
@@ -5955,6 +5966,7 @@ def do_task_please(
                                     else:  # if no list at all!
                                         while_counter += 1
                                         task_fail_counter += 1
+                                        retry_or_error_event_counter_list.append(True)
                                         error_log.append("No select_best list.")
                                         print("no list at all!")
                                         print(
@@ -6136,6 +6148,8 @@ def do_task_please(
                     duration_of_single_task = duration_min_sec(
                         start_time_whole_single_task, end_time_whole_single_task
                     )
+                    
+                    retry_counter = len(retry_or_error_event_counter_list)
 
                     # turn into min, sec
 
@@ -6152,6 +6166,7 @@ def do_task_please(
                         list_of_ranked_choice_options,
                         safe_task_attempt_log,
                         formatting_notes,
+                        retry_counter,
                         error_log_safe_string,
                         duration_of_single_task,
                         readable_timestamp,
@@ -6247,6 +6262,10 @@ def do_task_please(
 
                     task_failure_comment = "no answer given"
 
+                    
+                    retry_counter = len(retry_or_error_event_counter_list)
+                    
+                    
                     # replace some fields with 'fail'
                     list_of_items_to_write_to_csv = [
                         "fail",
@@ -6261,6 +6280,7 @@ def do_task_please(
                         list_of_ranked_choice_options,
                         safe_task_attempt_log,
                         formatting_notes,
+                        retry_counter,
                         error_log_safe_string,
                         duration_of_single_task,
                         readable_timestamp,
@@ -6513,7 +6533,7 @@ retry_x_times = 2
 # list_of_models = ["stable-zephyr-3b"]
 # list_of_models = ["claude-2.1"]
 # list_of_models = ["claude-3-opus-20240229"]
-list_of_models = ["mistral-7b-instruct", "gemma-2b-it", "stablelm-zephyr-3b"]
+list_of_models = ["llamacorn", "tinyllama", "stablelm-zephyr-3b"]
 # list_of_models = ["mistral-7b-instruct"]
 
 
@@ -6526,10 +6546,12 @@ if __name__ == "__main__":
 
     message = f"""
     These are the models you are slated to run,
-
-        list_of_models = {list_of_models}
-
-    You specify your list in the do_tasks.py file, at the bottom.
+    as specified in your list in the do_tasks.py file, at the bottom.
+ 
+       list_of_models = {list_of_models}
+        
+    Here are the possible models:
+    {print_find_all_models(path="jan/models/")}
 
     Do you wish to add another model? If so, type in a model name here...
 

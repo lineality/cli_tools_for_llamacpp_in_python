@@ -61,5 +61,10 @@ def print_find_all_models(path="jan/models/"):
         print("     ", this_model_path)
 
     print("\n\n")
-    
-print_find_all_models()
+
+
+######
+# Run
+######
+if __name__ == "__main__":
+    print_find_all_models()

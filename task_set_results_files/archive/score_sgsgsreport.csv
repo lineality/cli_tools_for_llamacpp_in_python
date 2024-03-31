@@ -1,0 +1,4 @@
+"percent","model","score","task_file","time_stamp"
+"0.0","llamacorn","write_a_make_a_function_challenge2.jsonl","0 / 1","2024-03-31-14:00:03337496"
+"0.0","tinyllama","write_a_make_a_function_challenge2.jsonl","0 / 1","2024-03-31-14:00:03337694"
+"100.0","stablelm-zephyr-3b","write_a_make_a_function_challenge2.jsonl","1 / 1","2024-03-31-14:00:03337830"
