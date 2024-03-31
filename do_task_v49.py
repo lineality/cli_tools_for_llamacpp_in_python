@@ -336,21 +336,30 @@ def extract_code_from_markdown(markdown_text):
     # code_block_pattern = r'```(python)?\n([\s\S]*?)\n```'
     code_block_pattern = r'```(python|markdown|code)?\n([\s\S]*?)\n```'
 
-    # Find all code blocks in the Markdown text
+    # # Find all code blocks in the Markdown text
+    # code_blocks = re.findall(code_block_pattern, markdown_text, re.MULTILINE)
+
+    # # Extract the code from the code blocks
+    # extracted_code = ''
+    # for block in code_blocks:
+    #     language, code = block
+    #     if language == 'python':
+    #         # If the code block is explicitly marked as Python, use it as is
+    #         extracted_code += code + '\n'
+    #     else:
+    #         # If the code block is not explicitly marked, assume it's Python code
+    #         extracted_code += code + '\n'
+    # return extracted_code.strip()
+    
+    
     code_blocks = re.findall(code_block_pattern, markdown_text, re.MULTILINE)
 
-    # Extract the code from the code blocks
-    extracted_code = ''
-    for block in code_blocks:
-        language, code = block
-        if language == 'python':
-            # If the code block is explicitly marked as Python, use it as is
-            extracted_code += code + '\n'
-        else:
-            # If the code block is not explicitly marked, assume it's Python code
-            extracted_code += code + '\n'
+    # Find the longest Markdown code block
+    longest_code_block = max(code_blocks, key=len, default='')
 
-    return extracted_code.strip()
+    return longest_code_block.strip()
+    
+
 
 
 # helper function for coding layer
