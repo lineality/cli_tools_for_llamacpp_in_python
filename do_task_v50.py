@@ -5419,8 +5419,8 @@ def do_task_please(
                                     Put your python code in markdown format (three pips)
                                     without hard-coding any answers into the function.
                                     
-                                    Any other comments or plans write outside of the python markdown and write before you write the function. Only the function
-                                    in the markdown last.
+                                    Write any other comments or plans before you write the function 
+                                    and outside of the python markdown.
                                     """
                                     
                                 else:
