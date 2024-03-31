@@ -6565,7 +6565,7 @@ retry_x_times = 6
 # list_of_models = ["claude-3-opus-20240229"]
 list_of_models = ["llamacorn", "tinyllama", "stablelm-zephyr-3b"]
 # list_of_models = ["mistral-7b-instruct"]
-
+list_of_models = ["llamacorn", "tinyllama"]
 
 
 
