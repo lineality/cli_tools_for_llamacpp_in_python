@@ -312,9 +312,17 @@ def create_empty_selectbest_frame(original_data, new_file_path):
 
 
 
-# helper function for coding layer
 def extract_code_from_markdown(markdown_text):
     """
+    requires re
+    Extract the longest code block from the given Markdown text.
+
+    Args:
+        markdown_text (str): The Markdown text containing code blocks.
+
+    Returns:
+        str: The longest code block found in the text, or an empty string if no code block is found.
+
     variation cases:
     
     variations include
@@ -329,36 +337,18 @@ def extract_code_from_markdown(markdown_text):
     
     ```code
     ```
-    
-    """    
-    
+
+
+    """
     # Regular expression pattern to match code blocks
-    # code_block_pattern = r'```(python)?\n([\s\S]*?)\n```'
     code_block_pattern = r'```(python|markdown|code)?\n([\s\S]*?)\n```'
-
-    # # Find all code blocks in the Markdown text
-    # code_blocks = re.findall(code_block_pattern, markdown_text, re.MULTILINE)
-
-    # # Extract the code from the code blocks
-    # extracted_code = ''
-    # for block in code_blocks:
-    #     language, code = block
-    #     if language == 'python':
-    #         # If the code block is explicitly marked as Python, use it as is
-    #         extracted_code += code + '\n'
-    #     else:
-    #         # If the code block is not explicitly marked, assume it's Python code
-    #         extracted_code += code + '\n'
-    # return extracted_code.strip()
-    
-    
+    # Find all code blocks in the text
     code_blocks = re.findall(code_block_pattern, markdown_text, re.MULTILINE)
 
-    # Find the longest Markdown code block
-    longest_code_block = max(code_blocks, key=len, default='')
+    # Find the longest code block
+    longest_code_block = max(code_blocks, key=lambda x: len(x[1]), default=('', ''))
 
-    return longest_code_block.strip()
-    
+    return longest_code_block[1]
 
 
 
