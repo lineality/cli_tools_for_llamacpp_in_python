@@ -365,7 +365,19 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
 
     pass_flag_set = set()
     
-    print(extracted_code)
+    # print(f"""
+    #     Input inspection: pass_fail_unit_test_function__stdout_stderr()
+        
+    #     code_markdown -> {code_markdown} {type(code_markdown)}
+    #     test_cases -> {test_cases} {type(test_cases)}
+    #     function_name -> {function_name} {type(function_name)}
+    #     retry_or_error_event_counter_list -> {retry_or_error_event_counter_list} {type(retry_or_error_event_counter_list)}
+    #     error_log -> {error_log} {type(error_log)}
+        
+    #     Extracted:
+    #     extracted_code -> {extracted_code} {type(extracted_code)}
+
+    #     """)
 
     for test_case in test_cases:
         input_values = test_case["input"]
@@ -3256,6 +3268,23 @@ def general_task_call_api_within_structure_check(
         
         if function_writing:
             
+            # print(f"""
+            #     Input inspection: general_task_call_api_within_structure_check()
+                
+            #     code_markdown:
+            #     dict_str -> {dict_str} {type(dict_str)}
+                
+            #     test_cases -> {test_cases} {type(test_cases)}
+                
+            #     function_name -> {function_name} {type(function_name)}
+                
+            #     retry_or_error_event_counter_list -> {retry_or_error_event_counter_list} {type(retry_or_error_event_counter_list)}
+                
+            #     error_log -> {error_log} {type(error_log)}
+
+            #     """)
+                    
+
             task_response_string, error_message = pass_fail_unit_test_function__stdout_stderr(
                 code_markdown=dict_str, 
                 test_cases=test_cases, 
@@ -5611,6 +5640,7 @@ def do_task_please(
                                 retry_x_times,
                                 these_original_task_options,
                                 this_task_config_dict,
+                                retry_or_error_event_counter_list,
                                 error_log,
                                 test_cases,
                                 function_name)
@@ -6523,7 +6553,7 @@ ai_local_or_cloud_mode = "gguf"
 # ai_local_or_cloud_mode = "cloud"
 number_of_preliminary_drafts = 2
 number_of_ranked_votes = 1
-retry_x_times = 2
+retry_x_times = 6
 
 ##############
 # Pick Models
