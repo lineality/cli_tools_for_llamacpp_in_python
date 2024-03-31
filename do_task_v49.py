@@ -360,11 +360,11 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
     """
     
     # Extract the code from the Markdown
-    code = extract_code_from_markdown(code_markdown)
+    extracted_code = extract_code_from_markdown(code_markdown)
 
     pass_flag_set = set()
     
-    print(code)
+    print(extracted_code)
 
     for test_case in test_cases:
         input_values = test_case["input"]
@@ -372,7 +372,7 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
         
         # Construct the full script with the test case applied
         # This script defines the function from the markdown, then calls it with the current test case's inputs
-        full_script = f"{code}\n\nprint({function_name}(*{input_values}))"
+        full_script = f"{extracted_code}\n\nprint({function_name}(*{input_values}))"
 
         # Run the full script using subprocess
         process = subprocess.run(
@@ -383,6 +383,7 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
         )
 
         stdout = process.stdout.strip()
+        stderr_plus = 'Feedback: This code ' + extracted_code + ' lead to this error: ' + process.stderr.strip() + ', stdout: ' + stdout + "Try again: "
 
         # Compare the actual output with the expected output
         try:
@@ -418,9 +419,9 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
         #     pass_flag_set.add('fail')
 
     if pass_flag_set == {'pass'}:
-        return 'pass'
+        return 'pass', ''
     else:
-        return False
+        return False, stderr_plus
         
 
 # Helper Function
@@ -3149,11 +3150,24 @@ def general_task_call_api_within_structure_check(
         "mistral7b",
     ]
 
+    
+    error_message_list_grab_last = []
+    
     while (not json_ok_flag) and (retry_counter < retry_x_times):
 
         ####################
         # get a translation
         ####################
+        
+        """
+        Add the last error to the input as feedback, 
+        if making a function
+        and if there was an error.
+        
+        Note: pathways other than writing code might use this too.
+        """
+        if error_message_list_grab_last and function_writing:
+            context_history = error_message_list_grab_last[0] + context_history
 
         try:
             # check json structure
@@ -3237,9 +3251,7 @@ def general_task_call_api_within_structure_check(
         
         if function_writing:
             
-            
-            
-            task_response_string = pass_fail_unit_test_function__stdout_stderr(
+            task_response_string, error_message = pass_fail_unit_test_function__stdout_stderr(
                 code_markdown=dict_str, 
                 test_cases=test_cases, 
                 function_name=function_name, 
@@ -3247,6 +3259,9 @@ def general_task_call_api_within_structure_check(
             
             if task_response_string == 'pass':
                 return task_response_string
+                
+            else:
+                error_message_list_grab_last.append(error_message)
         
         else:
             task_response_string = task_check_structure_of_response(
@@ -6498,8 +6513,8 @@ retry_x_times = 2
 # list_of_models = ["stable-zephyr-3b"]
 # list_of_models = ["claude-2.1"]
 # list_of_models = ["claude-3-opus-20240229"]
-# list_of_models = ["mistral-7b-instruct", "gemma-2b-it", "stablelm-zephyr-3b"]
-list_of_models = ["mistral-7b-instruct"]
+list_of_models = ["mistral-7b-instruct", "gemma-2b-it", "stablelm-zephyr-3b"]
+# list_of_models = ["mistral-7b-instruct"]
 
 
 

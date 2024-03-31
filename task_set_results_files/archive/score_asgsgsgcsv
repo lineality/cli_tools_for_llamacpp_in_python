@@ -1,0 +1,5 @@
+"percent","model","score","task_file","time_stamp"
+"100.0","mistral-7b-instruct","write_a_make_a_function_challenge2.jsonl","1 / 1","2024-03-30-23:42:49730595"
+"100.0","mistral-7b-instruct","write_a_make_a_function_challenge2.jsonl, write_a_make_a_function_challenge2.jsonl","2 / 2","2024-03-31-13:37:20138892"
+"0.0","gemma-2b-it","write_a_make_a_function_challenge2.jsonl","0 / 1","2024-03-31-13:37:20139058"
+"100.0","stablelm-zephyr-3b","write_a_make_a_function_challenge2.jsonl","1 / 1","2024-03-31-13:37:20139158"
