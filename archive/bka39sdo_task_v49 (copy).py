@@ -351,13 +351,10 @@ def extract_code_from_markdown(markdown_text):
     return longest_code_block[1]
 
 
-import ast 
+
 # helper function for coding layer
 def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, function_name, retry_or_error_event_counter_list, error_log):
     """
-    standard issues:
-    - input() is not allowed
-    - 
     ```
     def calculate_area(x,y):\n
         return x*y
@@ -411,7 +408,6 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
         """
         extracted_code = extracted_code.replace("print(", "# print(")
         # extracted_code = extracted_code.replace("\nprint(", "# print(")
-        extracted_code = extracted_code.replace("input()", "'error_no_input_allowed'")
             
         
         # full_script = f"{extracted_code}\n\nprint({function_name}(*{input_values}))"
@@ -430,40 +426,13 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
         stdout = process.stdout.strip()
         stderr_plus = 'Feedback: This code ' + extracted_code + ' lead to this error: ' + process.stderr.strip() + ', stdout: ' + stdout + "Try again: "
 
-        # # Compare the actual output with the expected output
-        # try:
-        #     # Try to evaluate the actual output and expected output as numbers
-        #     actual_output = float(stdout)
-        #     expected_output = float(expected_output)
-
-        #     if abs(actual_output - expected_output) < 1e-9:
-        #         print(f"Test Case Passed: Input = {input_values}, Expected Output = {expected_output}")
-        #         pass_flag_set.add('pass')
-        #     else:
-        #         print(f"Test Case Failed: Input = {input_values}, Expected Output = {expected_output}, Actual Output = {actual_output}")
-        #         error_log.append(stdout)
-        #         retry_or_error_event_counter_list.append(True)
-        #         pass_flag_set.add('fail')
-
-        # except ValueError:
-        #     # If the conversion to numbers fails, compare the string representations
-        #     if stdout == str(expected_output):
-        #         print(f"Test Case Passed: Input = {input_values}, Expected Output = {expected_output}")
-        #         pass_flag_set.add('pass')
-        #     else:
-        #         print(f"Test Case Failed: Input = {input_values}, Expected Output = {expected_output}, Actual Output = {stdout}")
-        #         error_log.append(stdout)
-        #         retry_or_error_event_counter_list.append(True)
-        #         pass_flag_set.add('fail')
-
-        # Import the ast module to safely evaluate string representations of lists
-
         # Compare the actual output with the expected output
         try:
-            # Try to evaluate the actual output and expected output as lists
-            actual_output = ast.literal_eval(stdout)
-            expected_output = ast.literal_eval(expected_output)
-            if actual_output == expected_output:
+            # Try to evaluate the actual output and expected output as numbers
+            actual_output = float(stdout)
+            expected_output = float(expected_output)
+
+            if abs(actual_output - expected_output) < 1e-9:
                 print(f"Test Case Passed: Input = {input_values}, Expected Output = {expected_output}")
                 pass_flag_set.add('pass')
             else:
@@ -471,8 +440,9 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
                 error_log.append(stdout)
                 retry_or_error_event_counter_list.append(True)
                 pass_flag_set.add('fail')
-        except (ValueError, SyntaxError):
-            # If the conversion to lists fails, compare the string representations
+
+        except ValueError:
+            # If the conversion to numbers fails, compare the string representations
             if stdout == str(expected_output):
                 print(f"Test Case Passed: Input = {input_values}, Expected Output = {expected_output}")
                 pass_flag_set.add('pass')
@@ -481,24 +451,16 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
                 error_log.append(stdout)
                 retry_or_error_event_counter_list.append(True)
                 pass_flag_set.add('fail')
-        
-        except Exception as e:
-            error_log.append(stdout)
-            pass_flag_set.add('fail')
-            error_message = str(e) + process.stderr.strip()
-            return False, error_message
-            
-        
-        # Assuming the function output is directly printed, compare stdout to expected output
-        if stdout == str(expected_output):
-            print(f"Test Case Passed: Input = {input_values}, Expected Output = {expected_output}")
-            pass_flag_set.add('pass')
-        else:
-            print(f"Test Case Failed: Input = {input_values}, Expected Output = {expected_output}, Actual Output = {stdout}")
-            error_log.append(stdout)
-            pass_flag_set.add('fail')
 
-    
+        # # Assuming the function output is directly printed, compare stdout to expected output
+        # if stdout == str(expected_output):
+        #     print(f"Test Case Passed: Input = {input_values}, Expected Output = {expected_output}")
+        #     pass_flag_set.add('pass')
+        # else:
+        #     print(f"Test Case Failed: Input = {input_values}, Expected Output = {expected_output}, Actual Output = {stdout}")
+        #     error_log.append(stdout)
+        #     pass_flag_set.add('fail')
+
     if pass_flag_set == {'pass'}:
         return 'pass', ''
     else:
