@@ -6515,7 +6515,7 @@ task_file_config_dic_list = [
     #     "use_offset_and_range": True,
     # },
     {
-        "file_name": "write_a_make_a_function_challenge2.jsonl",
+        "file_name": "code_writing_test_set_3.jsonl",
         "file_type": ".jsonl",
         "header_exits": False,
         "file_structure": "",
