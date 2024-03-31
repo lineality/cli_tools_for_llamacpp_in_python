@@ -5338,11 +5338,11 @@ def do_task_please(
                             pipes_open_solution_body_nocontext
                         """
 
-                        if not function_writing:
+                        if function_writing:
                                 ############
                                 # Pipes |||
                                 ############
-                                if task_mode_output_structure_mode == "markdowwn":
+                                if task_mode_output_structure_mode == "markdown":
                                     ############
                                     # Open Task: use context dict list
                                     ############
@@ -5361,62 +5361,61 @@ def do_task_please(
                                     
                                 else:
                                     print(
-                                        f""" exit: prompt selection 1: option problem task_mode_output_structure_mode {task_mode_output_structure_mode}"""
+                                        f"""not multiple-choice exit: prompt selection 1: option problem task_mode_output_structure_mode {task_mode_output_structure_mode}"""
                                     )
                                     sys.exit()
+ 
+                        #############
+                        # if context
+                        #############
+                        elif task_mode_use_history_context_dict_list:
+                            # TODO: make context dict list maker
+
+                            ############
+                            # Pipes |||
+                            ############
+                            if task_mode_output_structure_mode == "pipes":
+                                ############
+                                # Open Task: use context dict list
+                                ############
+                                context_history = f"""
+
+                                What is the best response for this task? 
+                                {this_task}
+
+                                Give your answer in this format:
+                                {pipes_open_solution_body_nocontext}
+
+                                """
+
+                            ##############
+                            # {dict: ...}
+                            ##############
+                            elif task_mode_output_structure_mode == "dict":
+                                ############
+                                # Open Task: use context dict list
+                                ############
+                                context_history = f"""
+
+                                What is the best response for this task? 
+                                {this_task}
+
+                                Give your answer in this format:
+                                {dict_open_solution_body_nocontext}
+
+                                """
+                            else:
+                                print(
+                                    f"""not function not multiple-choice exit: prompt selection 1: option problem task_mode_output_structure_mode {task_mode_output_structure_mode}"""
+                                )
+                                sys.exit()
+
                             
-                        else:     
-                            #############
-                            # if context
-                            #############
-                            if task_mode_use_history_context_dict_list:
-                                # TODO: make context dict list maker
-
-                                ############
-                                # Pipes |||
-                                ############
-                                if task_mode_output_structure_mode == "pipes":
-                                    ############
-                                    # Open Task: use context dict list
-                                    ############
-                                    context_history = f"""
-
-                                    What is the best response for this task? 
-                                    {this_task}
-
-                                    Give your answer in this format:
-                                    {pipes_open_solution_body_nocontext}
-
-                                    """
-
-                                ##############
-                                # {dict: ...}
-                                ##############
-                                elif task_mode_output_structure_mode == "dict":
-                                    ############
-                                    # Open Task: use context dict list
-                                    ############
-                                    context_history = f"""
-
-                                    What is the best response for this task? 
-                                    {this_task}
-
-                                    Give your answer in this format:
-                                    {dict_open_solution_body_nocontext}
-
-                                    """
-                                else:
-                                    print(
-                                        f""" exit: prompt selection 1: option problem task_mode_output_structure_mode {task_mode_output_structure_mode}"""
-                                    )
-                                    sys.exit()
-
-                                
 
                         ################
                         # if NO context
                         ################
-                        if not task_mode_use_history_context_dict_list:
+                        elif not task_mode_use_history_context_dict_list:
 
                             ############
                             # Pipes |||
@@ -5529,7 +5528,7 @@ def do_task_please(
 
                             else:
                                 print(
-                                    f""" exit: prompt selection 1: option problem task_mode_output_structure_mode {task_mode_output_structure_mode}"""
+                                    f""" multiple choice if context exit: prompt selection 1: option problem task_mode_output_structure_mode {task_mode_output_structure_mode}"""
                                 )
                                 sys.exit()
 
@@ -5586,7 +5585,7 @@ def do_task_please(
 
                             else:
                                 print(
-                                    f""" exit: prompt selection 1: option problem task_mode_output_structure_mode {task_mode_output_structure_mode}"""
+                                    f""" multiple choice if NO context, exit: prompt selection 1: option problem task_mode_output_structure_mode {task_mode_output_structure_mode}"""
                                 )
                                 sys.exit()
 
@@ -6536,7 +6535,7 @@ task_file_config_dic_list = [
         "function_test_cases__field_name": "test_cases",
         "function_name__field_name": "function_name",     
 
-        "output_structure_mode": "pipes",
+        "output_structure_mode": "markdown",
         "input_state_context_mode": "one_string",
         "ranked_choice_output_structure_mode": "pipes",
         "this_offset": 0,
