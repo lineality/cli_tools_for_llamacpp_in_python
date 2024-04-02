@@ -461,8 +461,8 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
         # Compare the actual output with the expected output
         try:
             # Try to evaluate the actual output and expected output as lists
-            actual_output = ast.literal_eval(stdout)
-            expected_output = ast.literal_eval(expected_output)
+            actual_output = float(ast.literal_eval(stdout))
+            expected_output = float(ast.literal_eval(expected_output))
             if actual_output == expected_output:
                 print(f"Test Case Passed: Input = {input_values}, Expected Output = {expected_output}")
                 pass_flag_set.add('pass')
@@ -473,7 +473,7 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
                 pass_flag_set.add('fail')
         except (ValueError, SyntaxError):
             # If the conversion to lists fails, compare the string representations
-            if stdout == str(expected_output):
+            if stdout.lower() == str(expected_output).lower():
                 print(f"Test Case Passed: Input = {input_values}, Expected Output = {expected_output}")
                 pass_flag_set.add('pass')
             else:
@@ -6577,35 +6577,6 @@ task_file_config_dic_list = [
     #     "this_range_inclusive": 2,
     #     "use_offset_and_range": True,
     # },
-    {
-        "file_name": "code_writing_test_set_5.jsonl",
-        "file_type": ".jsonl",
-        "header_exits": False,
-        "file_structure": "",
-        "index_of_task": None,
-        "index_of_options": None,
-        # Fields
-        "task_field_name": "task",
-        "options_field_name": "options",
-        "scoring_field_name": "answer_from_index_start_at_1",
-        "error_comment_data_lookup_table_field_name": None,
-        "answer_option_choices_provided": False,
-        "randomize_option_choices": False, 
-        "validate_the_answer": True,
-        "use_history_context_dict_list": False,
-        "system_instructions": False,
-        
-        "function_writing": True,
-        "function_test_cases__field_name": "test_cases",
-        "function_name__field_name": "function_name",     
-
-        "output_structure_mode": "markdown",
-        "input_state_context_mode": "one_string",
-        "ranked_choice_output_structure_mode": "pipes",
-        "this_offset": 0,
-        "this_range_inclusive": 1,
-        "use_offset_and_range": False,
-    },
    # {
    #      "file_name": "short_code_writing_test_set_1.jsonl",
    #      "file_type": ".jsonl",
@@ -6635,6 +6606,35 @@ task_file_config_dic_list = [
    #      "this_range_inclusive": 1,
    #      "use_offset_and_range": False,
    #  },
+  {
+        "file_name": "code_writing_test_set_7.jsonl",
+        "file_type": ".jsonl",
+        "header_exits": False,
+        "file_structure": "",
+        "index_of_task": None,
+        "index_of_options": None,
+        # Fields
+        "task_field_name": "task",
+        "options_field_name": "options",
+        "scoring_field_name": "answer_from_index_start_at_1",
+        "error_comment_data_lookup_table_field_name": None,
+        "answer_option_choices_provided": False,
+        "randomize_option_choices": False, 
+        "validate_the_answer": True,
+        "use_history_context_dict_list": False,
+        "system_instructions": False,
+        
+        "function_writing": True,
+        "function_test_cases__field_name": "test_cases",
+        "function_name__field_name": "function_name",     
+
+        "output_structure_mode": "markdown",
+        "input_state_context_mode": "one_string",
+        "ranked_choice_output_structure_mode": "pipes",
+        "this_offset": 0,
+        "this_range_inclusive": 1,
+        "use_offset_and_range": False,
+    },
 ]
 
 #####################
@@ -6657,7 +6657,7 @@ retry_x_times = 2
 list_of_models = ["llamacorn", "tinyllama", "stablelm-zephyr-3b"]
 list_of_models = ["mistral-7b-instruct"]
 # list_of_models = ["llamacorn", "tinyllama"]
-# list_of_models = ["llamacorn"]
+list_of_models = ["wizardcoder-python-13b"]
 # list_of_models = ["tinyllama", "mistral-7b-instruct", "stablelm-zephyr-3b"]
 
 ######

@@ -1,7 +1,7 @@
 """
 Append coding challenges to a test set
 """
-test_set_name = "code_writing_test_set_6.jsonl"
+test_set_name = "code_writing_test_set_7.jsonl"
 
 import json
 

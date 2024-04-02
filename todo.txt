@@ -7,3 +7,9 @@ for report:
 - add error log
 - add time to generate
 - add length of output
+
+track down:
+- Why 20tries?!>
+
+In html report, make error-set,
+and convert back to symbols for HTML
