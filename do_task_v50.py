@@ -430,6 +430,10 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
         stdout = process.stdout.strip()
         stderr_plus = 'Feedback: This code ' + extracted_code + ' lead to this error: ' + process.stderr.strip() + ', stdout: ' + stdout + "Try again: "
 
+
+        print(f"expected_output -> {expected_output} {type(expected_output)}")
+        print(f"stdout -> {stdout} {type(stdout)}")
+
         # # Compare the actual output with the expected output
         # try:
         #     # Try to evaluate the actual output and expected output as numbers
@@ -458,20 +462,34 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
 
         # Import the ast module to safely evaluate string representations of lists
 
-        # Compare the actual output with the expected output
         try:
             # Try to evaluate the actual output and expected output as lists
-            actual_output = float(ast.literal_eval(stdout))
-            expected_output = float(ast.literal_eval(expected_output))
+            actual_output = ast.literal_eval([stdout])
+
             if actual_output == expected_output:
                 print(f"Test Case Passed: Input = {input_values}, Expected Output = {expected_output}")
                 pass_flag_set.add('pass')
+                return 'pass', ''
+        except:
+            print("not a list")
+        
+        
+        # Compare the actual output with the expected output
+        try:
+            print(f"expected_output -> {expected_output} {type(expected_output)}")
+            print(f"float(stdout) -> {float(stdout)}")
+    
+            if float(stdout) == float(expected_output):
+                print(f"Test Case Passed: Input = {input_values}, Expected Output = {expected_output}")
+                pass_flag_set.add('pass')
+                return 'pass', ''
             else:
-                print(f"Test Case Failed: Input = {input_values}, Expected Output = {expected_output}, Actual Output = {actual_output}")
+                print(f"Test Case Failed: Input = {input_values}, Expected Output = {expected_output}, Actual Output = {stdout}")
                 error_log.append(stdout)
                 retry_or_error_event_counter_list.append(True)
                 pass_flag_set.add('fail')
         except (ValueError, SyntaxError):
+            print("except (ValueError, SyntaxError)")
             # If the conversion to lists fails, compare the string representations
             if stdout.lower() == str(expected_output).lower():
                 print(f"Test Case Passed: Input = {input_values}, Expected Output = {expected_output}")

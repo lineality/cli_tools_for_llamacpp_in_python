@@ -13,3 +13,12 @@ track down:
 
 In html report, make error-set,
 and convert back to symbols for HTML
+
+
+types of expected values
+
+numbers -> float
+
+string -> lower
+
+boolean --- ?
