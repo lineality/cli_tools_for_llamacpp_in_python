@@ -22,3 +22,65 @@ numbers -> float
 string -> lower
 
 boolean --- ?
+
+how to handle None
+
+make a list of case-specific check functions
+
+
+# 
+string check
+float check
+int check
+boolean check 
+none check
+
+list check
+	string check
+	float check
+	int check
+	boolean check 
+	none check
+
+
+dict check
+	string check
+	float check
+	int check
+	boolean check 
+	none check
+
+set check?
+tuple check?
+
+
+for python
+for rust
+for js/ts
+for zig?
+for go
+for c
+for assembler?
+
+
+...
+
+Why aren't the unit tests in the code itself?
+why convert to string?
+
+todo:
+add config-jsons to the csv (clean text mode)
+...
+make one config file?
+
+or two 2? 
+model config...
+test config
+
+
+formatting tasks
+
+asking the model to put data into a valid json
+or reproduce one
+
+test this by loading the json
