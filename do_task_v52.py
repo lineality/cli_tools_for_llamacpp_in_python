@@ -535,6 +535,93 @@ def check_equivalent_all(expected, actual):
         return False
 
 
+def run_code_in_subprocess(run_this_code, programming_language):
+    """
+    for javascript/typescript, 
+    other packages need to be installed
+    """
+    try:
+        if programming_language == 'python':
+            print('selected python')
+            process = subprocess.run(
+                [sys.executable, "-c", run_this_code],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+            )
+            
+            stdout = getattr(process, "stdout", "").strip()
+            stderr = getattr(process, "stderr", "").strip()
+            
+            process_proxy_return_dict = {
+                'stdout':stdout,
+                'stderr':stderr
+            }
+            return process_proxy_return_dict
+            
+
+
+        elif programming_language == 'javascript':
+            print('selected javascript')
+            # Execute JavaScript code using Node.js
+            process = subprocess.run(
+                ["node", "-e", run_this_code],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+            )
+
+            # Execute JavaScript code using Node.js
+            if isinstance(js_process, subprocess.CompletedProcess):
+                stdout, stderr = js_process.stdout, js_process.stderr
+
+                process_proxy_return_dict = {
+                    'stdout':stdout,
+                    'stderr':stderr
+                }
+                return process_proxy_return_dict
+
+        elif programming_language == 'typescript':
+            print('selected typescript')
+            # Execute TypeScript code using Node.js with ts-node
+            process = subprocess.run(
+                ["ts-node", "-e", run_this_code],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+            )
+
+            if isinstance(ts_process, subprocess.CompletedProcess):
+                stdout, stderr = ts_process.stdout, ts_process.stderr
+
+                process_proxy_return_dict = {
+                    'stdout':stdout,
+                    'stderr':stderr
+                }
+                return process_proxy_return_dict
+        
+        else:  # if no matching language 
+            print('no output, defaulting to fail')
+            process_proxy_return_dict = {
+                'stdout': None,
+                'stderr': f'no known language ? -> {programming_language}'
+            }
+            return process_proxy_return_dict
+
+        # default if no other return
+        process_proxy_return_dict = {
+            'stdout': None,
+            'stderr': 'unable to run'
+        }
+        return process_proxy_return_dict
+    
+    except Exception as e:
+        process_proxy_return_dict = {
+            'stdout':'',
+            'stderr':str(e)
+        }
+        return process_proxy_return_dict
+
 ###################################
 # helper function for coding layer
 def pass_fail_unit_test_function__stdout_stderr(
@@ -543,6 +630,7 @@ def pass_fail_unit_test_function__stdout_stderr(
     function_name,
     retry_or_error_event_counter_list,
     error_log,
+    programming_language='python'
 ):
     """
     standard issues:
@@ -575,19 +663,23 @@ def pass_fail_unit_test_function__stdout_stderr(
             )
 
             # run only function the requested in the script
-            full_script = f"{extracted_code}\n\nif __name__ == '__main__': print({function_name}(*{input_values}))"
+            run_this_code = f"{extracted_code}\n\nif __name__ == '__main__': print({function_name}(*{input_values}))"
 
-            # Run the full script using subprocess
-            process = subprocess.run(
-                [sys.executable, "-c", full_script],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                universal_newlines=True,
-            )
+            # # Python version: Run the 'run_this_code' script using subprocess
+            # process = subprocess.run(
+            #     [sys.executable, "-c", run_this_code],
+            #     stdout=subprocess.PIPE,
+            #     stderr=subprocess.PIPE,
+            #     universal_newlines=True,
+            # )
+            
+            # multi-languaeg-version
+            process = run_code_in_subprocess(run_this_code, programming_language)
 
-            stdout = getattr(process, "stdout", "").strip()
-            stderr = getattr(process, "stderr", "").strip()
-
+            # read stdout and std err
+            stdout = process['stdout']
+            stderr = process['stderr']
+            
             stderr_plus = (
                 "Feedback: This code "
                 + extracted_code
@@ -603,6 +695,7 @@ def pass_fail_unit_test_function__stdout_stderr(
             print(f"stderr -> {stderr} {type(stderr)}")
 
             if not stdout:
+                print("No stdout found. Fail as error.")
                 error_log.append(stderr)
                 return False, stderr_plus
 
@@ -614,6 +707,7 @@ def pass_fail_unit_test_function__stdout_stderr(
 
         # Compare the actual_output output with the expected output
         try:
+            print('Valid-ish stdout:')
             print(f"expected_output -> {expected_output} {type(expected_output)}")
             print(f"actual_output -> {actual_output}")
 
@@ -6889,7 +6983,7 @@ task_file_config_dic_list = [
     #      "use_offset_and_range": False,
     #  },
     {
-        "file_name": "code_writing_test_set_7.jsonl",
+        "file_name": "short_code_writing_test_set_7.jsonl",
         "file_type": ".jsonl",
         "header_exits": False,
         "file_structure": "",
@@ -6939,6 +7033,7 @@ list_of_models = ["mistral-7b-instruct"]
 # list_of_models = ["llamacorn", "tinyllama"]
 list_of_models = ["wizardcoder-python-13b"]
 # list_of_models = ["tinyllama", "mistral-7b-instruct", "stablelm-zephyr-3b"]
+list_of_models = ["llamacorn", "dolphin-2_6-phi", "codeninja-1.0-openchat"]
 list_of_models = ["llamacorn"]
 
 
