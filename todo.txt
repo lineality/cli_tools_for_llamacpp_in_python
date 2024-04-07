@@ -119,3 +119,8 @@ alu equivilance check?
 any false positives?
 
 
+add javascript coding challenges
+
+look at how many retries...
+maybe a try-list that is global to track tries?
+but what about types of tries?
