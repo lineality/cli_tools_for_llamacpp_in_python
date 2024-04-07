@@ -20,20 +20,50 @@ types of expected values
 numbers -> float
 
 string -> lower
-
+ 
 boolean --- ?
 
 how to handle None
 
 make a list of case-specific check functions
+ 
+    # Function to extract code from markdown, assuming it's already defined
+    # Function to create_challenge_json, assuming it's already defined
 
-
+    # Assuming challenge_data and other necessary variables are already defined
+    
+    
 # 
 string check
 float check
 int check
 boolean check 
 none check
+list (one type)
+dict (one type value)
+set (one type value)
+tuple (one type value)
+
+    # Function to extract code from markdown, assuming it's already defined
+    # Function to create_challenge_json, assuming it's already defined
+
+    # Assuming challenge_data and other necessary variables are already defined
+
+    # Example usage: Get the code from the test-taker (in Markdown format)
+    code_markdown = input
+
+    # Load the challenge JSON file to get function name and test cases
+    with open("challenge.json", "r") as file:
+    challenge_data = json.load(file)
+
+    function_name = challenge_data["function_name"]
+    test_cases = challenge_data["test_cases"]
+
+    # Run the test
+    run_test(code_markdown, test_cases, function_name)
+
+for list a dict values
+all same type?
 
 list check
 	string check

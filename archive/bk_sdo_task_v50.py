@@ -351,7 +351,177 @@ def extract_code_from_markdown(markdown_text):
     return longest_code_block[1]
 
 
+
+
+####################################
+# helper functions for coding layer
+####################################
 import ast 
+def check_equivalent_string(expected, actual):
+    """
+    Checked if forced-type as 
+    'string'
+    make these equivilant
+    """
+    try:
+        return str(expected) == str(actual)
+    except:
+        return False
+
+def check_equivalent_integer(expected, actual):
+    """
+    Checked if forced-type as 
+    'int'
+    make these equivilant
+    """
+    try:
+        return int(expected) == int(actual)
+    except:
+        return False
+
+def check_equivalent_float(expected, actual, tolerance=1e-6):
+    """
+    Checked if forced-type as 
+    'float'
+    make these equivilant
+    """
+    try:
+        expected_float = float(expected)
+        actual_float = float(actual)
+        return abs(expected_float - actual_float) < tolerance and (expected_float < 0) == (actual_float < 0)
+    except:
+        return False
+
+def check_equivalent_boolean(expected, actual):
+    """
+    Checked if forced-type as 
+    'bool'
+    make these equivilantequivalent
+    """
+    try:
+        # print('bool')
+        if isinstance(expected, bool) and isinstance(actual, bool):
+            return expected == actual
+
+    except:
+        return False
+
+def check_equivalent_none(expected, actual):
+    """
+    Checked if forced-type as 
+    'None'
+    make these equivilantequivalent
+    """
+    try:
+        return expected is None and actual is None
+    except:
+        return False
+
+# helper wrapper 1: check all
+def simple_types_check_equivalent(expected, actual):
+    """
+    Check if expected and actual are equivalent using various type-specific comparison functions.
+    Returns True if any of the type-specific comparisons are True, otherwise returns False.
+    """
+    checks = [
+        check_equivalent_string,
+        check_equivalent_integer,
+        check_equivalent_float,
+        check_equivalent_boolean,
+        check_equivalent_none
+    ]
+
+    try:
+
+        for check_func in checks:
+            if check_func(expected, actual):
+                return True
+
+        return False
+    except:
+        return False
+
+def check_equivalent_list(expected_list, actual_list_str):
+    """
+    Check if two lists are equivalent by comparing each element using the check_equivalent function.
+    The actual_list_str is expected to be a string representation of a list.
+    Returns True if the lists are equivalent, otherwise returns False.
+    """
+    try:
+        # Convert the actual_list_str to a list using ast.literal_eval
+        actual_list = ast.literal_eval(actual_list_str)
+
+        if len(expected_list) != len(actual_list):
+            # print('wrong length false')
+            return False
+
+        for expected_item, actual_item in zip(expected_list, actual_list):
+            if not simple_types_check_equivalent(expected_item, actual_item):
+                return False
+
+        return True
+
+    except (SyntaxError, ValueError):
+        # If the actual_list_str is not a valid list representation, return False
+        # print('exception')
+        return False
+
+
+def check_equivalent_dict(expected_dict, actual_dict):
+    """
+    Check if two dictionaries are equivalent by comparing each key-value pair using the check_equivalent function.
+    Returns True if the dictionaries are equivalent, otherwise returns False.
+    """
+    try:
+        if len(expected_dict) != len(actual_dict):
+            return False
+
+        for key in expected_dict:
+            if key not in actual_dict:
+                return False
+
+            expected_value = expected_dict[key]
+            actual_value = actual_dict[key]
+
+            if isinstance(expected_value, dict):
+                if not check_equivalent_dict(expected_value, actual_value):
+                    return False
+            elif isinstance(expected_value, list):
+                if not check_equivalent_list(expected_value, actual_value):
+                    return False
+            else:
+                if not simple_types_check_equivalent(expected_value, actual_value):
+                    return False
+        return True
+    except:
+        return False
+        
+# helper wrapper 2: check all
+def check_equivalent_all(expected, actual):
+    """
+    Check if expected and actual are equivalent using various type-specific comparison functions.
+    Returns True if any of the type-specific comparisons are True, otherwise returns False.
+    """
+    checks = [
+        check_equivalent_string,
+        check_equivalent_integer,
+        check_equivalent_float,
+        check_equivalent_boolean,
+        check_equivalent_none,
+        check_equivalent_list,
+    ]
+
+    try:
+
+        for check_func in checks:
+            if check_func(expected, actual):
+                return True
+
+        return False
+    except:
+        return False
+
+###################################
 # helper function for coding layer
 def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, function_name, retry_or_error_event_counter_list, error_log):
     """
@@ -380,6 +550,7 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
     # Run the test
     run_test(code_markdown, test_cases, function_name)
     """
+    
     
     # Extract the code from the Markdown
     extracted_code = extract_code_from_markdown(code_markdown)
@@ -433,6 +604,12 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
 
         print(f"expected_output -> {expected_output} {type(expected_output)}")
         print(f"stdout -> {stdout} {type(stdout)}")
+        print(f"stderr -> {stderr} {type(stderr)}")
+        
+        if not stdout:
+            error_log.append(stderr)
+            return False, stderr_plus
+
 
         # # Compare the actual output with the expected output
         # try:
@@ -486,8 +663,10 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
             else:
                 print(f"Test Case Failed: Input = {input_values}, Expected Output = {expected_output}, Actual Output = {stdout}")
                 error_log.append(stdout)
+                error_log.append(stderr)
                 retry_or_error_event_counter_list.append(True)
                 pass_flag_set.add('fail')
+
         except (ValueError, SyntaxError):
             print("except (ValueError, SyntaxError)")
             # If the conversion to lists fails, compare the string representations
@@ -497,11 +676,13 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
             else:
                 print(f"Test Case Failed: Input = {input_values}, Expected Output = {expected_output}, Actual Output = {stdout}")
                 error_log.append(stdout)
+                error_log.append(stderr)
                 retry_or_error_event_counter_list.append(True)
                 pass_flag_set.add('fail')
         
         except Exception as e:
             error_log.append(stdout)
+            error_log.append(stderr)
             pass_flag_set.add('fail')
             error_message = str(e) + process.stderr.strip()
             return False, error_message
