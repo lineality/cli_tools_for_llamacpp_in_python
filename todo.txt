@@ -114,3 +114,8 @@ asking the model to put data into a valid json
 or reproduce one
 
 test this by loading the json
+
+alu equivilance check?
+any false positives?
+
+
