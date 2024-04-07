@@ -579,7 +579,7 @@ def pass_fail_unit_test_function__stdout_stderr(code_markdown, test_cases, funct
             actual = stdout
 
 
-         except Exception as e:
+        except Exception as e:
             error_message = str(e) 
             return False, error_message
 
