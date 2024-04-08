@@ -535,13 +535,220 @@ def check_equivalent_all(expected, actual):
         return False
 
 
-def run_code_in_subprocess(run_this_code, programming_language):
+import os
+import shutil
+import subprocess
+
+import os
+import shutil
+import subprocess
+
+def run_rust_code(run_this_code, test_case, dependencies=None):
+    """
+    1. create repo called coding_challenge
+        $ cargo new coding_challenge
+    2. overwrite src/main.rs with code
+    3. add dependencies to Cargo.toml (if provided)
+    4. run unit tests
+        $ cargo test
+    5. check if the test passed or failed based on the expected output
+    6. remove coding_challenge dir
+    """
+    # Test Case Data
+    input_values = test_case["input"]
+    expected_output = test_case["expected_output"]
+
+    project_dir = "coding_challenge"
+
+    # 1. Create the project directory
+    os.makedirs(project_dir, exist_ok=True)
+
+    # 2. Initialize a new Cargo project
+    subprocess.run(["cargo", "new", "--bin", project_dir], check=True)
+
+    # 3. Overwrite src/main.rs with the provided code
+    main_rs_path = os.path.join(project_dir, "src", "main.rs")
+    with open(main_rs_path, "w") as f:
+        f.write(run_this_code)
+
+    # 4. Add dependencies to Cargo.toml (if provided)
+    if dependencies:
+        cargo_toml_path = os.path.join(project_dir, "Cargo.toml")
+        with open(cargo_toml_path, "a") as f:
+            f.write("\n[dependencies]\n")
+            for dep_name, dep_version in dependencies.items():
+                f.write(f"{dep_name} = \"{dep_version}\"\n")
+
+    # 5. Run unit tests
+    os.chdir(project_dir)
+    test_result = subprocess.run(["cargo", "test"], capture_output=True, text=True)
+    stdout = test_result.stdout
+
+    # 6. Check if the test passed or failed based on the expected output
+    test_passed = str(expected_output) in stdout
+
+    # 7. Remove the project directory
+    os.chdir("..")
+    shutil.rmtree(project_dir)
+
+    return test_passed
+
+import os
+import shutil
+import subprocess
+
+def run_rust_code(extracted_code, testcases_list, function_name, dependencies=None):
+    """
+    1. create repo called coding_challenge
+        $ cargo new coding_challenge
+    2. create a code test script based on the test case data
+        input & expected output
+     
+    3. make script with BOTH function AND code-test
+    4. write BOTH function AND code-test to src/main.rs
+    5. add dependencies to Cargo.toml (if provided)
+    6. run cargo test
+        $ cargo test
+        test the expected output inside the rust test
+        output pass/fail (or equivilant)
+    7. get test result (passed or failed), stdout, stderr
+    8. remove coding_challenge dir
+    9. Return 'pass' or 'fail' with stdout, stderr
+    """
+
+    try:
+        project_dir = "coding_challenge"
+        
+        # if directory exists, remove it. 
+        if os.path.isdir(project_dir):
+            shutil.rmtree(project_dir)
+
+
+        # 1. Initialize a new Cargo project (this creates directory)
+        # why --bin?
+        subprocess.run(["cargo", "new", "--bin", project_dir], check=True)
+
+        # 2. Make test script
+        """
+        e.g.
+        #[cfg(test)]
+        mod tests {
+            use super::*;
+
+            #[test]
+            fn test_add() {
+                assert_eq!(add(2, 3), 5);
+                assert_eq!(add(5, -3), 2);
+                assert_eq!(add(-4, -6), -10)    }
+        }    
+        """
+        
+        """
+        Construct code test
+        """
+        test_script = "#[cfg(test)]\n"
+        test_script += "mod tests {\n"
+        test_script += "    use super::*;\n"
+        test_script += "\n"
+        test_script += "    #[test]\n"
+        test_script += "    fn test_add() {\n"
+        
+        for test_case in testcases_list:
+            # extract Test Case Data
+            input_values = test_case["input"]
+            expected_output = test_case["expected_output"]
+            
+            """
+            Construct code test values string
+            """
+            input_values_string = ', '.join(map(str, input_values))
+            # input_values_string = ''
+            # for this_value in input_values:
+            #     input_values_string += str(this_value)
+            #     input_values_string += ','
+            
+            test_script += f"        assert_eq!({function_name}({input_values_string}), {expected_output});\n"
+        
+        test_script += "}\n" 
+        test_script += "}\n" 
+        
+        # 3: make overall script
+        run_this_code = extracted_code + "\n" + test_script
+        
+        print('run_this_code', run_this_code)
+        
+        # 4. Overwrite src/main.rs with the provided code
+        main_rs_path = os.path.join(project_dir, "src", "main.rs")
+        with open(main_rs_path, "w") as f:
+            f.write(run_this_code)
+
+        # 5. Add dependencies to Cargo.toml (if provided)
+        if dependencies:
+            cargo_toml_path = os.path.join(project_dir, "Cargo.toml")
+            with open(cargo_toml_path, "a") as f:
+                f.write("\n[dependencies]\n")
+                for dep_name, dep_version in dependencies.items():
+                    f.write(f"{dep_name} = \"{dep_version}\"\n")
+
+        # 6. Run unit tests
+        os.chdir(project_dir)
+        test_result = subprocess.run(["cargo", "test"], capture_output=True, text=True)
+
+        # 7. results
+        stdout = test_result.stdout
+        stderr = test_result.stderr
+        # maybe extract a pass/fail? what is cargos output format?
+
+
+        # Regular expression pattern to match the test result
+        pattern = r"test result: (\w+)\. (\d+) passed; (\d+) failed;"
+
+        # Search for the pattern in the output
+        match = re.search(pattern, stdout)
+
+        pass_fail_result = 'fail'
+        if match:
+            result = match.group(1)
+            passed = int(match.group(2))
+            failed = int(match.group(3))
+            
+            if result == "ok" and failed == 0:
+                print("All tests passed!")
+                pass_fail_result = 'pass'
+            else:
+                print(f"Tests failed. Passed: {passed}, Failed: {failed}")
+                pass_fail_result = 'fail'
+        else:
+            print("Unable to determine test result.")
+
+        # 8. The myth of the eternal return
+        return pass_fail_result, stdout, stderr
+        # return stdout, stderr
+
+    except Exception as e:
+        print("Issue:", str(e))
+        return 'fail', None, 'fail'
+
+    finally:
+        # 9. Remove the project directory
+        os.chdir("..")
+        shutil.rmtree(project_dir)
+
+def run_code_in_subprocess(extracted_code, test_cases, function_name, test_case, programming_language):
     """
     for javascript/typescript, 
     other packages need to be installed
+    
+    input_values list is for the code test case
     """
     try:
+        
         if programming_language == 'python':
+            
+            
+            # run only function the requested in the script
+            run_this_code = f"{extracted_code}\n\nif __name__ == '__main__': print({function_name}(*{input_values}))"
+            
             print('selected python')
             process = subprocess.run(
                 [sys.executable, "-c", run_this_code],
@@ -559,8 +766,22 @@ def run_code_in_subprocess(run_this_code, programming_language):
             }
             return process_proxy_return_dict
             
+        elif programming_language == 'rust':
+        
+            score, stdout, stderr = run_rust_code(extracted_code, testcases_list, function_name, dependencies=None)
+            
+            if score == 'pass':
+                process_proxy_return_dict = {
+                    'stdout': score,
+                    'stderr': stdout + stderr
+                }
 
-
+            else:
+                process_proxy_return_dict = {
+                    'stdout': 'fail',
+                    'stderr': stdout + stderr
+                }
+        
         elif programming_language == 'javascript':
             print('selected javascript')
             # Execute JavaScript code using Node.js
@@ -662,9 +883,9 @@ def pass_fail_unit_test_function__stdout_stderr(
                 "input()", "'error_no_input_allowed'"
             )
 
-            # run only function the requested in the script
-            run_this_code = f"{extracted_code}\n\nif __name__ == '__main__': print({function_name}(*{input_values}))"
-
+            # # run only function the requested in the script
+            # run_this_code = f"{extracted_code}\n\nif __name__ == '__main__': print({function_name}(*{input_values}))"
+            
             # # Python version: Run the 'run_this_code' script using subprocess
             # process = subprocess.run(
             #     [sys.executable, "-c", run_this_code],
@@ -674,7 +895,8 @@ def pass_fail_unit_test_function__stdout_stderr(
             # )
             
             # multi-languaeg-version
-            process = run_code_in_subprocess(run_this_code, programming_language)
+            # using: input_values = test_case["input"]
+            process = run_code_in_subprocess(extracted_code, test_case, programming_language)
 
             # read stdout and std err
             stdout = process['stdout']
@@ -690,6 +912,10 @@ def pass_fail_unit_test_function__stdout_stderr(
                 + "Try again: "
             )
 
+            # pre-calculated for rust
+            if programming_language == 'rust':
+                return process
+            
             print(f"expected_output -> {expected_output} {type(expected_output)}")
             print(f"stdout -> {stdout} {type(stdout)}")
             print(f"stderr -> {stderr} {type(stderr)}")
@@ -7085,3 +7311,52 @@ if __name__ == "__main__":
     # make html report
     html_for_all_reports()
     html_for_all_score_tallies()
+    
+    
+    
+    #######################
+    # demo rust code tests
+    #######################
+    
+    extracted_code = """
+    fn multiply(a: f64, b: f64, c: f64) -> f64 {
+        a * b * c
+    }
+    """
+
+    test_cases = [
+        {"input": [4.0, 5.0, 2.0], "expected_output": 40.0},
+        {"input": [3.5, 2.0, 1.5], "expected_output": 10.5},
+        {"input": [2.0, 2.0, 2.0], "expected_output": 8.0},
+        {"input": [1.0, 1.0, 1.0], "expected_output": 1.0}
+    ]
+
+    function_name = "multiply"
+    
+    score, stdout, stderr = run_rust_code(extracted_code, test_cases, function_name, dependencies=None)
+    print('score', score)
+    print('out', stdout)
+    print('err', stderr)
+
+
+    extracted_code = """
+
+    fn multiply(a: f64, b: f64, c: f64) -> f64 {
+        a * b * c
+    }
+    """
+
+
+    test_cases = [
+        {"input": [4.0, 5.0, 2.0], "expected_output": 40.0},
+        {"input": [3.5, 2.0, 1.5], "expected_output": 10.5},
+        {"input": [2.0, 2.0, 2.0], "expected_output": 8.0},
+        {"input": [1.0, 1.0, 1.0], "expected_output": 1.0}
+    ]
+
+    function_name = "multiply"
+
+    score, stdout, stderr = run_rust_code(extracted_code, test_cases, function_name, dependencies=None)
+    print('score', score)
+    print('out', stdout)
+    print('err', stderr)

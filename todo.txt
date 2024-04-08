@@ -124,3 +124,11 @@ add javascript coding challenges
 look at how many retries...
 maybe a try-list that is global to track tries?
 but what about types of tries?
+
+
+
+maybe update the python code test code to do a full code test inside python...like rust does
+
+figure out how to specify language input...
+make code-tests for rust-language...
+maybe add field to test-dict?
