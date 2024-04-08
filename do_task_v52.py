@@ -337,13 +337,18 @@ def extract_code_from_markdown(markdown_text):
 
     """
     # Regular expression pattern to match code blocks
-    code_block_pattern = r"```(python|markdown|code)?\n([\s\S]*?)\n```"
+    code_block_pattern = r"```(python|rust|markdown|code)?\n([\s\S]*?)\n```"
     # Find all code blocks in the text
     code_blocks = re.findall(code_block_pattern, markdown_text, re.MULTILINE)
+    
+    print(f"extract_code_from_markdown code_blocks -> {code_blocks}")
 
     # Find the longest code block
     longest_code_block = max(code_blocks, key=lambda x: len(x[1]), default=("", ""))
 
+    print(f"extract_code_from_markdown longest_code_block -> {longest_code_block}")
+
+    
     return longest_code_block[1]
 
 
@@ -699,6 +704,7 @@ def run_rust_code(extracted_code, testcases_list, function_name, dependencies=No
         stderr = test_result.stderr
         # maybe extract a pass/fail? what is cargos output format?
 
+        print(f"rust output -> {stdout} {stderr}")
 
         # Regular expression pattern to match the test result
         pattern = r"test result: (\w+)\. (\d+) passed; (\d+) failed;"
@@ -756,6 +762,8 @@ def run_code_in_subprocess(extracted_code, test_cases, function_name, test_case,
                 stderr=subprocess.PIPE,
                 universal_newlines=True,
             )
+            
+            print(f"python output -> {process}")
             
             stdout = getattr(process, "stdout", "").strip()
             stderr = getattr(process, "stderr", "").strip()
@@ -896,7 +904,7 @@ def pass_fail_unit_test_function__stdout_stderr(
             
             # multi-languaeg-version
             # using: input_values = test_case["input"]
-            process = run_code_in_subprocess(extracted_code, test_case, programming_language)
+            process = run_code_in_subprocess(extracted_code, test_cases, function_name, test_case, programming_language)
 
             # read stdout and std err
             stdout = process['stdout']
@@ -6030,11 +6038,11 @@ def do_task_please(
 
                                     {this_task}
 
-                                    Put your python code in markdown format (three pips)
+                                    Put your {programming_language} code in markdown format (three pips)
                                     without hard-coding any answers into the function.
 
                                     Write any other comments or plans before you write the function 
-                                    and outside of the python markdown.
+                                    and outside of the {programming_language} markdown.
                                     """
 
                             else:
@@ -7327,28 +7335,28 @@ if __name__ == "__main__":
     
     
     
-    #######################
-    # demo rust code tests
-    #######################
+    # #######################
+    # # demo rust code tests
+    # #######################
     
-    extracted_code = """
-    fn multiply(a: f64, b: f64, c: f64) -> f64 {
-        a * b * c
-    }
-    """
+    # extracted_code = """
+    # fn multiply(a: f64, b: f64, c: f64) -> f64 {
+    #     a * b * c
+    # }
+    # """
 
-    test_cases = [
-        {"input": [4.0, 5.0, 2.0], "expected_output": 40.0},
-        {"input": [3.5, 2.0, 1.5], "expected_output": 10.5},
-        {"input": [2.0, 2.0, 2.0], "expected_output": 8.0},
-        {"input": [1.0, 1.0, 1.0], "expected_output": 1.0}
-    ]
+    # test_cases = [
+    #     {"input": [4.0, 5.0, 2.0], "expected_output": 40.0},
+    #     {"input": [3.5, 2.0, 1.5], "expected_output": 10.5},
+    #     {"input": [2.0, 2.0, 2.0], "expected_output": 8.0},
+    #     {"input": [1.0, 1.0, 1.0], "expected_output": 1.0}
+    # ]
 
-    function_name = "multiply"
+    # function_name = "multiply"
     
-    score, stdout, stderr = run_rust_code(extracted_code, test_cases, function_name, dependencies=None)
-    print('score', score)
-    print('out', stdout)
-    print('err', stderr)
+    # score, stdout, stderr = run_rust_code(extracted_code, test_cases, function_name, dependencies=None)
+    # print('score', score)
+    # print('out', stdout)
+    # print('err', stderr)
 
 
