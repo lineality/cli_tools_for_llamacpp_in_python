@@ -3801,6 +3801,7 @@ def general_task_call_api_within_structure_check(
     error_log,
     test_cases=None,
     function_name=None,
+    programming_language=None,
 ):
     """
     task_mode_output_structure_mode is passed to the output structure checker
@@ -3963,6 +3964,7 @@ def general_task_call_api_within_structure_check(
                     function_name=function_name,
                     retry_or_error_event_counter_list=retry_or_error_event_counter_list,
                     error_log=error_log,
+                    programming_language=programming_language,
                 )
             )
 
@@ -5783,6 +5785,7 @@ def do_task_please(
                         error_comment_data_lookup_table_field_name,
                         function_test_cases__field_name,
                         function_name__field_name,
+                        "programming_language",
                     ]
 
                     # Step 1: Extract the JSON object from the specified line
@@ -5860,6 +5863,15 @@ def do_task_please(
                         print(f"function_name -> {function_name}{type(function_name)}")
                     else:
                         function_name = None
+
+                    
+                    # programming_language for code test
+                    if 'programming_language' in specific_fields:
+                        programming_language = specific_fields['programming_language']
+                        print(f"test_cases -> {test_cases}{type(test_cases)}")
+                    else:
+                        programming_language = None
+
 
                     ##############################
                     ##############################
@@ -6307,6 +6319,7 @@ def do_task_please(
                                 error_log,
                                 test_cases,
                                 function_name,
+                                programming_language,
                             )
                         )
 
@@ -7209,7 +7222,7 @@ task_file_config_dic_list = [
     #      "use_offset_and_range": False,
     #  },
     {
-        "file_name": "short_code_writing_test_set_7.jsonl",
+        "file_name": "short_code_writing_test_set_8.jsonl",
         "file_type": ".jsonl",
         "header_exits": False,
         "file_structure": "",
@@ -7339,24 +7352,3 @@ if __name__ == "__main__":
     print('err', stderr)
 
 
-    extracted_code = """
-
-    fn multiply(a: f64, b: f64, c: f64) -> f64 {
-        a * b * c
-    }
-    """
-
-
-    test_cases = [
-        {"input": [4.0, 5.0, 2.0], "expected_output": 40.0},
-        {"input": [3.5, 2.0, 1.5], "expected_output": 10.5},
-        {"input": [2.0, 2.0, 2.0], "expected_output": 8.0},
-        {"input": [1.0, 1.0, 1.0], "expected_output": 1.0}
-    ]
-
-    function_name = "multiply"
-
-    score, stdout, stderr = run_rust_code(extracted_code, test_cases, function_name, dependencies=None)
-    print('score', score)
-    print('out', stdout)
-    print('err', stderr)
