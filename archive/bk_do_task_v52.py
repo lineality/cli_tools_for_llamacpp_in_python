@@ -370,18 +370,9 @@ def extract_code_from_markdown(markdown_text, function_name):
     if len(matching_code_blocks) > 1:
         longest_matching_code_block = max(matching_code_blocks, key=lambda x: len(x[1]))
         print(f"extract_code_from_markdown longest_matching_code_block -> {longest_matching_code_block}")
-        
-        match = longest_matching_code_block[1]
-        
+        return longest_matching_code_block[1]
     elif len(matching_code_blocks) == 1:
-        print(f"extract_code_from_markdown matching_code_blocks[0][1] -> {matching_code_blocks[0][1]}")
-        match = matching_code_blocks[0][1]
-        
-    if match: 
-        print(f"found this code: {match}")
-        return match
-
-    return None
+        return matching_code_blocks[0][1]
 
 ####################################
 # helper functions for coding layer
@@ -651,19 +642,10 @@ def run_rust_code(extracted_code, testcases_list, function_name, dependencies=No
     8. remove coding_challenge dir
     9. Return 'pass' or 'fail' with stdout, stderr
     """
-    stdout = ''
-    stderr = ''
-
-    print("\n Starting run_rust_code(extracted_code, testcases_list, function_name, dependencies=None")
-
-    print('extracted_code', extracted_code)
-    print('testcases_list', testcases_list)
-    print('function_name', function_name)
-    print('dependencies', dependencies)
 
     try:
         project_dir = "coding_challenge"
-
+        
         # if directory exists, remove it. 
         if os.path.isdir(project_dir):
             shutil.rmtree(project_dir)
@@ -742,60 +724,32 @@ def run_rust_code(extracted_code, testcases_list, function_name, dependencies=No
         # 7. results
         stdout = test_result.stdout
         stderr = test_result.stderr
-        all_output = stdout + stderr
         # maybe extract a pass/fail? what is cargos output format?
 
-        print(f"""rust output 
-
-            rust stdout -> {stdout} 
-
-
-            rust stderr ->  {stderr}
-
-            """)
+        print(f"rust output -> {stdout} {stderr}")
 
         # Regular expression pattern to match the test result
         pattern = r"test result: (\w+)\. (\d+) passed; (\d+) failed;"
 
         # Search for the pattern in the output
         match = re.search(pattern, stdout)
-        print(f"regex match -> {match}")
 
         pass_fail_result = 'fail'
-
         if match:
             result = match.group(1)
             passed = int(match.group(2))
             failed = int(match.group(3))
-            print(f"Tests Passed or failed. Passed: {passed}, Failed: {failed}")
             
             if result == "ok" and failed == 0:
                 print("All tests passed!")
                 pass_fail_result = 'pass'
-                stdout = 'pass'
-                stderr = ''
             else:
                 print(f"Tests failed. Passed: {passed}, Failed: {failed}")
                 pass_fail_result = 'fail'
         else:
-            print("No success match found")
-            pass_fail_result = 'fail'
-            
+            print("Unable to determine test result.")
+
         # 8. The myth of the eternal return
-        if pass_fail_result == 'fail':
-
-            pattern = r"^error\[([A-Z0-9]+)\]: (.*)$"
-            errors = re.findall(pattern, all_output, re.MULTILINE)
-            error_set = set(f"Error Number: {error_num}, Description: {error_desc.strip()}" for error_num, error_desc in errors)
-            error_set_string = ', '.join(str(item) for item in error_set)
-            
-            print("error_set", error_set_string)
-            stderr = error_set_string
-
-        print(f"returning")
-        print(f"pass_fail_result -> {pass_fail_result}")
-        print(f"stdout -> {stdout}")
-        print(f"stderr -> {stderr}")
         return pass_fail_result, stdout, stderr
         # return stdout, stderr
 
@@ -808,12 +762,7 @@ def run_rust_code(extracted_code, testcases_list, function_name, dependencies=No
         os.chdir("..")
         shutil.rmtree(project_dir)
 
-def run_code_in_subprocess(
-    extracted_code, 
-    test_cases, 
-    function_name, 
-    test_case, 
-    programming_language):
+def run_code_in_subprocess(extracted_code, test_cases, function_name, test_case, programming_language):
     """
     for javascript/typescript, 
     other packages need to be installed
@@ -823,11 +772,11 @@ def run_code_in_subprocess(
     try:
         
         if programming_language == 'python':
-
-
+            
+            
             # run only function the requested in the script
             run_this_code = f"{extracted_code}\n\nif __name__ == '__main__': print({function_name}(*{input_values}))"
-
+            
             print('selected python')
             process = subprocess.run(
                 [sys.executable, "-c", run_this_code],
@@ -835,46 +784,33 @@ def run_code_in_subprocess(
                 stderr=subprocess.PIPE,
                 universal_newlines=True,
             )
-
+            
             print(f"python output -> {process}")
-
+            
             stdout = getattr(process, "stdout", "").strip()
             stderr = getattr(process, "stderr", "").strip()
-
+            
             process_proxy_return_dict = {
                 'stdout':stdout,
                 'stderr':stderr
             }
             return process_proxy_return_dict
-
-        elif programming_language == 'rust':
-            print("language, rust in run_code_in_subprocess()")
-        
-            score, stdout, stderr = run_rust_code(
-                extracted_code, 
-                test_cases, 
-                function_name, 
-                dependencies=None)
             
-            print(f"""
-                the rust 
-                score -> {score}
-                stdout -> {stdout}
-                stderr -> {stderr}""")
+        elif programming_language == 'rust':
+        
+            score, stdout, stderr = run_rust_code(extracted_code, testcases_list, function_name, dependencies=None)
             
             if score == 'pass':
                 process_proxy_return_dict = {
                     'stdout': score,
                     'stderr': stdout + stderr
                 }
-                return process_proxy_return_dict
 
             else:
                 process_proxy_return_dict = {
                     'stdout': 'fail',
                     'stderr': stdout + stderr
                 }
-                return process_proxy_return_dict
         
         elif programming_language == 'javascript':
             print('selected javascript')
@@ -939,14 +875,13 @@ def run_code_in_subprocess(
 
 ###################################
 # helper function for coding layer
-# TODO: how is this returning the words stdout stderr?
 def pass_fail_unit_test_function__stdout_stderr(
     code_markdown,
     test_cases,
     function_name,
     retry_or_error_event_counter_list,
     error_log,
-    programming_language=None
+    programming_language='python'
 ):
     """
     standard issues:
@@ -960,13 +895,8 @@ def pass_fail_unit_test_function__stdout_stderr(
 
     # Extract the code from the Markdown
     extracted_code = extract_code_from_markdown(code_markdown, function_name)
-    
-    if not extracted_code:
-        return False, f"This is not code correctly formated in markdown: {code_markdown}"
 
     if programming_language == 'rust':
-        print('rust selected in pass_fail_unit_test_function__stdout_stderr()')
-        
         test_case = ''
         rust_result = run_code_in_subprocess(
             extracted_code, 
@@ -974,20 +904,10 @@ def pass_fail_unit_test_function__stdout_stderr(
             function_name, 
             test_case, 
             programming_language)
-        
-        print(f"rust_result -> {rust_result}")
-        # set two outputs
-        stdout = rust_result['stdout']
-        stderr = rust_result['stderr']
-
-        # log error if fail
-        if rust_result['stdout'] == 'fail':
+        if not stdout:
             print("No stdout found. Fail as error.")
-            stdout = False
             error_log.append(rust_result['stderr'])
-
-        # return no stdout if error or fail
-        return stdout, stderr
+        return rust_result
                 
     for test_case in test_cases:
 
@@ -4088,19 +4008,12 @@ def general_task_call_api_within_structure_check(
                     programming_language=programming_language,
                 )
             )
-            print(f"""
-                general_task_call_api_within_structure_check pass_fail_unit_test_function__stdout_stderr 
-                task_response_string -> {task_response_string}
-                """)
-            print(f"error_message -> {error_message}")
 
             if task_response_string == "pass":
                 return task_response_string
 
             else:
                 error_message_list_grab_last.append(error_message)
-                retry_counter += 1
-                task_response_string = None
 
         else:
             task_response_string = task_check_structure_of_response(
@@ -7455,29 +7368,28 @@ if __name__ == "__main__":
     
     
     
-    #######################
-    # demo rust code tests
-    #######################
+    # #######################
+    # # demo rust code tests
+    # #######################
     
-    extracted_code = """
-    fn multiply(a: f64, b: f64, c: f64) -> f64 {
-        a * b * c
-    }
-    """
+    # extracted_code = """
+    # fn multiply(a: f64, b: f64, c: f64) -> f64 {
+    #     a * b * c
+    # }
+    # """
 
-    test_cases = [
-        {"input": [4.0, 5.0, 2.0], "expected_output": 40.0},
-        {"input": [3.5, 2.0, 1.5], "expected_output": 10.5},
-        {"input": [2.0, 2.0, 2.0], "expected_output": 8.0},
-        {"input": [1.0, 1.0, 1.0], "expected_output": 1.0}
-    ]
+    # test_cases = [
+    #     {"input": [4.0, 5.0, 2.0], "expected_output": 40.0},
+    #     {"input": [3.5, 2.0, 1.5], "expected_output": 10.5},
+    #     {"input": [2.0, 2.0, 2.0], "expected_output": 8.0},
+    #     {"input": [1.0, 1.0, 1.0], "expected_output": 1.0}
+    # ]
 
-    function_name = "multiply"
+    # function_name = "multiply"
     
-    score, stdout, stderr = run_rust_code(extracted_code, test_cases, function_name, dependencies=None)
-    
-    print('score', score)
-    print('out', stdout)
-    print('err', stderr)
+    # score, stdout, stderr = run_rust_code(extracted_code, test_cases, function_name, dependencies=None)
+    # print('score', score)
+    # print('out', stdout)
+    # print('err', stderr)
 
 
