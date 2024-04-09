@@ -168,7 +168,7 @@ create_challenge_json(function_name, input_parameters, output_description, test_
 # calculate_right_triangle_area
 function_name = "multiply"
 input_parameters = ["a", "b", "c"]
-output_description = "Multiply three numbers. Get the product of three inputs."
+output_description = "Multiply three float numbers. Get the product of three float inputs."
 test_cases = [
     {
         "input": [4.0, 5.0, 2.0],
@@ -180,11 +180,11 @@ test_cases = [
     },
     {
         "input": [2.0, 2.0, 2.0],
-        "expected_output": 8
+        "expected_output": 8.0
     },
     {
         "input": [1.0, 1.0, 1.0],
-        "expected_output": 1
+        "expected_output": 1.0
     },
 ]
 programming_language = 'rust'

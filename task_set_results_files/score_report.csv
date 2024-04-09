@@ -1,0 +1,3 @@
+"percent","model","score","task_file","time_stamp"
+"100.0","llamacorn","short_code_writing_test_set_8.jsonl","1 / 1","2024-04-09-10:46:41925147"
+"100.0","mistral-7b-instruct","short_code_writing_test_set_8.jsonl","1 / 1","2024-04-09-10:46:41925371"
