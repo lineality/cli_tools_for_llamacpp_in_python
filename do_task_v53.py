@@ -16,6 +16,7 @@ Uncomment for cloud mode
 """
 Offline and Vanilla OK!
 """
+import traceback
 import string
 import random
 import time
@@ -73,6 +74,7 @@ def make_answers_directory_and_csv_path_header_string(
                 solution_dir_path, exist_ok=True
             )  # Ensure the directory is created if it does not exist
         except Exception as e:
+            traceback.print_exc()
             print(f"Error creating directory {solution_dir_path}: {e}")
             return  # Exit the function if directory creation fails
 
@@ -159,6 +161,7 @@ def list_files_in_aitaskfiles_dir(file_type_list=None):
                 file_path, exist_ok=True
             )  # Ensure the directory is created if it does not exist
         except Exception as e:
+            traceback.print_exc()
             print(f"Error creating directory {file_path}: {e}")
             return  # Exit the function if directory creation fails
 
@@ -211,6 +214,7 @@ def list_files_in_aitaskfiles_dir(file_type_list=None):
         return output_list
 
     except Exception as e:
+        traceback.print_exc()
         raise e
 
 
@@ -371,17 +375,18 @@ def extract_code_from_markdown(markdown_text, function_name):
 
     # If there are multiple matching code blocks, find the longest one
     if len(matching_code_blocks) > 1:
+        print('found more than one match containing function definition')
         longest_matching_code_block = max(matching_code_blocks, key=lambda x: len(x[1]))
-        print(f"extract_code_from_markdown longest_matching_code_block -> {longest_matching_code_block}")
+        # print(f"extract_code_from_markdown longest_matching_code_block -> {longest_matching_code_block}")
         
         match = longest_matching_code_block[1]
         
     elif len(matching_code_blocks) == 1:
-        print(f"extract_code_from_markdown matching_code_blocks[0][1] -> {matching_code_blocks[0][1]}")
+        # print(f"extract_code_from_markdown matching_code_blocks[0][1] -> {matching_code_blocks[0][1]}")
         match = matching_code_blocks[0][1]
         
     if match: 
-        print(f"found this code: {match}")
+        print(f"\n found this code: {match} \n")
         return match
 
     return None
@@ -401,6 +406,7 @@ def check_equivalent_string(expected, actual):
     try:
         return str(expected) == str(actual)
     except Exception as e:
+        traceback.print_exc()
         print(str(e))
         return False
 
@@ -414,6 +420,7 @@ def check_equivalent_integer(expected, actual):
     try:
         return int(expected) == int(actual)
     except Exception as e:
+        traceback.print_exc()
         print(str(e))
         return False
 
@@ -431,6 +438,7 @@ def check_equivalent_float(expected, actual, tolerance=1e-6):
             expected_float < 0
         ) == (actual_float < 0)
     except Exception as e:
+        traceback.print_exc()
         print(str(e))
         return False
 
@@ -447,6 +455,7 @@ def check_equivalent_boolean(expected, actual):
             return expected == actual
 
     except Exception as e:
+        traceback.print_exc()
         print(str(e))
         return False
 
@@ -460,6 +469,7 @@ def check_equivalent_none(expected, actual):
     try:
         return expected is None and actual is None
     except Exception as e:
+        traceback.print_exc()
         print(str(e))
         return False
 
@@ -486,6 +496,7 @@ def simple_types_check_equivalent(expected, actual):
 
         return False
     except Exception as e:
+        traceback.print_exc()
         print(str(e))
         return False
 
@@ -543,6 +554,7 @@ def check_equivalent_dict(expected_dict, actual_dict):
                     return False
         return True
     except Exception as e:
+        traceback.print_exc()
         print(str(e))
         return False
 
@@ -570,6 +582,7 @@ def check_equivalent_all(expected, actual):
 
         return False
     except Exception as e:
+        traceback.print_exc()
         print(str(e))
         return False
 
@@ -701,10 +714,10 @@ def run_rust_code(extracted_code, testcases_list, function_name, dependencies=No
         test_script += "    #[test]\n"
         test_script += "    fn test_add() {\n"
         
-        for test_case in testcases_list:
+        for this_testcase in testcases_list:
             # extract Test Case Data
-            input_values = test_case["input"]
-            expected_output = test_case["expected_output"]
+            input_values = this_testcase["input"]
+            expected_output = this_testcase["expected_output"]
             
             """
             Construct code test values string
@@ -805,6 +818,7 @@ def run_rust_code(extracted_code, testcases_list, function_name, dependencies=No
         # return stdout, stderr
 
     except Exception as e:
+        traceback.print_exc()
         print("Issue:", str(e))
         return 'fail', None, 'fail'
 
@@ -817,8 +831,9 @@ def run_code_in_subprocess(
     extracted_code, 
     test_cases, 
     function_name, 
-    test_case, 
-    programming_language):
+    this_testcase, 
+    programming_language,
+    dependencies=None):
     """
     for javascript/typescript, 
     other packages need to be installed
@@ -826,7 +841,19 @@ def run_code_in_subprocess(
     input_values list is for the code test case
     """
     try:
-        
+        print("\n Starting run_code_in_subprocess()")
+        print(f"extracted_code -> {extracted_code}")
+        print(f"test_cases -> {test_cases}")
+        print(f"function_name -> {function_name}")
+        print(f"this_testcase -> {this_testcase}")
+        print(f"programming_language -> {programming_language}")
+        print(f"dependencies -> {dependencies}")
+                     
+        input_values = this_testcase["input"]
+        expected_output = this_testcase["expected_output"]
+        ######################################
+        # Pathways for programmming languages
+        ######################################
         if programming_language == 'python':
 
 
@@ -936,10 +963,13 @@ def run_code_in_subprocess(
         return process_proxy_return_dict
     
     except Exception as e:
+        traceback.print_exc()
+        print(f"run_code_in_subprocess() failed error = {str(e)}")
         process_proxy_return_dict = {
             'stdout':'',
             'stderr':str(e)
         }
+
         return process_proxy_return_dict
 
 ###################################
@@ -951,7 +981,8 @@ def pass_fail_unit_test_function__stdout_stderr(
     function_name,
     retry_or_error_event_counter_list,
     error_log,
-    programming_language=None
+    programming_language,
+    dependencies=None
 ):
     """
     standard issues:
@@ -967,18 +998,20 @@ def pass_fail_unit_test_function__stdout_stderr(
     extracted_code = extract_code_from_markdown(code_markdown, function_name)
     
     if not extracted_code:
+        print('warning, no code extracted')
         return False, f"This is not code correctly formated in markdown: {code_markdown}"
 
     if programming_language == 'rust':
         print('rust selected in pass_fail_unit_test_function__stdout_stderr()')
         
-        test_case = ''
+        this_testcase = ''
         rust_result = run_code_in_subprocess(
             extracted_code, 
             test_cases, 
             function_name, 
-            test_case, 
-            programming_language)
+            this_testcase, 
+            programming_language,
+            dependencies=None)
         
         print(f"rust_result -> {rust_result}")
         # set two outputs
@@ -987,18 +1020,18 @@ def pass_fail_unit_test_function__stdout_stderr(
 
         # log error if fail
         if rust_result['stdout'] == 'fail':
-            print("No stdout found. Fail as error.")
+            print("rust: No stdout found. Fail as error.")
             stdout = False
             error_log.append(rust_result['stderr'])
 
         # return no stdout if error or fail
         return stdout, stderr
-                
-    for test_case in test_cases:
+    
+    for this_testcase in test_cases:
 
         try:
-            input_values = test_case["input"]
-            expected_output = test_case["expected_output"]
+            input_values = this_testcase["input"]
+            expected_output = this_testcase["expected_output"]
 
             """
             Construct the full script with the test case applied
@@ -1023,8 +1056,7 @@ def pass_fail_unit_test_function__stdout_stderr(
             # )
             
             # multi-languaeg-version
-            # using: input_values = test_case["input"]
-            process = run_code_in_subprocess(extracted_code, test_cases, function_name, test_case, programming_language)
+            process = run_code_in_subprocess(extracted_code, test_cases, function_name, this_testcase, programming_language)
 
             # read stdout and std err
             stdout = process['stdout']
@@ -1041,7 +1073,7 @@ def pass_fail_unit_test_function__stdout_stderr(
             )
 
 
-            
+            print(f"\n after run_code_in_subprocess:")
             print(f"expected_output -> {expected_output} {type(expected_output)}")
             print(f"stdout -> {stdout} {type(stdout)}")
             print(f"stderr -> {stderr} {type(stderr)}")
@@ -1054,6 +1086,7 @@ def pass_fail_unit_test_function__stdout_stderr(
             actual_output = stdout
 
         except Exception as e:
+            traceback.print_exc()
             error_message = str(e)
             return False, error_message
 
@@ -1082,6 +1115,7 @@ def pass_fail_unit_test_function__stdout_stderr(
                 return False, stderr_plus
 
         except Exception as e:
+            traceback.print_exc()
             # error_log.append(f"test cases: {str(test_cases)}")
             error_log.append(stdout)
             error_message = str(e) + process.stderr.strip()
@@ -1157,6 +1191,7 @@ def save_json_to_file(input_text, file_name, target_language, optional_tag=""):
                 directory_path, exist_ok=True
             )  # Ensure the directory is created if it does not exist
         except Exception as e:
+            traceback.print_exc()
             print(f"Error creating directory {directory_path}: {e}")
             return  # Exit the function if directory creation fails
 
@@ -1200,6 +1235,7 @@ def set_save_json_to_file(input_text, file_name, target_language, optional_tag="
                 directory_path, exist_ok=True
             )  # Ensure the directory is created if it does not exist
         except Exception as e:
+            traceback.print_exc()
             print(f"Error creating directory {directory_path}: {e}")
             return  # Exit the function if directory creation fails
 
@@ -1880,6 +1916,7 @@ def make_html_report(target_csv_file_sources_dir, path_out):
                             readable_timestamp=escape(row["readable_timestamp"]),
                         )
             except Exception as e:
+                traceback.print_exc()
                 print(f"No dice on {csv_file} -> {e}")
                 print("")
 
@@ -1893,6 +1930,7 @@ def make_html_report(target_csv_file_sources_dir, path_out):
             html_file.write(html_content)
         print(f"HTML summary generated successfully!")
     except Exception as e:
+        traceback.print_exc()
         print(f"No dice on generating HTML summary -> {e}")
         print("")
 
@@ -2462,6 +2500,7 @@ def record_history_save_files(dialogue_history):
 #         )
 #         result_container['completion'] = completion
 #     except Exception as e:
+traceback.print_exc()
 #         result_container['error'] = e
 
 
@@ -2491,6 +2530,7 @@ def record_history_save_files(dialogue_history):
 #         return result_container.get('completion')
 
 #     except Exception as e:
+traceback.print_exc()
 #         raise( e, f"ERROR in function: run_api_call_with_timeout(input_string)" )
 
 
@@ -2534,6 +2574,7 @@ def record_history_save_files(dialogue_history):
 #             return text
 
 #         except Exception as e:
+traceback.print_exc()
 #             print(f"an error occurred: {e}")
 #             retries += 1
 #             if retries > max_retries:
@@ -2682,6 +2723,7 @@ def record_history_save_files(dialogue_history):
 #         results = completion.choices[0].message.content
 
 #     except Exception as e:
+traceback.print_exc()
 #         print("API call function call_openai_chat_api(this_input, select_model=3) failed, error = ", e)
 #         return e
 
@@ -2741,6 +2783,7 @@ def task_extract_markdown_json_to_dict(dict_str, error_log):
                 print(f"Failed dict_str precheck")
 
     except Exception as e:
+        traceback.print_exc()
         print(f"Failed dict_str precheck {str(e)}")
 
     # extraction 1
@@ -2752,6 +2795,7 @@ def task_extract_markdown_json_to_dict(dict_str, error_log):
             dict_str = match.group(1) if match else ""
 
     except Exception as e:
+        traceback.print_exc()
         print(
             f"\nTRY AGAIN: check_function_description_keys() extraction from markdown failed: {e}"
         )
@@ -2778,6 +2822,7 @@ def task_extract_markdown_json_to_dict(dict_str, error_log):
             )
 
     except Exception as e:
+        traceback.print_exc()
         print(f"Failed dict_str -> {repr(dict_str)} {str(e)}")
         return False
 
@@ -2802,6 +2847,7 @@ def task_extract_markdown_json_to_dict(dict_str, error_log):
             )
 
     except Exception as e:
+        traceback.print_exc()
         print(f"Failed dict_str -> {repr(dict_str)} {str(e)}")
         return False
 
@@ -2823,6 +2869,7 @@ def task_extract_markdown_json_to_dict(dict_str, error_log):
         dict_str = dict_str.replace('",\n}', '"\n}')
 
     except Exception as e:
+        traceback.print_exc()
         print(f"\nTRY AGAIN:try safety cleaning: {e}")
         print(f"Failed repr(dict_str) -> {repr(dict_str)}")
         return False
@@ -2836,6 +2883,7 @@ def task_extract_markdown_json_to_dict(dict_str, error_log):
         dict_data = json.loads(dict_str)
 
     except Exception as e:
+        traceback.print_exc()
         print(f"\nTRY AGAIN: trying json.loads(dict_str) Dictionary load failed: {e}")
         print(f"Failed repr(dict_str) -> {repr(dict_str)}")
         return False
@@ -2846,6 +2894,7 @@ def task_extract_markdown_json_to_dict(dict_str, error_log):
         dict_str = dict_data["translation"]
 
     except Exception as e:
+        traceback.print_exc()
         print(
             f"\nTRY AGAIN: check_function_description_keys() extraction 2 from translation = dict_data['translation'] failed: {e}"
         )
@@ -2899,6 +2948,7 @@ def check_answer_in_dict(answer_number, data_dict):
             return None
 
     except Exception as e:
+        traceback.print_exc()
         print(f"check_answer_in_dict() issue: {str(e)}")
         return None
 
@@ -3103,6 +3153,7 @@ def str_to_int_or_none(string_input):
     try:
         return int(string_input)
     except Exception as e:
+        traceback.print_exc()
         print(str(e))
         return None
 
@@ -3188,6 +3239,7 @@ def check_structure_of_response(dict_str):
             return False
 
     except Exception as e:
+        traceback.print_exc()
         print(
             f"check_structure_of_response error parsing ai translation_list -> {str(e)}"
         )
@@ -3318,6 +3370,7 @@ def task_check_structure_of_response(
             raise "No output structure mode selected: task_check_structure_of_response()"
 
     except Exception as e:
+        traceback.print_exc()
         print(
             f"Exception task_check_structure_of_response() error parsing ai response_to_task -> {str(e)}"
         )
@@ -3335,6 +3388,7 @@ def remove_non_integers_from_list(input_list):
             if isinstance(item, int) or (isinstance(item, str) and item.isdigit())
         ]
     except Exception as e:
+        traceback.print_exc()
         raise e
 
 
@@ -3372,6 +3426,7 @@ def extract_values_from_dict(dict_str):
         return values_list
 
     except Exception as e:
+        traceback.print_exc()
         print(f"extract_values_from_dict failed to get values, maybe bad input {str(e)}")
         return False
 
@@ -3403,6 +3458,7 @@ def return_list_of_jsons_from_string(dict_str):
             return extract_dictionaries_from_string_no_pips(dict_str)
 
     except Exception as e:
+        traceback.print_exc()
         print(
             f"failed, no json return_list_of_jsons_from_string(dict_str) dict_str-> {dict_str} {str(e)}"
         )
@@ -3556,6 +3612,7 @@ def make_score_tally(directory_path):
         print(f"Report appended to {report_filename}")
 
     except Exception as e:
+        traceback.print_exc()
         print(f"Error processing score tally: {e}")
 
 
@@ -3705,6 +3762,7 @@ def get_csv_len_in_rows(path):
         return row_count
 
     except Exception as e:
+        traceback.print_exc()
         raise e
 
 
@@ -3890,6 +3948,7 @@ def call_api_within_structure_check(
                 raise f"No known model option chosen...use_this_model -> {use_this_model}"
 
         except Exception as e:
+            traceback.print_exc()
             jsonchecked_translation = None
             print(f"Failed: {str(e)}")
 
@@ -4054,6 +4113,7 @@ def general_task_call_api_within_structure_check(
                 raise f"No known model option chosen...use_this_model -> {use_this_model}"
 
         except Exception as e:
+            traceback.print_exc()
             task_response_string = None
             print(
                 f"\n\nMaybe incorrect model choice, use_this_model -> {use_this_model}: general_task_call_api_within_structure_check Failed: {str(e)}"
@@ -4091,6 +4151,7 @@ def general_task_call_api_within_structure_check(
                     retry_or_error_event_counter_list=retry_or_error_event_counter_list,
                     error_log=error_log,
                     programming_language=programming_language,
+                    dependencies=None,
                 )
             )
             print(f"""
@@ -4242,6 +4303,7 @@ def number_call_api_within_structure_check(
                 raise f"No known model option chosen...use_this_model -> {use_this_model}"
 
         except Exception as e:
+            traceback.print_exc()
             json_checked_value_list = None
             print(f"Failed: {str(e)}")
 
@@ -4374,6 +4436,7 @@ def task_number_call_api_within_structure_check(
                 raise f"No known model option chosen...use_this_model -> {use_this_model}"
 
         except Exception as e:
+            traceback.print_exc()
             json_checked_value_list = None
             print(f"Failed: {str(e)}")
 
@@ -4517,6 +4580,7 @@ def crawler_call_api_within_json_structure_check(
                 raise f"No known model option chosen...use_this_model -> {use_this_model}"
 
         except Exception as e:
+            traceback.print_exc()
             jsonchecked_translation = None
             print(f"Failed: {str(e)}")
 
@@ -4732,6 +4796,7 @@ def extract_row_from_jsonl(this_row_or_line_number, this_path):
     except csv.Error as e:
         print(f"CSV parsing error in file {this_path}: {e}")
     except Exception as e:
+        traceback.print_exc()
         print(f"An unexpected error occurred: {e}")
 
     # Return empty list if the row was not found, an error occurred, or file cannot be parsed
@@ -5076,6 +5141,7 @@ def filter_list_convert_to_int(input_list):
         return result
 
     except Exception as e:
+        traceback.print_exc()
         print(str(e))
         return False
 
@@ -5511,6 +5577,7 @@ def mini_translate_json(
             #         return False
 
             # except Exception as e:
+            traceback.print_exc()
             #     print(f"\nTRY AGAIN: dict_leaf_detection_boolean_true_means_defective() empty or stub leaf found: {e}")
             #     print(f"Failed dict_str -> {dict_of_selected_best}")
             #     return False
@@ -5544,6 +5611,7 @@ def create_cvs_list_of_fields_to_csv_header(file_path, fields_list):
     except FileNotFoundError:
         print(f"File '{file_path}' not found.")
     except Exception as e:
+        traceback.print_exc()
         print(f"An error occurred: {str(e)}")
 
 
@@ -5569,6 +5637,7 @@ def append_list_of_values_to_csv(file_path, fields_list):
     except FileNotFoundError:
         print(f"File '{file_path}' not found.")
     except Exception as e:
+        traceback.print_exc()
         print(f"An error occurred: {str(e)}")
 
 
@@ -7407,7 +7476,7 @@ list_of_models = ["wizardcoder-python-13b"]
 # list_of_models = ["tinyllama", "mistral-7b-instruct", "stablelm-zephyr-3b"]
 list_of_models = ["llamacorn", "dolphin-2_6-phi", "codeninja-1.0-openchat"]
 list_of_models = ["llamacorn", "mistral-7b-instruct"]
-
+list_of_models = ["llamacorn"]
 
 ######
 # Run
