@@ -366,6 +366,9 @@ def extract_code_from_markdown(markdown_text, function_name):
         if re.search(function_pattern, code, re.MULTILINE):
             matching_code_blocks.append((lang, code))
 
+    # default
+    match = None
+
     # If there are multiple matching code blocks, find the longest one
     if len(matching_code_blocks) > 1:
         longest_matching_code_block = max(matching_code_blocks, key=lambda x: len(x[1]))
@@ -757,6 +760,8 @@ def run_rust_code(extracted_code, testcases_list, function_name, dependencies=No
         # Regular expression pattern to match the test result
         pattern = r"test result: (\w+)\. (\d+) passed; (\d+) failed;"
 
+        # default
+        match = None
         # Search for the pattern in the output
         match = re.search(pattern, stdout)
         print(f"regex match -> {match}")
@@ -4099,7 +4104,7 @@ def general_task_call_api_within_structure_check(
 
             else:
                 error_message_list_grab_last.append(error_message)
-                retry_counter += 1
+                # retry_counter += 1
                 task_response_string = None
 
         else:
@@ -7401,7 +7406,7 @@ list_of_models = ["mistral-7b-instruct"]
 list_of_models = ["wizardcoder-python-13b"]
 # list_of_models = ["tinyllama", "mistral-7b-instruct", "stablelm-zephyr-3b"]
 list_of_models = ["llamacorn", "dolphin-2_6-phi", "codeninja-1.0-openchat"]
-list_of_models = ["llamacorn"]
+list_of_models = ["llamacorn", "mistral-7b-instruct"]
 
 
 ######
