@@ -3474,7 +3474,7 @@ def make_score_tally(directory_path):
     os.makedirs(solution_dir_path, exist_ok=True)
 
     report_filename = os.path.join(solution_dir_path, "score_report.csv")
-    tally_header_string_list = ["percent", "model", "score", "task_file", "time_stamp"]
+    tally_header_string_list = ["percent", "model", "task_file", "score", "time_stamp"]
 
     # # Check if the file exists and is empty to decide on writing the header
     if not os.path.exists(report_filename) or os.path.getsize(report_filename) == 0:
