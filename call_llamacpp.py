@@ -147,7 +147,7 @@ def api_llamacapp(
     # note: set threads to cpu count
 
     # Define the command as a string
-    command = f"""./main 2>/dev/null -m {whole_model_path} --temp {parameter_dict["--temp"]} --top-k {parameter_dict["--top-k"]} --top-p {parameter_dict["--top-p"]} --min-p {parameter_dict["--min-p"]} --seed {parameter_dict["--seed"]} --tfs {parameter_dict["--tfs"]} --typical {parameter_dict["--typical"]} --mirostat {parameter_dict["--mirostat"]} --mirostat-lr {parameter_dict["--mirostat-lr"]} --mirostat-ent {parameter_dict["--mirostat-ent"]} --threads {str(int(os.cpu_count()))} --ctx-size {parameter_dict["--ctx-size"]} -p "{prompt}" """
+    command = f"""./main 2>/dev/null -m {whole_model_path} --temp {parameter_dict["--temp"]} --top-k {parameter_dict["--top-k"]} --top-p {parameter_dict["--top-p"]} --min-p {parameter_dict["--min-p"]} --seed {parameter_dict["--seed"]} --tfs {parameter_dict["--tfs"]} --typical {parameter_dict["--typical"]} --mirostat {parameter_dict["--mirostat"]} --mirostat-lr {parameter_dict["--mirostat-lr"]} --mirostat-ent {parameter_dict["--mirostat-ent"]} --n-gpu-layers {parameter_dict["--n-gpu-layers"]} --threads {str(int(os.cpu_count()))} --ctx-size {parameter_dict["--ctx-size"]} -p "{prompt}" """
 
     # # inspection
     print(f"command -> {repr(command)}")

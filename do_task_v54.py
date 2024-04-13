@@ -1071,7 +1071,7 @@ def pass_fail_unit_test_function__stdout_stderr(
                 + stderr
                 + ", stdout: "
                 + stdout
-                + "Try again: "
+                + " Try again: "
             )
 
 
@@ -7405,18 +7405,19 @@ use_this_model = "claude-2.1"
 
 # Tune Your Paramaters for llama.cpp
 parameter_dict = {
-    "--temp": 0.8,  # (default value is 0.8)
-    "--top-k": 40,  # (selection among N most probable. default: 40)
-    "--top-p": 0.9,  # (probability above threshold P. default: 0.9)
-    "--min-p": 0.05,  # (minimum probability threshold. default: 0.05)
-    "--seed": -1,  # seed, -1 is a random seed
-    "--tfs": 1,  # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
-    "--threads": 8,  # (~ set to number of physical CPU cores)
-    "--typical": 1,  # (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
-    "--mirostat": 2,  # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
+    "--temp": 0.8,      # (default value is 0.8)
+    "--top-k": 40,      # (selection among N most probable. default: 40)
+    "--top-p": 0.9,     # (probability above threshold P. default: 0.9)
+    "--min-p": 0.05,    # (minimum probability threshold. default: 0.05)
+    "--seed": -1,       # seed, -1 is a random seed
+    "--tfs": 1,         # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
+    "--threads": 8,     # (~ set to number of physical CPU cores)
+    "--typical": 1,     # (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
+    "--mirostat": 2,    # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
     "--mirostat-lr": 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
     "--mirostat-ent": 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
-    "--ctx-size": 500,  # Sets the size of the prompt context
+    "--ctx-size": 500,      # Sets the size of the prompt context
+    "--n-gpu-layers": 0,    # When compiled with GPU support, this option allows offloading some layers to the GPU for computation.
 }
 
 # Configure your task overall
