@@ -20,17 +20,20 @@ import traceback
 import string
 import random
 import time
-import glob
-import csv
 import sys
 from datetime import datetime, UTC
 import json  # Added missing import
 import re
 import subprocess
+import csv
+import html
+import glob
+# import os
+
 
 from call_llamacpp import gguf_api, mini_gguf_api
 # from html_all_reports_summary_from_csv import html_for_all_reports
-from html_tally_score import html_for_all_score_tallies
+# from html_tally_score import html_for_all_score_tallies
 
 """
 .env: get your environment variables:
@@ -1842,6 +1845,10 @@ def make_html_report(target_csv_file_sources_dir, path_out):
 
     csv_files = glob.glob(os.path.join(target_csv_file_sources_dir, "*.csv"))
 
+    # remove "score_report.csv" from list
+    csv_files.remove("task_set_results_files/score_report.csv")
+    # print(csv_files)
+
     try:
         html_content = """
         <html>
@@ -1875,10 +1882,16 @@ def make_html_report(target_csv_file_sources_dir, path_out):
         """
 
         for csv_file in csv_files:
+
+            print(f"in make_html_report(), This csv_file -> {csv_file}")
+
             try:
                 with open(csv_file, "r") as csvfile:
                     csvreader = csv.DictReader(csvfile)
                     for row in csvreader:
+
+                        # selected option
+
                         html_content += """
                             <tr>
                                 <td>{score}</td>
@@ -1918,7 +1931,7 @@ def make_html_report(target_csv_file_sources_dir, path_out):
                         )
             except Exception as e:
                 traceback.print_exc()
-                print(f"No dice on {csv_file} -> {e}")
+                print(f"No dice on file -> {csv_file}, error -> {e}")
                 print("")
 
         html_content += """
@@ -1945,6 +1958,106 @@ def html_for_all_reports():
     report_destination = f"task_set_results_files/HTML_summary_{clean_timestamp}.html"
 
     make_html_report(target_csv_file_sources_dir, report_destination)
+
+
+
+def make_score_tally_html_report(target_csv_file_sources_dir, path_out):
+    """
+    works with
+    html_for_all_score_tallies()
+    """
+    csv_files = glob.glob(os.path.join(target_csv_file_sources_dir, "*.csv"))
+
+    # get files only that say 'score report'
+    csv_files = [item for item in csv_files if "score_report" in item]
+
+    print(f"For this many tallieses: {len(csv_files)}")
+
+
+    try:
+        html_content = """
+        <html>
+        <head>
+            <title>Score Tally Summary</title>
+            <style>
+                table, th, td {
+                    border: 1px solid black;
+                    border-collapse: collapse;
+                    padding: 5px;
+                    text-align: center;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Score Tally Summary</h1>
+            <table>
+                <tr>
+                    <th>Percent</th>
+                    <th>Model</th>
+                    <th>Task File</th>
+                    <th>Score</th>
+                    <th>Timestamp</th>
+                </tr>
+        """
+        for csv_file in csv_files:
+                        
+            try:
+                with open(csv_file, "r") as csvfile:
+                    csvreader = csv.DictReader(csvfile)
+                    for row in csvreader:
+
+                        
+                        # remove the redundancy in the set list
+                        # Split the task_file string by comma and convert it to a set
+                        task_files = set(row["task_file"].split(", "))
+                        
+                        # Join the unique task files back into a comma-separated string
+                        row["task_file"] = ", ".join(task_files)
+
+                        
+                        html_content += """
+                            <tr>
+                                <td>{percent}</td>
+                                <td>{model}</td>
+                                <td>{task_file}</td>
+                                <td>{score}</td>
+                                <td>{time_stamp}</td>
+                            </tr>
+                        """.format(
+                            percent=html.escape(row["percent"]),
+                            model=html.escape(row["model"]),
+                            task_file=html.escape(row["task_file"]),
+                            score=html.escape(row["score"]),
+                            time_stamp=html.escape(row["time_stamp"]),
+                        )
+            except Exception as e:
+                traceback.print_exc()
+                print(f"make_score_tally_html_report(), No dice on {csv_file} -> {e}")
+                print("")
+        html_content += """
+            </table>
+        </body>
+        </html>
+        """
+        with open(path_out, "w", encoding="utf-8") as html_file:
+            html_file.write(html_content)
+        print(f"Score Tally HTML summary generated successfully!")
+    except Exception as e:
+        traceback.print_exc()
+        print(f"No dice on generating Score Tally HTML summary -> {e}")
+        print("")
+
+
+def html_for_all_score_tallies():
+    """
+    works with
+    make_score_tally_html_report(target_csv_file_sources_dir, path_out)
+    """
+    date_time = datetime.now()
+    clean_timestamp = date_time.strftime("%Y%m%d%H%M%S%f")
+    target_csv_file_sources_dir = "task_set_results_files"
+    report_destination = f"task_set_results_files/HTML_score_tally_summary_{clean_timestamp}.html"
+    make_score_tally_html_report(target_csv_file_sources_dir, report_destination)
 
 
 def replace_text_with_special_characters_swapback(input_item):
@@ -3531,7 +3644,7 @@ def make_score_tally(directory_path):
     os.makedirs(solution_dir_path, exist_ok=True)
 
     report_filename = os.path.join(solution_dir_path, "score_report.csv")
-    tally_header_string_list = ["percent", "model", "score", "task_file", "time_stamp"]
+    tally_header_string_list = ["percent", "model", "task_file", "score", "time_stamp"]
 
     # # Check if the file exists and is empty to decide on writing the header
     if not os.path.exists(report_filename) or os.path.getsize(report_filename) == 0:
@@ -7505,20 +7618,20 @@ if __name__ == "__main__":
     if len(add_this):
         list_of_models.append(add_this)
 
-    ##########
-    # Do Task
-    ##########
-    do_task_please(
-        list_of_models,
-        ai_local_or_cloud_mode,
-        number_of_preliminary_drafts,
-        retry_x_times,
-        number_of_ranked_votes,
-        task_mode_configies,
-        task_file_config_dic_list,
-        parameter_dict=parameter_dict,
-        models_dir_path="jan/models",
-    )
+    # ##########
+    # # Do Task
+    # ##########
+    # do_task_please(
+    #     list_of_models,
+    #     ai_local_or_cloud_mode,
+    #     number_of_preliminary_drafts,
+    #     retry_x_times,
+    #     number_of_ranked_votes,
+    #     task_mode_configies,
+    #     task_file_config_dic_list,
+    #     parameter_dict=parameter_dict,
+    #     models_dir_path="jan/models",
+    # )
 
     #####################
     # Make a score tally
@@ -7531,29 +7644,29 @@ if __name__ == "__main__":
     
     
     
-    #######################
-    # demo rust code tests
-    #######################
+    # #######################
+    # # demo rust code tests
+    # #######################
     
-    extracted_code = """
-    fn multiply(a: f64, b: f64, c: f64) -> f64 {
-        a * b * c
-    }
-    """
+    # extracted_code = """
+    # fn multiply(a: f64, b: f64, c: f64) -> f64 {
+    #     a * b * c
+    # }
+    # """
 
-    test_cases = [
-        {"input": [4.0, 5.0, 2.0], "expected_output": 40.0},
-        {"input": [3.5, 2.0, 1.5], "expected_output": 10.5},
-        {"input": [2.0, 2.0, 2.0], "expected_output": 8.0},
-        {"input": [1.0, 1.0, 1.0], "expected_output": 1.0}
-    ]
+    # test_cases = [
+    #     {"input": [4.0, 5.0, 2.0], "expected_output": 40.0},
+    #     {"input": [3.5, 2.0, 1.5], "expected_output": 10.5},
+    #     {"input": [2.0, 2.0, 2.0], "expected_output": 8.0},
+    #     {"input": [1.0, 1.0, 1.0], "expected_output": 1.0}
+    # ]
 
-    function_name = "multiply"
+    # function_name = "multiply"
     
-    score, stdout, stderr = run_rust_code(extracted_code, test_cases, function_name, dependencies=None)
+    # score, stdout, stderr = run_rust_code(extracted_code, test_cases, function_name, dependencies=None)
     
-    print('score', score)
-    print('out', stdout)
-    print('err', stderr)
+    # print('score', score)
+    # print('out', stdout)
+    # print('err', stderr)
 
 
