@@ -119,16 +119,22 @@ alu equivilance check?
 any false positives?
 
 
-add javascript coding challenges
-
-look at how many retries...
-maybe a try-list that is global to track tries?
-but what about types of tries?
-
-
 
 maybe update the python code test code to do a full code test inside python...like rust does
 
-figure out how to specify language input...
-make code-tests for rust-language...
+
+adding languages to coding challenges...
+js/ts? add javascript coding challenges
+
+future issue:
+- internal vs. external code output checks
+
 maybe add field to test-dict?
+
+
+automated making code challenges...
+with unit tests included
+and comments on the mistakes...
+
+
+

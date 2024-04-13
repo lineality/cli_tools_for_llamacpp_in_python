@@ -7566,7 +7566,7 @@ task_file_config_dic_list = [
     #      "use_offset_and_range": False,
     #  },
     {
-        "file_name": "code_writing_test_set_8.jsonl",
+        "file_name": "short_code_writing_test_set_8.jsonl",
         "file_type": ".jsonl",
         "header_exits": False,
         "file_structure": "",
@@ -7618,8 +7618,8 @@ list_of_models = ["wizardcoder-python-13b"]
 # list_of_models = ["tinyllama", "mistral-7b-instruct", "stablelm-zephyr-3b"]
 list_of_models = ["llamacorn", "dolphin-2_6-phi", "codeninja-1.0-openchat"]
 # list_of_models = ["llamacorn", "mistral-7b-instruct"]
-# list_of_models = ["llamacorn"]
-list_of_models = ["llamacorn", "dolphin-2_6-phi", "codeninja-1.0-openchat", "mistral-7b-instruct"]
+list_of_models = ["llamacorn"]
+# list_of_models = ["llamacorn", "dolphin-2_6-phi", "codeninja-1.0-openchat", "mistral-7b-instruct"]
 
 ######
 # Run
