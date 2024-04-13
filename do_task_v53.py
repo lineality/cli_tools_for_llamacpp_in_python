@@ -848,9 +848,10 @@ def run_code_in_subprocess(
         print(f"this_testcase -> {this_testcase}")
         print(f"programming_language -> {programming_language}")
         print(f"dependencies -> {dependencies}")
-                     
-        input_values = this_testcase["input"]
-        expected_output = this_testcase["expected_output"]
+        
+        if this_testcase:
+            input_values = this_testcase["input"]
+            expected_output = this_testcase["expected_output"]
         ######################################
         # Pathways for programmming languages
         ######################################
