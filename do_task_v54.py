@@ -7567,7 +7567,7 @@ task_file_config_dic_list = [
     #      "use_offset_and_range": False,
     #  },
     {
-        "file_name": "short_code_writing_test_set_8.jsonl",
+        "file_name": "code_writing_test_set_8.jsonl",
         "file_type": ".jsonl",
         "header_exits": False,
         "file_structure": "",
