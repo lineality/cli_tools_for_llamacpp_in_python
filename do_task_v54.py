@@ -4255,6 +4255,13 @@ def general_task_call_api_within_structure_check(
 
             #     """)
 
+            # check for exploding model, too long response
+            if len(dict_str) > 4444:
+                error_message_list_grab_last.append("model-exploded")
+                # retry_counter += 1
+                task_response_string = None            
+            
+            
             task_response_string, error_message = (
                 pass_fail_unit_test_function__stdout_stderr(
                     code_markdown=dict_str,
