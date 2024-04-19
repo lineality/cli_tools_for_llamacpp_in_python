@@ -1,3 +1,14 @@
+
+models that work:
+- llamacorn
+- codeninja
+
+
+models that don't work:
+
+
+
+
 # TODO
 - maybe make an instruct...doc maker reader...thing
 - convert from csv to jsonl?
