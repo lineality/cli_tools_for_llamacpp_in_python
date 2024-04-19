@@ -7418,7 +7418,7 @@ parameter_dict = {
     "--min-p": 0.05,    # (minimum probability threshold. default: 0.05)
     "--seed": -1,       # seed, -1 is a random seed
     "--tfs": 1,         # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
-    "--threads": 8,     # (~ set to number of physical CPU cores)
+    "--threads": None,     # (~ set this to number of physical CPU cores, None may default to that)
     "--typical": 1,     # (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
     "--mirostat": 2,    # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
     "--mirostat-lr": 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
@@ -7574,7 +7574,7 @@ task_file_config_dic_list = [
     #      "use_offset_and_range": False,
     #  },
     {
-        "file_name": "code_writing_test_set_8.jsonl",
+        "file_name": "short_code_writing_test_set_8.jsonl",
         "file_type": ".jsonl",
         "header_exits": False,
         "file_structure": "",
