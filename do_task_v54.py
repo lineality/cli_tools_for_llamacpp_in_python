@@ -1028,9 +1028,8 @@ def pass_fail_unit_test_function__stdout_stderr(
             print("rust: No stdout found. Fail as error.")
             stdout = False
             stderr = "response was incoherent explosion"
-            
-            else:
-                error_log.append(rust_result['stderr'])
+
+            error_log.append(rust_result['stderr'])
 
         # return no stdout if error or fail
         return stdout, stderr
