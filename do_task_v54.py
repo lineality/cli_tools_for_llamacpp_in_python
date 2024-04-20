@@ -1009,6 +1009,8 @@ def pass_fail_unit_test_function__stdout_stderr(
     
     if not extracted_code:
         print('warning, no code extracted')
+        error_log.append('warning, no code extracted')
+        retry_or_error_event_counter_list.append(True)
         return False, f"This is not code correctly formated in markdown: {code_markdown}"
 
     if programming_language == 'rust':
@@ -1038,7 +1040,7 @@ def pass_fail_unit_test_function__stdout_stderr(
             stderr = "response was incoherent explosion"
 
             error_log.append(rust_result['stderr'])
-
+            retry_or_error_event_counter_list.append(True)
         # return no stdout if error or fail
         return stdout, stderr
     
@@ -1096,6 +1098,7 @@ def pass_fail_unit_test_function__stdout_stderr(
             if not stdout:
                 print("No stdout found. Fail as error.")
                 error_log.append(stderr)
+                retry_or_error_event_counter_list.append(True)
                 return False, stderr_plus
 
             actual_output = stdout
@@ -1103,6 +1106,8 @@ def pass_fail_unit_test_function__stdout_stderr(
         except Exception as e:
             traceback.print_exc()
             error_message = str(e)
+            error_log.append(error_message)
+            retry_or_error_event_counter_list.append(True)
             return False, error_message
 
         # Compare the actual_output output with the expected output
@@ -4156,6 +4161,8 @@ def general_task_call_api_within_structure_check(
     error_message_list_for_loop__grab_use_last = []
 
     while (not json_ok_flag) and (retry_counter < retry_x_times):
+    
+        print(f"starting while loop, retry_counter/retry_x_times is -> {retry_counter}/{retry_x_times}")
 
         ####################
         # get a translation
