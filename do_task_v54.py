@@ -4275,44 +4275,41 @@ def general_task_call_api_within_structure_check(
                 print(f"Error Caught, Model exploded. Output Length -> {len(dict_str)}")
                 error_message_list_for_loop__grab_use_last.append("model-exploded")
                 error_log.append("model-exploded")
+                error_message = "model-exploded"
                 
-                # retry_counter += 1
-                task_response_string = None            
-                
-                retry_counter += 1
-                print(
-                    f"\n\ngeneral_task_call_api_within_structure_check in while retry_counter -> {retry_counter}\n"
-                )
+                task_response_string = None    
+                dict_str = None        
     
-                if retry_counter > retry_x_times:
-                    return False
-                
-            task_response_string, error_message = (
-                pass_fail_unit_test_function__stdout_stderr(
-                    code_markdown=dict_str,
-                    test_cases=test_cases,
-                    function_name=function_name,
-                    retry_or_error_event_counter_list=retry_or_error_event_counter_list,
-                    error_log=error_log,
-                    programming_language=programming_language,
-                    dependencies=None,
+        
+            if dict_str:
+                task_response_string, error_message = (
+                    pass_fail_unit_test_function__stdout_stderr(
+                        code_markdown=dict_str,
+                        test_cases=test_cases,
+                        function_name=function_name,
+                        retry_or_error_event_counter_list=retry_or_error_event_counter_list,
+                        error_log=error_log,
+                        programming_language=programming_language,
+                        dependencies=None,
+                    )
                 )
-            )
-            print(f"""
-                general_task_call_api_within_structure_check pass_fail_unit_test_function__stdout_stderr 
-                task_response_string -> {task_response_string}
-                """)
-            print(f"error_message -> {error_message}")
-
-            if task_response_string == "pass":
-                return task_response_string
-
-            else:
-                error_log.append(error_message)
-                error_message_list_for_loop__grab_use_last.append(error_message)
                 
-                # retry_counter += 1
-                task_response_string = None
+                
+                print(f"""
+                    general_task_call_api_within_structure_check pass_fail_unit_test_function__stdout_stderr 
+                    task_response_string -> {task_response_string}
+                    """)
+                print(f"error_message -> {error_message}")
+
+                if task_response_string == "pass":
+                    return task_response_string
+
+                else:
+                    error_log.append(error_message)
+                    error_message_list_for_loop__grab_use_last.append(error_message)
+                    
+                    # retry_counter += 1
+                    task_response_string = None
 
         else:
             task_response_string = task_check_structure_of_response(
