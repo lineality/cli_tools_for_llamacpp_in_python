@@ -1958,7 +1958,7 @@ def html_for_all_reports():
     clean_timestamp = date_time.strftime("%Y%m%d%H%M%S%f")
 
     target_csv_file_sources_dir = "task_set_results_files"
-    report_destination = f"task_set_results_files/HTML_summary_{clean_timestamp}.html"
+    report_destination = f"task_set_results_files/HTML_taskset_results_summary_{clean_timestamp}.html"
 
     make_html_report(target_csv_file_sources_dir, report_destination)
 
@@ -4144,7 +4144,7 @@ def general_task_call_api_within_structure_check(
     #     "mistral7b",
     # ]
 
-    error_message_list_grab_last = []
+    error_message_list_for_loop__grab_use_last = []
 
     while (not json_ok_flag) and (retry_counter < retry_x_times):
 
@@ -4159,8 +4159,8 @@ def general_task_call_api_within_structure_check(
 
         Note: pathways other than writing code might use this too.
         """
-        if error_message_list_grab_last and function_writing:
-            context_history = error_message_list_grab_last[0] + context_history
+        if error_message_list_for_loop__grab_use_last and function_writing:
+            context_history = error_message_list_for_loop__grab_use_last[0] + context_history
 
         try:
             # check json structure
@@ -4273,7 +4273,9 @@ def general_task_call_api_within_structure_check(
             ###############################################
             if len(dict_str) > 4444:
                 print(f"Error Caught, Model exploded. Output Length -> {len(dict_str)}")
-                error_message_list_grab_last.append("model-exploded")
+                error_message_list_for_loop__grab_use_last.append("model-exploded")
+                error_log.append("model-exploded")
+                
                 # retry_counter += 1
                 task_response_string = None            
                 
@@ -4306,7 +4308,9 @@ def general_task_call_api_within_structure_check(
                 return task_response_string
 
             else:
-                error_message_list_grab_last.append(error_message)
+                error_log.append(error_message)
+                error_message_list_for_loop__grab_use_last.append(error_message)
+                
                 # retry_counter += 1
                 task_response_string = None
 
@@ -4326,8 +4330,10 @@ def general_task_call_api_within_structure_check(
         else:
             retry_counter += 1
             print(
-                f"\n\ngeneral_task_call_api_within_structure_check in while retry_counter -> {retry_counter}\n"
-            )
+                f"""\n\n
+                general_task_call_api_within_structure_check in while 
+                this retry: retry_counter -> {retry_counter}
+                """)
 
             if retry_counter > retry_x_times:
                 return False
@@ -7597,7 +7603,7 @@ task_file_config_dic_list = [
     #      "use_offset_and_range": False,
     #  },
     {
-        "file_name": "code_writing_test_set_8.jsonl",
+        "file_name": "short_code_writing_test_set_8.jsonl",
         "file_type": ".jsonl",
         "header_exits": False,
         "file_structure": "",
@@ -7651,6 +7657,8 @@ list_of_models = ["llamacorn", "dolphin-2_6-phi", "codeninja-1.0-openchat"]
 # list_of_models = ["llamacorn", "mistral-7b-instruct"]
 list_of_models = ["codeninja-1.0-opench"]
 # list_of_models = ["llamacorn", "dolphin-2_6-phi", "codeninja-1.0-openchat", "mistral-7b-instruct"]
+list_of_models = ["llamacorn"]
+
 
 ######
 # Run
