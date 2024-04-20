@@ -666,7 +666,7 @@ def run_rust_code(extracted_code, testcases_list, function_name, dependencies=No
         output pass/fail (or equivilant)
     7. get test result (passed or failed), stdout, stderr
     8. remove coding_challenge dir
-    9. Return 'pass' or 'fail' with stdout, stderr
+    9. Return "pass" or 'fail' with stdout, stderr
     """
     stdout = ''
     stderr = ''
@@ -790,8 +790,8 @@ def run_rust_code(extracted_code, testcases_list, function_name, dependencies=No
             
             if result == "ok" and failed == 0:
                 print("All tests passed!")
-                pass_fail_result = 'pass'
-                stdout = 'pass'
+                pass_fail_result = "pass"
+                stdout = "pass"
                 stderr = ''
             else:
                 print(f"Tests failed. Passed: {passed}, Failed: {failed}")
@@ -811,6 +811,10 @@ def run_rust_code(extracted_code, testcases_list, function_name, dependencies=No
             print("error_set", error_set_string)
             stderr = error_set_string
 
+        # if pass_fail_result == "pass":
+        #     working_solution_list.append(extracted_code)
+         
+        
         print(f"returning")
         print(f"pass_fail_result -> {pass_fail_result}")
         print(f"stdout -> {stdout}")
@@ -896,7 +900,11 @@ def run_code_in_subprocess(
                 stdout -> {stdout}
                 stderr -> {stderr}""")
             
-            if score == 'pass':
+            if score == "pass":
+
+                # # add working code for report
+                # working_solution_list.append(extracted_code)
+                                
                 process_proxy_return_dict = {
                     'stdout': score,
                     'stderr': stdout + stderr
@@ -4103,6 +4111,7 @@ def general_task_call_api_within_structure_check(
     this_task_config_dict,
     retry_or_error_event_counter_list,
     error_log,
+    working_solution_list,
     test_cases=None,
     function_name=None,
     programming_language=None,
@@ -4160,7 +4169,7 @@ def general_task_call_api_within_structure_check(
         Note: pathways other than writing code might use this too.
         """
         if error_message_list_for_loop__grab_use_last and function_writing:
-            context_history = error_message_list_for_loop__grab_use_last[0] + context_history
+            context_history = error_message_list_for_loop__grab_use_last[-1] + context_history
 
         try:
             # check json structure
@@ -4301,6 +4310,9 @@ def general_task_call_api_within_structure_check(
                 print(f"error_message -> {error_message}")
 
                 if task_response_string == "pass":
+                    extracted_code = extract_code_from_markdown(dict_str, function_name)
+                    # TODO: maybe make this...extracted
+                    working_solution_list.append(extracted_code)
                     return task_response_string
 
                 else:
@@ -5863,6 +5875,8 @@ def do_task_please(
             "--ctx-size": 500,  # Sets the size of the prompt context
         }
 
+    working_solution_list = []
+    
     ##################################
     # do_task_please Factory
     ##################################
@@ -6666,6 +6680,7 @@ def do_task_please(
                                 this_task_config_dict,
                                 retry_or_error_event_counter_list,
                                 error_log,
+                                working_solution_list,
                                 test_cases,
                                 function_name,
                                 programming_language,
@@ -7113,6 +7128,9 @@ def do_task_please(
                     # for write function
                     if function_writing and (selected_option == "pass"):
                         score = 1
+                        
+                        # add solution to report for coding
+                        selected_option = f"pass -> {working_solution_list[-1]}"
 
                     # if multiple choice and should check answer:
                     elif (
