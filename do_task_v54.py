@@ -7178,7 +7178,7 @@ def do_task_please(
                     """
                     if task_mode_validate_the_answer and (
                         not task_mode_answer_option_choices_provided_boolean
-                    ):
+                    ) and not function_writing:
                         print("checking substring")
                         print(
                             f"selected_option -> {selected_option} type -> {type(selected_option)}"
