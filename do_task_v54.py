@@ -4030,11 +4030,13 @@ def call_api_within_structure_check(
                 response = configies_dict["pipeline_mode"](
                     context_history, parameter_dict, configies_dict
                 )
-                print(response[0])
-                print(response[1])
-                print(response[2])
+                print("\nin call_api_within_structure_check()...")
+                print(f"response[0] -> {response[0]}")
+                print(f"response[1] -> {response[1]}")
+                print(f"response[2] -> {response[2]}")
+                
                 dict_str = response[2]
-
+                
             ################
             # for cloud api
             ################
