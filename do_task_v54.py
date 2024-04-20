@@ -4272,7 +4272,7 @@ def general_task_call_api_within_structure_check(
             # check for exploding model, too long response
             ###############################################
             if len(dict_str) > 4444:
-                print(f"Error Caught, Model exploded. Output Length -> {len(dict_str)}")
+                print(f"\nError Caught, Model exploded. Output Length -> {len(dict_str)}")
                 error_message_list_for_loop__grab_use_last.append("model-exploded")
                 error_log.append("model-exploded")
                 error_message = "model-exploded"
@@ -4293,8 +4293,7 @@ def general_task_call_api_within_structure_check(
                         dependencies=None,
                     )
                 )
-                
-                
+
                 print(f"""
                     general_task_call_api_within_structure_check pass_fail_unit_test_function__stdout_stderr 
                     task_response_string -> {task_response_string}
@@ -4327,9 +4326,10 @@ def general_task_call_api_within_structure_check(
         else:
             retry_counter += 1
             print(
-                f"""\n\n
+                f"""\n
                 general_task_call_api_within_structure_check in while 
                 this retry: retry_counter -> {retry_counter}
+                
                 """)
 
             if retry_counter > retry_x_times:
@@ -4414,9 +4414,11 @@ def number_call_api_within_structure_check(
                 response = configies_dict["pipeline_mode"](
                     context_history, parameter_dict, configies_dict
                 )
-                print(response[0])
-                print(response[1])
-                print(response[2])
+                print("\n\nModel output (tuple) -> ")
+                print(f"response[0] -> {response[0]}")
+                print(f"response[1] -> {response[1]}")
+                print(f"response[2] -> {response[2]}")
+
                 dict_str = response[2]
 
             ################

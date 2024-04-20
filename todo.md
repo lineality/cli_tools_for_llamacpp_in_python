@@ -5,7 +5,7 @@ models that work:
 
 
 models that don't work:
-- deepseek coder?
+
 
 
 
