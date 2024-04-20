@@ -1020,11 +1020,17 @@ def pass_fail_unit_test_function__stdout_stderr(
         stdout = rust_result['stdout']
         stderr = rust_result['stderr']
 
+        print(f"len(stdout) -> {len(stdout)}")
+        print(f"len(stderr) -> {len(stderr)}")
+        
         # log error if fail
         if rust_result['stdout'] == 'fail':
             print("rust: No stdout found. Fail as error.")
             stdout = False
-            error_log.append(rust_result['stderr'])
+            stderr = "response was incoherent explosion"
+            
+            else:
+                error_log.append(rust_result['stderr'])
 
         # return no stdout if error or fail
         return stdout, stderr
@@ -4194,7 +4200,13 @@ def general_task_call_api_within_structure_check(
                 print(response[2])
                 dict_str = response[2]
 
-                draft_task_attempt_log.append(response)
+                # check for exploding model, too long response
+                if ( len(response[0]) + len(response[1]) + len(response[2]) ) > 4444:
+                    print(f"Model exploded. Output Length -> {len(dict_str)}")
+                    draft_task_attempt_log.append("model-exploded")
+                    
+                else:
+                    draft_task_attempt_log.append(response)
 
             ################
             # for cloud api
@@ -4254,15 +4266,24 @@ def general_task_call_api_within_structure_check(
             #     error_log -> {error_log} {type(error_log)}
 
             #     """)
-
+            
+            ###############################################
             # check for exploding model, too long response
+            ###############################################
             if len(dict_str) > 4444:
                 print(f"Error Caught, Model exploded. Output Length -> {len(dict_str)}")
                 error_message_list_grab_last.append("model-exploded")
                 # retry_counter += 1
                 task_response_string = None            
-            
-            
+                
+                retry_counter += 1
+                print(
+                    f"\n\ngeneral_task_call_api_within_structure_check in while retry_counter -> {retry_counter}\n"
+                )
+    
+                if retry_counter > retry_x_times:
+                    return False
+                
             task_response_string, error_message = (
                 pass_fail_unit_test_function__stdout_stderr(
                     code_markdown=dict_str,
@@ -7575,7 +7596,7 @@ task_file_config_dic_list = [
     #      "use_offset_and_range": False,
     #  },
     {
-        "file_name": "short_code_writing_test_set_8.jsonl",
+        "file_name": "code_writing_test_set_8.jsonl",
         "file_type": ".jsonl",
         "header_exits": False,
         "file_structure": "",
@@ -7627,7 +7648,7 @@ list_of_models = ["wizardcoder-python-13b"]
 # list_of_models = ["tinyllama", "mistral-7b-instruct", "stablelm-zephyr-3b"]
 list_of_models = ["llamacorn", "dolphin-2_6-phi", "codeninja-1.0-openchat"]
 # list_of_models = ["llamacorn", "mistral-7b-instruct"]
-list_of_models = ["llamacorn"]
+list_of_models = ["codeninja-1.0-opench"]
 # list_of_models = ["llamacorn", "dolphin-2_6-phi", "codeninja-1.0-openchat", "mistral-7b-instruct"]
 
 ######
