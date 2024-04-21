@@ -1110,7 +1110,7 @@ def pass_fail_unit_test_function__stdout_stderr(
             retry_or_error_event_counter_list.append(True)
             return False, error_message
 
-        # Compare the actual_output output with the expected output
+        # Compare the actual_output output with the expected output 
         try:
             print('Valid-ish stdout:')
             print(f"expected_output -> {expected_output} {type(expected_output)}")
