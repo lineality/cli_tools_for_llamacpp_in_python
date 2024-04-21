@@ -388,10 +388,6 @@ def extract_code_from_markdown(markdown_text, function_name):
         
     if match: 
         print(f"\n found this code: {match} \n")
-        
-        
-        cleaned_match = match.replace("input(", "error, python user-input-method is not allowed")
-        
         return match
 
     return None
