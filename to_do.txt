@@ -5,7 +5,9 @@ models that work:
 
 
 models that don't work:
-- deepseek coder?
+- deepseek coder
+- hermes pro 2
+- 
 
 
 
