@@ -3,7 +3,6 @@ Puzzle makers:
 formal system logics code challenge:
 - makestake tables
 - 
-- 
 
 
 models that work:
