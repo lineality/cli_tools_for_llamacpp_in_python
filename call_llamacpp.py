@@ -53,6 +53,20 @@ def api_llamacapp(
     e.g. to use a local mode instead of an online-api (local, offline, private)
 
     """
+    
+    # inspection
+    print(f"""
+    
+    api_llamacapp() inputs:
+        
+    prompt,           {prompt}
+    cpp_path,         {cpp_path}
+    model_path_base,  {model_path_base}
+    model_and_folder, {model_and_folder}
+    parameter_dict    {parameter_dict}
+    
+    """)
+    
 
     prompt = re.sub(r'\s+', ' ', prompt.strip())
 
@@ -1199,6 +1213,7 @@ if __name__ == "__main__":
     # context_history = re.sub(r'\s+', ' ', context_history.strip())
     
     # context_history = "Write a python function called calculate_area(), such that given input(s) are (length, width), so, def calculate_area(length, width): and the output is The area of a rectangle, only return a number Put your python code in markdown format without hard-coding any answers into the function. Any other comments or plans write outside of the python markdown and write before you write the function. Only the function in the markdown last."
+    context_history = "hello world"
 
     ai_model = "deepcode"
     ai_model = "estopian"

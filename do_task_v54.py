@@ -7686,7 +7686,7 @@ list_of_models = ["llamacorn", "dolphin-2_6-phi", "codeninja-1.0-openchat"]
 list_of_models = ["codeninja-1.0-opench"]
 # list_of_models = ["llamacorn", "dolphin-2_6-phi", "codeninja-1.0-openchat", "mistral-7b-instruct"]
 list_of_models = ["llamacorn"]
-
+list_of_models = ["gema-2-9"]
 
 ######
 # Run
