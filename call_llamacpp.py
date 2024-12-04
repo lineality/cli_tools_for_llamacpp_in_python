@@ -133,16 +133,16 @@ def api_llamacapp(
 
     # Define the command as a string
     command = f"""
-    make -j && ./main 2>/dev/null -m {whole_model_path} {parameter_string} --prompt "{prompt}"
+    make -j && ./llama-cli 2>/dev/null -m {whole_model_path} {parameter_string} --prompt "{prompt}"
     """
 
     # Define the command as a string
     command = f"""
-    ./main 2>/dev/null -m {whole_model_path} {parameter_string} --prompt "{prompt}"
+    ./llama-cli 2>/dev/null -m {whole_model_path} {parameter_string} --prompt "{prompt}"
     """
 
     # Define the command as a string
-    command = f"""./main 2>/dev/null -m {whole_model_path} --prompt "{prompt}" {parameter_string}"""
+    command = f"""./llama-cli 2>/dev/null -m {whole_model_path} --prompt "{prompt}" {parameter_string}"""
 
     ###################
     # Check CPU number
@@ -166,7 +166,7 @@ def api_llamacapp(
 
 
     # Define the command as a string
-    command = f"""./main 2>/dev/null -m {whole_model_path} --temp {parameter_dict["--temp"]} --top-k {parameter_dict["--top-k"]} --top-p {parameter_dict["--top-p"]} --min-p {parameter_dict["--min-p"]} --seed {parameter_dict["--seed"]} --tfs {parameter_dict["--tfs"]} --typical {parameter_dict["--typical"]} --mirostat {parameter_dict["--mirostat"]} --mirostat-lr {parameter_dict["--mirostat-lr"]} --mirostat-ent {parameter_dict["--mirostat-ent"]} --threads {cpu_target} --ctx-size {parameter_dict["--ctx-size"]} -p "{prompt}" """
+    command = f"""./llama-cli 2>/dev/null -m {whole_model_path} --temp {parameter_dict["--temp"]} --top-k {parameter_dict["--top-k"]} --top-p {parameter_dict["--top-p"]} --min-p {parameter_dict["--min-p"]} --seed {parameter_dict["--seed"]} --tfs {parameter_dict["--tfs"]} --typical {parameter_dict["--typical"]} --mirostat {parameter_dict["--mirostat"]} --mirostat-lr {parameter_dict["--mirostat-lr"]} --mirostat-ent {parameter_dict["--mirostat-ent"]} --threads {cpu_target} --ctx-size {parameter_dict["--ctx-size"]} -p "{prompt}" """
 
     # # inspection
     print(f"command -> {repr(command)}")
@@ -181,9 +181,9 @@ def api_llamacapp(
     Shell=True is used to interpret the command as a string and execute it through the shell
     This is necessary for commands that involve shell operators like '&&'
 
-    make -j && ./main 2>/dev/null -m /home/xxx/jan/models/tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -p "What is a horseshoe crab?"
+    make -j && ./llama-cli 2>/dev/null -m /home/xxx/jan/models/tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -p "What is a horseshoe crab?"
 
-    ./main 2>/dev/null -m /home/xxx/jan/models/tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -p "What is a horseshoe crab?"
+    ./llama-cli 2>/dev/null -m /home/xxx/jan/models/tinyllama-1.1b/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -p "What is a horseshoe crab?"
 
     """
     try:
@@ -1204,7 +1204,7 @@ if __name__ == "__main__":
     ai_model = "estopian"
     ai_model = "zephyr"
     ai_model = "mistral-7b-instruct-v0.2.Q4_K_M"
-    # ai_model = "gemma"
+    ai_model = "gemma-2-2b"
 
     configies_dict = {
         'model_path_base': add_segment_to_absolute_base_path("jan/models/"),
