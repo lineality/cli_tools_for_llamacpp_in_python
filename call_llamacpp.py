@@ -178,6 +178,13 @@ def api_llamacapp(
     --n-gpu-layers {parameter_dict["--n-gpu-layers"]}
     """
 
+    """
+    this cli part:
+    ```bash
+    2>/dev/null
+    ```
+    returns the result (not super clear syntax there...)
+    """
 
     # Define the command as a string
     command = f"""./llama-cli 2>/dev/null -m {whole_model_path} --temp {parameter_dict["--temp"]} --top-k {parameter_dict["--top-k"]} --top-p {parameter_dict["--top-p"]} --min-p {parameter_dict["--min-p"]} --seed {parameter_dict["--seed"]} --tfs {parameter_dict["--tfs"]} --typical {parameter_dict["--typical"]} --mirostat {parameter_dict["--mirostat"]} --mirostat-lr {parameter_dict["--mirostat-lr"]} --mirostat-ent {parameter_dict["--mirostat-ent"]} --threads {cpu_target} --ctx-size {parameter_dict["--ctx-size"]} -p "{prompt}" """
@@ -1091,23 +1098,6 @@ if __name__ == "__main__":
 
 
 
-    #######################
-    # Tune Your Paramaters
-    #######################
-    parameter_dict = {
-        "--temp": 0.8,  # (default value is 0.8)
-        "--top-k": 40,  # (selection among N most probable. default: 40)
-        "--top-p": 0.9,  # (probability above threshold P. default: 0.9)
-        "--min-p": 0.05,  # (minimum probability threshold. default: 0.05)
-        "--seed": -1,  # seed, =1 is random seed
-        "--tfs": 1,  # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
-        "--threads": 8,  # (~ set to number of physical CPU cores)
-        "--typical": 1,  # (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
-        "--mirostat": 2,  # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
-        "--mirostat-lr": 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
-        "--mirostat-ent": 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
-        "--ctx-size": 500,  # Sets the size of the prompt context
-    }
 
 
 
@@ -1238,7 +1228,7 @@ if __name__ == "__main__":
     # context_history = re.sub(r'\s+', ' ', context_history.strip())
     
     # context_history = "Write a python function called calculate_area(), such that given input(s) are (length, width), so, def calculate_area(length, width): and the output is The area of a rectangle, only return a number Put your python code in markdown format without hard-coding any answers into the function. Any other comments or plans write outside of the python markdown and write before you write the function. Only the function in the markdown last."
-    context_history = "hello world"
+
 
     ai_model = "deepcode"
     ai_model = "estopian"
@@ -1251,9 +1241,48 @@ if __name__ == "__main__":
         'model_nickname': ai_model,
         'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
     }
+    
+    
+    
 
+    ######################
+    # Set Context History
+    ######################
+    context_history = "hello world"
+        
+    ###############
+    # Set ai_model
+    ###############
+    ai_model = "gemma-2-2b"
+        
+    #######################
+    # Tune Your Paramaters
+    #######################
+    parameter_dict = {
+        "--temp": 0.8,  # (default value is 0.8)
+        "--top-k": 40,  # (selection among N most probable. default: 40)
+        "--top-p": 0.9,  # (probability above threshold P. default: 0.9)
+        "--min-p": 0.05,  # (minimum probability threshold. default: 0.05)
+        "--seed": -1,  # seed, =1 is random seed
+        "--tfs": 1,  # (tail free sampling with parameter z. default: 1.0) 1.0 = disabled
+        "--threads": 8,  # (~ set to number of physical CPU cores)
+        "--typical": 1,  # (locally typical sampling with parameter p  typical (also like ~Temperature) (default: 1.0, 1.0 = disabled).
+        "--mirostat": 2,  # (default: 0,  0= disabled, 1= Mirostat, 2= Mirostat 2.0)
+        "--mirostat-lr": 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
+        "--mirostat-ent": 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
+        "--ctx-size": 500,  # Sets the size of the prompt context
+    }
 
+    #####################
+    # Set Configurations
+    #####################
+    configies_dict = {
+        'model_path_base': add_segment_to_absolute_base_path("jan/models/"),
+        'model_nickname': ai_model,
+        'cpp_path': add_segment_to_absolute_base_path("code/llama_cpp/llama.cpp"),
+    }
+    
     response = mini_gguf_api(context_history, parameter_dict, configies_dict)
-    print(response[0])
-    print(response[1])
-    print(response[2])
+    print(f"response[0] -> {response[0]}")
+    print(f"response[1] -> {response[1]}")
+    print(f"response[2] -> {response[2]}")
