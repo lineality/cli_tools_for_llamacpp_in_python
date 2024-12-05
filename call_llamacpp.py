@@ -186,9 +186,26 @@ def api_llamacapp(
     returns the result (not super clear syntax there...)
     """
 
+    #######################
+    # Write Prompt To File
+    #######################
+    
+    current_dir = os.getcwd()
+    prompt_file_path = os.path.join(current_dir, 'prompt.txt')
+    # prompt_file_path = os.path.join(cpp_path, 'prompt.txt')  # Put it in the same directory as llama-cli
+
+
+    with open(prompt_file_path, 'w') as file:
+        file.write(prompt)
+    
+    # old, direct text
     # Define the command as a string
     command = f"""./llama-cli 2>/dev/null -m {whole_model_path} --temp {parameter_dict["--temp"]} --top-k {parameter_dict["--top-k"]} --top-p {parameter_dict["--top-p"]} --min-p {parameter_dict["--min-p"]} --seed {parameter_dict["--seed"]} --tfs {parameter_dict["--tfs"]} --typical {parameter_dict["--typical"]} --mirostat {parameter_dict["--mirostat"]} --mirostat-lr {parameter_dict["--mirostat-lr"]} --mirostat-ent {parameter_dict["--mirostat-ent"]} --threads {cpu_target} --ctx-size {parameter_dict["--ctx-size"]} -p "{prompt}" """
 
+    # new: prompt file (better character handling)
+    # Define the command as a string
+    command = f"""./llama-cli 2>/dev/null -m {whole_model_path} --temp {parameter_dict["--temp"]} --top-k {parameter_dict["--top-k"]} --top-p {parameter_dict["--top-p"]} --min-p {parameter_dict["--min-p"]} --seed {parameter_dict["--seed"]} --tfs {parameter_dict["--tfs"]} --typical {parameter_dict["--typical"]} --mirostat {parameter_dict["--mirostat"]} --mirostat-lr {parameter_dict["--mirostat-lr"]} --mirostat-ent {parameter_dict["--mirostat-ent"]} --threads {cpu_target} --ctx-size {parameter_dict["--ctx-size"]} --file {prompt_file_path}"""
+    
     # # inspection
     print(f"command -> {repr(command)}")
 
@@ -1271,6 +1288,7 @@ if __name__ == "__main__":
         "--mirostat-lr": 0.05,  # (Mirostat learning rate, eta.  default: 0.1)
         "--mirostat-ent": 3.0,  # (Mirostat target entropy, tau.  default: 5.0)
         "--ctx-size": 500,  # Sets the size of the prompt context
+        "--file": "prompt.txt"
     }
 
     #####################
