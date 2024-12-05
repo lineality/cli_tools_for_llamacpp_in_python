@@ -431,23 +431,48 @@ for the llama-cpp api
 """
 
 
+# def find_folders_and_files_with_gguf(base_path):
+#     folders_and_files_with_gguf = []
+#     # Iterate through all items in base path
+#     for item in os.listdir(base_path):
+#         item_path = os.path.join(base_path, item)
+#         # Check if the item is a directory
+#         if os.path.isdir(item_path):
+#             # Check each file in the directory
+#             for file in os.listdir(item_path):
+#                 # Check if the file ends with '.gguf'
+#                 if file.endswith(".gguf"):
+#                     # Construct the desired string format: basefolder/filename
+#                     result = f"{item}/{file}"
+#                     folders_and_files_with_gguf.append(result)
+#                     break  # Found a matching file, no need to check the rest
+#     return folders_and_files_with_gguf
+
 def find_folders_and_files_with_gguf(base_path):
     folders_and_files_with_gguf = []
+    # print(f"Searching in base path: {base_path}")  # Debugging print
     # Iterate through all items in base path
     for item in os.listdir(base_path):
         item_path = os.path.join(base_path, item)
+        # print(f"Checking item: {item_path}")  # Debugging print
         # Check if the item is a directory
         if os.path.isdir(item_path):
+            # print(f"{item_path} is a directory")  # Debugging print
             # Check each file in the directory
             for file in os.listdir(item_path):
+                # print(f"Checking file: {file} in directory: {item_path}")  # Debugging print
                 # Check if the file ends with '.gguf'
-                if file.endswith(".gguf"):
+                if file.endswith('.gguf'):
                     # Construct the desired string format: basefolder/filename
                     result = f"{item}/{file}"
                     folders_and_files_with_gguf.append(result)
+                    # print(f"Found matching file: {result}")  # Debugging print
                     break  # Found a matching file, no need to check the rest
+        elif item.endswith('.gguf'):
+            # Directly add the file if it ends with '.gguf'
+            folders_and_files_with_gguf.append(item)
+            print(f"Found matching file directly in base path: {item}")  # Debugging print
     return folders_and_files_with_gguf
-
 
 # Base path where to search for folders and gguf files
 # base_path = '/home/xxx/jan/models'
